@@ -1,0 +1,409 @@
+Continue building the existing Deal Signal — Diligence Watchtower application.
+
+Do not redesign the application shell or change the established visual language.
+
+Preserve the existing:
+
+sidebar
+typography
+spacing
+colours
+cards
+dark enterprise aesthetic
+navigation
+overall layout
+
+If the floating “Formula Bar” label visible on the Portfolio screen is part of the application, remove it.
+
+Objective for this iteration
+
+Build the main Watchtower screen for the fictional deal:
+
+NovaCura Therapeutics
+
+This should become the core screen of the product.
+
+The user should immediately understand:
+
+What has changed?
+What matters?
+Why does it matter?
+What should I investigate next?
+
+Do not build real AI or backend integrations yet.
+
+Use realistic synthetic data and interactions.
+
+Navigation behaviour
+
+Make the NovaCura Therapeutics card on the Portfolio page clickable.
+
+Clicking it should open the NovaCura Watchtower.
+
+Also make the existing Watchtower sidebar navigation item open this same screen by default.
+
+Page header
+
+At the top of the page show:
+
+NovaCura Therapeutics
+
+Below it:
+
+Specialty Pharma · Diligence
+
+Include a small Amber status indicator.
+
+On the right-hand side include:
+
+Last evidence refresh: 14 Aug 2026, 14:32
+
+and a secondary button:
+
+Refresh Evidence
+
+This button does not need real functionality yet.
+
+Executive status section
+
+Immediately beneath the header create four compact summary cards:
+
+Overall Diligence Risk
+
+AMBER
+
+Supporting text:
+
+Risk increased since previous review
+
+Material Signals
+
+3
+
+Supporting text:
+
+2 new since yesterday
+
+Open Actions
+
+7
+
+Supporting text:
+
+3 high priority
+
+Sources Monitored
+
+42
+
+Supporting text:
+
+5 updated today
+
+These cards should be compact and executive-friendly.
+
+Do not make them excessively large.
+
+Main content structure
+
+The main body should have two columns.
+
+The left side should be approximately 65–70% width.
+
+The right side should be approximately 30–35% width.
+
+LEFT COLUMN
+Section: Material Signals
+
+This is the most important component on the page.
+
+Create a heading:
+
+Material Signals
+
+Supporting text:
+
+Changes and contradictions requiring investment-team attention
+
+Show three signal cards.
+
+Signal 1 — HIGH PRIORITY
+
+Use a Red/High visual treatment.
+
+Title:
+
+Customer concentration has increased materially
+
+Category:
+
+Commercial
+
+Status:
+
+New
+
+Summary:
+
+The largest customer now represents 31% of Q2 revenue, versus 18% stated in the management presentation.
+
+Show a visually clear comparison:
+
+Previous understanding
+18%
+
+Latest evidence
+31%
+
+Add:
+
+Materiality: High
+
+Confidence: 94%
+
+Detected: 14 Aug 2026, 14:27
+
+Sources:
+
+Management Presentation — May 2026
+July Management Accounts — Aug 2026
+
+Recommended action preview:
+
+Validate whether the increase is seasonal or structural and request monthly customer-level revenue for the previous 24 months.
+
+Include a button:
+
+Investigate Signal
+
+This will eventually open the Signal Detail screen.
+
+For now it can navigate to a placeholder route or screen.
+
+Signal 2 — MEDIUM PRIORITY
+
+Use an Amber visual treatment.
+
+Title:
+
+FY27 growth assumption exceeds current run-rate
+
+Category:
+
+Financial
+
+Status:
+
+Updated
+
+Summary:
+
+The investment model assumes 14% FY27 revenue growth while the latest trading data implies an annualised run-rate closer to 8%.
+
+Show:
+
+Model assumption
+14%
+
+Current run-rate
+8%
+
+Materiality:
+
+Medium
+
+Confidence:
+
+89%
+
+Detected:
+
+14 Aug 2026, 13:58
+
+Sources:
+
+Investment Model v7
+July Management Accounts
+CFO Trading Update
+
+Recommended action preview:
+
+Stress-test the base case at 8–10% growth and quantify the resulting EBITDA and leverage impact.
+
+Include:
+
+Investigate Signal
+
+Signal 3 — MEDIUM PRIORITY
+
+Use an Amber visual treatment.
+
+Title:
+
+Regulatory milestone timing is inconsistent
+
+Category:
+
+Regulatory
+
+Status:
+
+New
+
+Summary:
+
+Management guidance implies a Q1 2027 regulatory milestone, while the latest regulatory submission indicates a likely Q2 2027 decision window.
+
+Show:
+
+Management guidance
+Q1 2027
+
+Latest evidence
+Q2 2027
+
+Materiality:
+
+Medium
+
+Confidence:
+
+86%
+
+Detected:
+
+14 Aug 2026, 12:41
+
+Sources:
+
+Management Presentation
+Regulatory Submission Update
+Legal DD Notes
+
+Recommended action preview:
+
+Confirm the expected decision timeline and assess the impact of a three-month delay on launch assumptions and liquidity.
+
+Include:
+
+Investigate Signal
+
+RIGHT COLUMN
+Section: Diligence Coverage
+
+Create a compact panel showing the major diligence areas and their current status.
+
+Commercial
+
+Amber
+2 signals
+
+Financial
+
+Amber
+1 signal
+
+Regulatory
+
+Amber
+1 signal
+
+Legal
+
+Green
+No material changes
+
+Technology
+
+Green
+No material changes
+
+Management
+
+Green
+No material changes
+
+The purpose is to let an investment professional understand overall diligence coverage at a glance.
+
+Section: Recent Evidence
+
+Below Diligence Coverage, add another panel:
+
+Recent Evidence
+
+Show the five latest source updates:
+
+July Management Accounts.xlsx
+Updated 14:22
+Financial
+
+Regulatory Submission Update.pdf
+Updated 12:34
+Regulatory
+
+CFO Trading Update.docx
+Updated yesterday
+Financial
+
+Commercial DD Update.pdf
+Updated yesterday
+Commercial
+
+Management Presentation.pdf
+Updated 8 Aug
+Management
+
+Use small file-type icons and subtle category labels.
+
+Section: Watchtower Activity
+
+At the bottom of the right column create a simple timeline:
+
+Watchtower Activity
+
+14:27
+New commercial signal detected
+
+14:25
+July Management Accounts analysed
+
+13:58
+Financial signal updated
+
+12:41
+Regulatory signal detected
+
+12:38
+New regulatory evidence processed
+
+This should subtly reinforce that the system is continuously monitoring the deal rather than waiting for questions.
+
+Important design principle
+
+The page should NOT feel like a chatbot.
+
+The primary experience is:
+
+monitoring → detection → prioritisation → investigation
+
+The system is proactively surfacing issues.
+
+Use AI terminology sparingly.
+
+The interface should feel like a professional private equity diligence control room.
+
+Interaction
+
+For this iteration:
+
+Portfolio → NovaCura should navigate to this page.
+Watchtower sidebar item should navigate to this page.
+Signal cards should have hover states.
+“Investigate Signal” buttons should appear clickable.
+Do not build the detailed signal workflow yet.
+Do not build Ask Watchtower yet.
+Do not build real file processing.
+Do not build real APIs.
+Do not redesign the sidebar.
+
+Once the NovaCura Watchtower screen is complete, stop and wait for further instructions.

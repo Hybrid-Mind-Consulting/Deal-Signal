@@ -261,11 +261,29 @@ export const ANALYSIS_EVENTS = [
   },
 ];
 
-export const DATA_SOURCES = [
-  { id: 'ds-1', name: 'FDA CDER Database', type: 'Regulatory', status: 'Active', lastSync: '10 mins ago' },
-  { id: 'ds-2', name: 'ClinicalTrials.gov', type: 'Registry', status: 'Active', lastSync: '12 mins ago' },
-  { id: 'ds-3', name: 'SEC EDGAR Real-Time', type: 'Filings', status: 'Active', lastSync: '2 mins ago' },
-  { id: 'ds-4', name: 'Global BioPharma News Wire', type: 'News Feed', status: 'Active', lastSync: '1 min ago' },
-  { id: 'ds-5', name: 'Internal VDR (Intralinks)', type: 'Document Room', status: 'Active', lastSync: '45 mins ago' },
-  { id: 'ds-6', name: 'USPTO Patent Bulk Data', type: 'IP', status: 'Pending', lastSync: '4 hrs ago' },
+export const DATA_SOURCES: {
+  id: string;
+  name: string;
+  category: 'Management' | 'Financial' | 'Commercial' | 'Regulatory';
+  updatedAt: string;
+  signals: number;
+  highlight?: boolean;
+}[] = [
+  // Management
+  { id: 'ds-m1', name: 'Management Presentation — May 2026', category: 'Management', updatedAt: '14 Aug 2026, 09:15', signals: 2 },
+  { id: 'ds-m2', name: 'Management Q&A Notes',              category: 'Management', updatedAt: '12 Aug 2026, 16:40', signals: 0 },
+  { id: 'ds-m3', name: 'Strategy Update',                   category: 'Management', updatedAt: '8 Aug 2026, 11:20',  signals: 0 },
+  // Financial
+  { id: 'ds-f1', name: 'Investment Model v7',                         category: 'Financial', updatedAt: '13 Aug 2026, 17:00', signals: 1 },
+  { id: 'ds-f2', name: 'July Management Accounts — Aug 2026',         category: 'Financial', updatedAt: '14 Aug 2026, 14:22', signals: 1, highlight: true },
+  { id: 'ds-f3', name: 'CFO Trading Update',                          category: 'Financial', updatedAt: '14 Aug 2026, 12:34', signals: 1 },
+  { id: 'ds-f4', name: 'Customer Revenue Analysis',                   category: 'Financial', updatedAt: '11 Aug 2026, 10:05', signals: 1 },
+  // Commercial
+  { id: 'ds-c1', name: 'Commercial DD Update', category: 'Commercial', updatedAt: '13 Aug 2026, 14:30', signals: 1 },
+  { id: 'ds-c2', name: 'Customer Contracts',   category: 'Commercial', updatedAt: '9 Aug 2026, 09:00',  signals: 0 },
+  { id: 'ds-c3', name: 'Market Research',      category: 'Commercial', updatedAt: '6 Aug 2026, 15:45',  signals: 0 },
+  // Regulatory
+  { id: 'ds-r1', name: 'Regulatory Submission Update', category: 'Regulatory', updatedAt: '14 Aug 2026, 13:10', signals: 1 },
+  { id: 'ds-r2', name: 'Regulatory Timeline',          category: 'Regulatory', updatedAt: '11 Aug 2026, 11:30', signals: 1 },
+  { id: 'ds-r3', name: 'Legal DD Notes',               category: 'Regulatory', updatedAt: '7 Aug 2026, 14:15',  signals: 0 },
 ];

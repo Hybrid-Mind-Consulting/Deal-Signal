@@ -8,15 +8,15 @@ interface PageHeaderProps {
 
 export function PageHeader({ title, subtitle, children }: PageHeaderProps) {
   return (
-    <div className="flex items-end justify-between mb-8 pb-4 border-b border-border">
+    <div className="flex items-start justify-between mb-8">
       <div>
-        <h1 className="text-2xl font-bold tracking-tight text-foreground">{title}</h1>
+        <h1 className="text-xl font-semibold tracking-tight text-foreground">{title}</h1>
         {subtitle && (
-          <p className="text-sm text-muted-foreground mt-1">{subtitle}</p>
+          <p className="text-sm text-muted-foreground mt-0.5">{subtitle}</p>
         )}
       </div>
       {children && (
-        <div className="flex items-center space-x-4">
+        <div className="flex items-center gap-2 flex-shrink-0">
           {children}
         </div>
       )}

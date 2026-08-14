@@ -10,20 +10,14 @@ function priorityStyle(priority: string) {
   if (priority === 'HIGH')
     return {
       badge: 'bg-[hsl(0,84%,60%,0.12)] text-[hsl(0,84%,60%)] border border-[hsl(0,84%,60%,0.25)]',
-      bar: 'bg-[hsl(0,84%,60%)]',
+      accent: 'border-l-[hsl(0,84%,60%,0.5)]',
       conf: 'text-[hsl(0,84%,60%)]',
     };
   return {
     badge: 'bg-[hsl(38,92%,50%,0.12)] text-[hsl(38,92%,50%)] border border-[hsl(38,92%,50%,0.25)]',
-    bar: 'bg-[hsl(38,92%,50%)]',
+    accent: 'border-l-[hsl(38,92%,50%,0.5)]',
     conf: 'text-[hsl(38,92%,50%)]',
   };
-}
-
-function statusStyle(status: string) {
-  if (status === 'New') return 'bg-primary/10 text-primary border-primary/20';
-  if (status === 'Updated') return 'bg-[hsl(38,92%,50%,0.1)] text-[hsl(38,92%,50%)] border-[hsl(38,92%,50%,0.25)]';
-  return 'bg-muted text-muted-foreground border-border';
 }
 
 export default function Signals() {
@@ -33,14 +27,12 @@ export default function Signals() {
     <div className="animate-in fade-in duration-500">
       <PageHeader
         title="Signals"
-        subtitle="NovaCura Therapeutics — Active material signals"
+        subtitle="NovaCura Therapeutics — active material signals"
       />
 
       <div className="space-y-3">
         {MATERIAL_SIGNALS.map((signal, idx) => {
           const ps = priorityStyle(signal.priority);
-          const ss = statusStyle(signal.status);
-          const isHigh = signal.priority === 'HIGH';
 
           return (
             <motion.div
@@ -49,24 +41,19 @@ export default function Signals() {
               animate={{ opacity: 1, y: 0 }}
               transition={{ delay: idx * 0.08 }}
               className={cn(
-                'bg-card border border-card-border rounded-xl overflow-hidden border-l-[3px] hover:shadow-md hover:shadow-black/20 transition-shadow duration-200',
-                isHigh
-                  ? 'border-l-[hsl(0,84%,60%,0.5)]'
-                  : 'border-l-[hsl(38,92%,50%,0.5)]',
+                'bg-card border border-card-border rounded-xl overflow-hidden border-l-[3px]',
+                ps.accent,
               )}
             >
-              <div className="px-5 py-4 flex items-start gap-5">
-                {/* Left: badges + title + summary */}
+              <div className="px-5 py-4 flex items-start gap-6">
+                {/* Left: badge + title + summary */}
                 <div className="flex-1 min-w-0">
-                  <div className="flex flex-wrap items-center gap-2 mb-2">
-                    <span className={cn('text-[10px] font-bold uppercase tracking-widest px-2 py-0.5 rounded', ps.badge)}>
+                  <div className="flex items-center gap-2 mb-2">
+                    <span className={cn('text-[10px] font-semibold uppercase tracking-wider px-2 py-0.5 rounded', ps.badge)}>
                       {signal.priority}
                     </span>
-                    <span className="text-[10px] font-medium uppercase tracking-wider px-2 py-0.5 rounded bg-muted text-muted-foreground border border-border">
+                    <span className="text-[10px] text-muted-foreground uppercase tracking-wider">
                       {signal.category}
-                    </span>
-                    <span className={cn('text-[10px] font-medium uppercase tracking-wider px-2 py-0.5 rounded border', ss)}>
-                      {signal.status}
                     </span>
                   </div>
                   <h3 className="text-sm font-semibold text-foreground leading-snug mb-1">
@@ -78,20 +65,20 @@ export default function Signals() {
                 </div>
 
                 {/* Right: meta + action */}
-                <div className="flex-shrink-0 flex flex-col items-end gap-3 min-w-[140px]">
+                <div className="flex-shrink-0 flex flex-col items-end gap-3 min-w-[130px]">
                   <div className="text-right space-y-1.5">
                     <div className="flex items-center justify-end gap-1.5">
                       <span className="text-[10px] text-muted-foreground">Confidence</span>
-                      <span className={cn('text-xs font-bold', ps.conf)}>{signal.confidence}%</span>
+                      <span className={cn('text-xs font-semibold', ps.conf)}>{signal.confidence}%</span>
                     </div>
                     <div className="flex items-center justify-end gap-1.5">
                       <span className="text-[10px] text-muted-foreground">Detected</span>
-                      <span className="text-xs font-medium text-foreground">{signal.detected}</span>
+                      <span className="text-xs text-foreground">{signal.detected}</span>
                     </div>
                   </div>
                   <button
                     onClick={() => navigate('/signals/customer-concentration')}
-                    className="inline-flex items-center gap-1 text-xs font-semibold text-primary hover:text-primary/80 transition-colors group"
+                    className="inline-flex items-center gap-1 text-xs font-medium text-primary hover:text-primary/80 transition-colors group"
                   >
                     View Signal
                     <ArrowRight className="w-3 h-3 group-hover:translate-x-0.5 transition-transform" />
@@ -103,9 +90,8 @@ export default function Signals() {
         })}
       </div>
 
-      {/* Footer note */}
-      <p className="text-xs text-muted-foreground mt-6 border-t border-border pt-4">
-        Showing 3 active signals · NovaCura Therapeutics · Last updated 14 Aug 2026, 14:32
+      <p className="text-xs text-muted-foreground mt-8">
+        3 active signals · NovaCura Therapeutics · Last updated 14 Aug 2026, 14:32
       </p>
     </div>
   );

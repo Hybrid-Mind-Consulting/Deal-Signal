@@ -2,11 +2,8 @@ import React, { useEffect, useRef, useState } from 'react';
 import { useLocation } from 'wouter';
 import { motion, AnimatePresence } from 'framer-motion';
 import {
-  AlertTriangle,
   ArrowRight,
-  BarChart2,
   CheckCircle2,
-  ChevronRight,
   Clock,
   Database,
   FileSpreadsheet,
@@ -14,8 +11,6 @@ import {
   FileType2,
   Loader2,
   RefreshCw,
-  Shield,
-  TrendingUp,
   Zap,
 } from 'lucide-react';
 import {
@@ -27,28 +22,16 @@ import {
 } from '@/data/mock';
 import { cn } from '@/lib/utils';
 
-// ─── Demo sequence steps ──────────────────────────────────────────────────────
+// ─── Demo sequence ────────────────────────────────────────────────────────────
 
 const DEMO_STEPS = [
-  {
-    label: 'New evidence detected',
-    sub: 'July Management Accounts — Aug 2026',
-  },
-  {
-    label: 'Analysing evidence',
-    sub: 'Extracting customer revenue data',
-  },
-  {
-    label: 'Cross-referencing prior evidence',
-    sub: 'Comparing against Management Presentation — May 2026',
-  },
-  {
-    label: 'Material signal detected',
-    sub: 'Customer concentration increased from 18% to 31%',
-  },
+  { label: 'New evidence detected',          sub: 'July Management Accounts — Aug 2026' },
+  { label: 'Analysing evidence',             sub: 'Extracting customer revenue data' },
+  { label: 'Cross-referencing prior evidence', sub: 'Comparing against Management Presentation — May 2026' },
+  { label: 'Material signal detected',       sub: 'Customer concentration increased from 18% to 31%' },
 ];
 
-const DEMO_TIMINGS = [0, 900, 1800, 2700, 3600]; // ms when each step activates; last = complete
+const DEMO_TIMINGS = [0, 900, 1800, 2700, 3600];
 
 const NEW_ACTIVITIES = [
   { id: 'demo-a1', time: '14:27', description: 'New evidence ingested: July Management Accounts — Aug 2026', highlight: true },
@@ -63,43 +46,31 @@ function priorityColors(priority: MaterialSignal['priority']) {
   if (priority === 'HIGH')
     return {
       badge: 'bg-[hsl(0,84%,60%,0.12)] text-[hsl(0,84%,60%)] border border-[hsl(0,84%,60%,0.25)]',
-      bar: 'bg-[hsl(0,84%,60%)]',
       value: 'text-[hsl(0,84%,60%)]',
       glow: 'border-l-[hsl(0,84%,60%,0.5)]',
+      mat: 'text-[hsl(0,84%,60%)]',
     };
   if (priority === 'MEDIUM')
     return {
       badge: 'bg-[hsl(38,92%,50%,0.12)] text-[hsl(38,92%,50%)] border border-[hsl(38,92%,50%,0.25)]',
-      bar: 'bg-[hsl(38,92%,50%)]',
       value: 'text-[hsl(38,92%,50%)]',
       glow: 'border-l-[hsl(38,92%,50%,0.5)]',
+      mat: 'text-[hsl(38,92%,50%)]',
     };
   return {
     badge: 'bg-primary/10 text-primary border border-primary/25',
-    bar: 'bg-primary',
     value: 'text-primary',
     glow: 'border-l-primary/50',
+    mat: 'text-primary',
   };
 }
 
 function statusColors(status: 'Green' | 'Amber' | 'Red') {
   if (status === 'Green')
-    return {
-      dot: 'bg-[hsl(160,84%,39%)]',
-      text: 'text-[hsl(160,84%,39%)]',
-      badge: 'bg-[hsl(160,84%,39%,0.1)] text-[hsl(160,84%,39%)] border border-[hsl(160,84%,39%,0.25)]',
-    };
+    return { dot: 'bg-[hsl(160,84%,39%)]', text: 'text-[hsl(160,84%,39%)]', badge: 'text-[hsl(160,84%,39%)]' };
   if (status === 'Amber')
-    return {
-      dot: 'bg-[hsl(38,92%,50%)]',
-      text: 'text-[hsl(38,92%,50%)]',
-      badge: 'bg-[hsl(38,92%,50%,0.1)] text-[hsl(38,92%,50%)] border border-[hsl(38,92%,50%,0.25)]',
-    };
-  return {
-    dot: 'bg-[hsl(0,84%,60%)]',
-    text: 'text-[hsl(0,84%,60%)]',
-    badge: 'bg-[hsl(0,84%,60%,0.1)] text-[hsl(0,84%,60%)] border border-[hsl(0,84%,60%,0.25)]',
-  };
+    return { dot: 'bg-[hsl(38,92%,50%)]', text: 'text-[hsl(38,92%,50%)]', badge: 'text-[hsl(38,92%,50%)]' };
+  return { dot: 'bg-[hsl(0,84%,60%)]', text: 'text-[hsl(0,84%,60%)]', badge: 'text-[hsl(0,84%,60%)]' };
 }
 
 function fileIcon(ext: string) {
@@ -119,10 +90,10 @@ function NotificationToast({ visible }: { visible: boolean }) {
           animate={{ opacity: 1, y: 0 }}
           exit={{ opacity: 0, y: -12 }}
           transition={{ duration: 0.25 }}
-          className="fixed top-5 right-6 z-50 flex items-center gap-3 px-4 py-3 rounded-xl bg-card border border-[hsl(0,84%,60%,0.4)] shadow-xl shadow-black/30"
+          className="fixed top-5 right-6 z-50 flex items-center gap-3 px-4 py-3 rounded-xl bg-card border border-[hsl(0,84%,60%,0.35)] shadow-xl shadow-black/30"
         >
-          <span className="flex-shrink-0 w-2 h-2 rounded-full bg-[hsl(0,84%,60%)] animate-pulse" />
-          <span className="text-xs font-semibold text-foreground">
+          <span className="flex-shrink-0 w-1.5 h-1.5 rounded-full bg-[hsl(0,84%,60%)] animate-pulse" />
+          <span className="text-xs font-medium text-foreground">
             New high-priority commercial signal detected
           </span>
         </motion.div>
@@ -133,35 +104,24 @@ function NotificationToast({ visible }: { visible: boolean }) {
 
 // ─── Simulation progress panel ────────────────────────────────────────────────
 
-function SimulationPanel({
-  activeStep,
-  isComplete,
-}: {
-  activeStep: number;
-  isComplete: boolean;
-}) {
+function SimulationPanel({ activeStep, isComplete }: { activeStep: number; isComplete: boolean }) {
   return (
     <motion.div
       initial={{ opacity: 0, height: 0 }}
       animate={{ opacity: 1, height: 'auto' }}
       exit={{ opacity: 0, height: 0 }}
       transition={{ duration: 0.2 }}
-      className="overflow-hidden mb-6"
+      className="overflow-hidden mb-7"
     >
-      <div className="bg-card border border-card-border rounded-xl p-4">
-        {/* Panel header */}
+      <div className="border border-card-border rounded-xl p-4">
         <div className="flex items-center gap-2 mb-4">
-          {isComplete ? (
-            <CheckCircle2 className="w-3.5 h-3.5 text-[hsl(160,84%,39%)]" />
-          ) : (
-            <Loader2 className="w-3.5 h-3.5 text-primary animate-spin" />
-          )}
-          <span className="text-xs font-bold uppercase tracking-widest text-foreground">
+          {isComplete
+            ? <CheckCircle2 className="w-3.5 h-3.5 text-[hsl(160,84%,39%)]" />
+            : <Loader2 className="w-3.5 h-3.5 text-primary animate-spin" />}
+          <span className="text-xs font-medium text-foreground">
             {isComplete ? 'Evidence analysis complete' : 'Analysing new evidence…'}
           </span>
         </div>
-
-        {/* Steps */}
         <div className="grid grid-cols-4 gap-3">
           {DEMO_STEPS.map((s, i) => {
             const stepNum = i + 1;
@@ -172,37 +132,23 @@ function SimulationPanel({
                 key={i}
                 className={cn(
                   'rounded-lg border px-3 py-2.5 transition-colors duration-300',
-                  done
-                    ? 'bg-[hsl(160,84%,39%,0.06)] border-[hsl(160,84%,39%,0.25)]'
-                    : active
-                      ? 'bg-primary/5 border-primary/30'
-                      : 'bg-background border-border opacity-40',
+                  done   ? 'bg-[hsl(160,84%,39%,0.06)] border-[hsl(160,84%,39%,0.2)]'
+                  : active ? 'bg-primary/5 border-primary/25'
+                  :          'border-border opacity-40',
                 )}
               >
                 <div className="flex items-center gap-1.5 mb-1">
-                  {done ? (
-                    <CheckCircle2 className="w-3 h-3 text-[hsl(160,84%,39%)] flex-shrink-0" />
-                  ) : active ? (
-                    <Loader2 className="w-3 h-3 text-primary animate-spin flex-shrink-0" />
-                  ) : (
-                    <span className="w-3 h-3 rounded-full border border-border flex-shrink-0" />
-                  )}
-                  <span
-                    className={cn(
-                      'text-[10px] font-bold uppercase tracking-wider',
-                      done
-                        ? 'text-[hsl(160,84%,39%)]'
-                        : active
-                          ? 'text-primary'
-                          : 'text-muted-foreground',
-                    )}
-                  >
+                  {done  ? <CheckCircle2 className="w-3 h-3 text-[hsl(160,84%,39%)] flex-shrink-0" />
+                  : active ? <Loader2 className="w-3 h-3 text-primary animate-spin flex-shrink-0" />
+                  :          <span className="w-3 h-3 rounded-full border border-border flex-shrink-0" />}
+                  <span className={cn(
+                    'text-[10px] font-semibold uppercase tracking-wider',
+                    done ? 'text-[hsl(160,84%,39%)]' : active ? 'text-primary' : 'text-muted-foreground',
+                  )}>
                     {s.label}
                   </span>
                 </div>
-                <p className="text-[10px] text-muted-foreground leading-relaxed pl-4">
-                  {s.sub}
-                </p>
+                <p className="text-[10px] text-muted-foreground leading-relaxed pl-[18px]">{s.sub}</p>
               </div>
             );
           })}
@@ -214,59 +160,42 @@ function SimulationPanel({
 
 // ─── Page header ──────────────────────────────────────────────────────────────
 
-function WatchtowerHeader({
-  onSimulate,
-  simRunning,
-}: {
-  onSimulate: () => void;
-  simRunning: boolean;
-}) {
+function WatchtowerHeader({ onSimulate, simRunning }: { onSimulate: () => void; simRunning: boolean }) {
   const amber = statusColors('Amber');
   return (
-    <div className="flex items-start justify-between mb-6 pb-5 border-b border-border">
+    <div className="flex items-start justify-between mb-7">
       <div>
-        <h1 className="text-2xl font-bold tracking-tight text-foreground">
-          NovaCura Therapeutics
-        </h1>
-        <div className="flex items-center gap-2 mt-1.5">
-          <span
-            className={cn(
-              'inline-flex items-center gap-1.5 text-xs font-medium px-2 py-0.5 rounded-full border',
-              amber.badge,
-            )}
-          >
+        <h1 className="text-xl font-semibold tracking-tight text-foreground">NovaCura Therapeutics</h1>
+        <div className="flex items-center gap-2.5 mt-1.5">
+          <span className={cn('flex items-center gap-1.5 text-xs font-medium', amber.text)}>
             <span className={cn('w-1.5 h-1.5 rounded-full', amber.dot)} />
             Amber
           </span>
-          <span className="text-sm text-muted-foreground">
-            Specialty Pharma · Diligence
+          <span className="text-muted-foreground/40 text-xs">·</span>
+          <span className="text-sm text-muted-foreground">Specialty Pharma · Diligence</span>
+          <span className="text-muted-foreground/40 text-xs">·</span>
+          <span className="text-xs text-muted-foreground flex items-center gap-1">
+            <Clock className="w-3 h-3" />
+            14 Aug 2026, 14:32
           </span>
         </div>
       </div>
-      <div className="flex items-center gap-3">
-        <div className="text-right">
-          <p className="text-xs text-muted-foreground">Last evidence refresh</p>
-          <p className="text-sm font-medium text-foreground">14 Aug 2026, 14:32</p>
-        </div>
-        <button className="inline-flex items-center gap-2 px-3 py-2 rounded-md border border-border bg-card text-sm font-medium text-muted-foreground hover:text-foreground hover:border-foreground/20 transition-colors">
+      <div className="flex items-center gap-2">
+        <button className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-md border border-border text-sm text-muted-foreground hover:text-foreground hover:border-border/80 transition-colors">
           <RefreshCw className="w-3.5 h-3.5" />
-          Refresh Evidence
+          Refresh
         </button>
         <button
           onClick={onSimulate}
           disabled={simRunning}
           className={cn(
-            'inline-flex items-center gap-2 px-3 py-2 rounded-md border text-sm font-medium transition-colors',
+            'inline-flex items-center gap-1.5 px-3 py-1.5 rounded-md border text-sm font-medium transition-colors',
             simRunning
-              ? 'border-primary/30 bg-primary/5 text-primary cursor-not-allowed'
-              : 'border-primary/40 bg-primary/10 text-primary hover:bg-primary/20 hover:border-primary/60',
+              ? 'border-primary/30 bg-primary/8 text-primary cursor-not-allowed'
+              : 'border-primary/40 bg-primary/10 text-primary hover:bg-primary/16 hover:border-primary/60',
           )}
         >
-          {simRunning ? (
-            <Loader2 className="w-3.5 h-3.5 animate-spin" />
-          ) : (
-            <Zap className="w-3.5 h-3.5" />
-          )}
+          {simRunning ? <Loader2 className="w-3.5 h-3.5 animate-spin" /> : <Zap className="w-3.5 h-3.5" />}
           Simulate New Evidence
         </button>
       </div>
@@ -274,50 +203,38 @@ function WatchtowerHeader({
   );
 }
 
-// ─── Executive summary cards ──────────────────────────────────────────────────
+// ─── Stats bar (replaces 4 individual StatusCards) ───────────────────────────
 
-function StatusCard({
-  label,
-  value,
-  sub,
-  highlight,
-}: {
-  label: string;
-  value: string;
-  sub: string;
-  highlight?: 'amber' | 'red' | 'green';
-}) {
-  const valueClass =
-    highlight === 'amber'
-      ? 'text-[hsl(38,92%,50%)]'
-      : highlight === 'red'
-        ? 'text-[hsl(0,84%,60%)]'
-        : highlight === 'green'
-          ? 'text-[hsl(160,84%,39%)]'
-          : 'text-foreground';
-
+function StatsBar() {
+  const stats = [
+    { label: 'Diligence Risk', value: 'Amber', sub: 'Risk elevated', highlight: 'amber' as const },
+    { label: 'Material Signals', value: '3', sub: '2 new since yesterday', highlight: 'amber' as const },
+    { label: 'Open Actions', value: '7', sub: '3 high priority', highlight: undefined },
+    { label: 'Sources Monitored', value: '42', sub: '5 updated today', highlight: undefined },
+  ];
   return (
-    <div className="bg-card border border-card-border rounded-lg px-5 py-4">
-      <p className="text-xs font-medium text-muted-foreground uppercase tracking-wider mb-2">
-        {label}
-      </p>
-      <p className={cn('text-2xl font-bold tracking-tight', valueClass)}>{value}</p>
-      <p className="text-xs text-muted-foreground mt-1">{sub}</p>
+    <div className="flex items-stretch border border-card-border rounded-xl divide-x divide-border mb-8">
+      {stats.map((s) => (
+        <div key={s.label} className="flex-1 px-6 py-4">
+          <p className="text-xs text-muted-foreground mb-1.5">{s.label}</p>
+          <p className={cn(
+            'text-xl font-bold leading-none',
+            s.highlight === 'amber' ? 'text-[hsl(38,92%,50%)]'
+            : s.highlight === 'red' ? 'text-[hsl(0,84%,60%)]'
+            : 'text-foreground',
+          )}>
+            {s.value}
+          </p>
+          <p className="text-xs text-muted-foreground mt-1.5">{s.sub}</p>
+        </div>
+      ))}
     </div>
   );
 }
 
 // ─── Signal card ─────────────────────────────────────────────────────────────
 
-function SignalCard({
-  signal,
-  index,
-  highlighted,
-}: {
-  signal: MaterialSignal;
-  index: number;
-  highlighted?: boolean;
-}) {
+function SignalCard({ signal, index, highlighted }: { signal: MaterialSignal; index: number; highlighted?: boolean }) {
   const [, navigate] = useLocation();
   const colors = priorityColors(signal.priority);
 
@@ -327,126 +244,62 @@ function SignalCard({
       animate={{ opacity: 1, y: 0 }}
       transition={{ delay: index * 0.08 }}
       className={cn(
-        'bg-card border border-card-border rounded-xl overflow-hidden border-l-[3px] transition-all duration-500 hover:shadow-lg hover:shadow-black/20 cursor-default',
+        'bg-card border border-card-border rounded-xl border-l-[3px] overflow-hidden transition-all duration-500',
         colors.glow,
-        highlighted && 'ring-2 ring-[hsl(0,84%,60%,0.5)] shadow-lg shadow-[hsl(0,84%,60%,0.1)]',
+        highlighted && 'ring-1 ring-[hsl(0,84%,60%,0.4)] shadow-md shadow-[hsl(0,84%,60%,0.06)]',
       )}
     >
-      {/* Card header */}
-      <div className="px-5 pt-5 pb-4 border-b border-border">
-        <div className="flex items-start justify-between gap-3 mb-3">
-          <div className="flex flex-wrap items-center gap-2">
-            <span
-              className={cn(
-                'text-[10px] font-bold uppercase tracking-widest px-2 py-0.5 rounded',
-                colors.badge,
-              )}
-            >
-              {signal.priority} PRIORITY
+      <div className="px-5 py-5">
+        {/* Top row: priority badge + category + date */}
+        <div className="flex items-center justify-between mb-3">
+          <div className="flex items-center gap-2.5">
+            <span className={cn('text-[10px] font-semibold uppercase tracking-wider px-2 py-0.5 rounded', colors.badge)}>
+              {signal.priority}
             </span>
-            <span className="text-[10px] font-medium uppercase tracking-wider px-2 py-0.5 rounded bg-muted text-muted-foreground border border-border">
-              {signal.category}
-            </span>
-            <span className="text-[10px] font-medium uppercase tracking-wider px-2 py-0.5 rounded bg-primary/5 text-primary border border-primary/20">
-              {signal.status}
-            </span>
+            <span className="text-[10px] text-muted-foreground uppercase tracking-wider">{signal.category}</span>
           </div>
+          <span className="text-xs text-muted-foreground">{signal.detected}</span>
         </div>
-        <h3 className="text-base font-semibold text-foreground leading-snug">
+
+        {/* Title */}
+        <h3 className="text-[15px] font-semibold text-foreground leading-snug mb-1.5">
           {signal.title}
         </h3>
-        <p className="text-sm text-muted-foreground mt-1.5 leading-relaxed">
+
+        {/* Summary */}
+        <p className="text-sm text-muted-foreground leading-relaxed mb-5">
           {signal.summary}
         </p>
-      </div>
 
-      {/* Comparison */}
-      <div className="px-5 py-4 border-b border-border bg-background/30">
-        <div className="grid grid-cols-2 gap-3">
-          <div className="bg-card border border-border rounded-lg px-4 py-3">
-            <p className="text-[10px] font-medium text-muted-foreground uppercase tracking-wider mb-1">
-              {signal.previousLabel}
-            </p>
-            <p className="text-xl font-bold text-foreground">{signal.previousValue}</p>
-          </div>
-          <div
-            className={cn(
-              'border rounded-lg px-4 py-3',
-              signal.priority === 'HIGH'
-                ? 'bg-[hsl(0,84%,60%,0.06)] border-[hsl(0,84%,60%,0.2)]'
-                : 'bg-[hsl(38,92%,50%,0.06)] border-[hsl(38,92%,50%,0.2)]',
-            )}
-          >
-            <p className="text-[10px] font-medium text-muted-foreground uppercase tracking-wider mb-1">
-              {signal.latestLabel}
-            </p>
-            <p className={cn('text-xl font-bold', colors.value)}>{signal.latestValue}</p>
-          </div>
-        </div>
-      </div>
-
-      {/* Meta + sources */}
-      <div className="px-5 py-4 border-b border-border">
-        <div className="grid grid-cols-3 gap-4 mb-4">
+        {/* Value comparison — inline, no nested boxes */}
+        <div className="flex items-center gap-5 mb-4">
           <div>
-            <p className="text-[10px] text-muted-foreground uppercase tracking-wider mb-0.5">
-              Materiality
-            </p>
-            <p
-              className={cn(
-                'text-sm font-semibold',
-                signal.materiality === 'High'
-                  ? 'text-[hsl(0,84%,60%)]'
-                  : 'text-[hsl(38,92%,50%)]',
-              )}
-            >
-              {signal.materiality}
-            </p>
+            <p className="text-[11px] text-muted-foreground mb-1">{signal.previousLabel}</p>
+            <p className="text-2xl font-bold text-foreground">{signal.previousValue}</p>
           </div>
+          <ArrowRight className="w-4 h-4 text-muted-foreground/40 flex-shrink-0" />
           <div>
-            <p className="text-[10px] text-muted-foreground uppercase tracking-wider mb-0.5">
-              Confidence
-            </p>
-            <p className="text-sm font-semibold text-foreground">{signal.confidence}%</p>
-          </div>
-          <div>
-            <p className="text-[10px] text-muted-foreground uppercase tracking-wider mb-0.5">
-              Detected
-            </p>
-            <p className="text-sm font-medium text-foreground">{signal.detected}</p>
+            <p className="text-[11px] text-muted-foreground mb-1">{signal.latestLabel}</p>
+            <p className={cn('text-2xl font-bold', colors.value)}>{signal.latestValue}</p>
           </div>
         </div>
 
-        <div>
-          <p className="text-[10px] text-muted-foreground uppercase tracking-wider mb-2">
-            Sources
+        {/* Meta + action row */}
+        <div className="flex items-center justify-between gap-4">
+          <p className="text-xs text-muted-foreground leading-relaxed">
+            Materiality:{' '}
+            <span className={colors.mat}>{signal.materiality}</span>
+            {' · '}{signal.confidence}% confidence
+            {' · '}{signal.sources.join(', ')}
           </p>
-          <div className="flex flex-wrap gap-1.5">
-            {signal.sources.map((s) => (
-              <span
-                key={s}
-                className="text-[10px] font-medium px-2 py-0.5 rounded bg-muted border border-border text-muted-foreground"
-              >
-                {s}
-              </span>
-            ))}
-          </div>
+          <button
+            onClick={() => navigate('/signals/customer-concentration')}
+            className="inline-flex items-center gap-1.5 text-xs font-medium text-primary hover:text-primary/80 transition-colors group flex-shrink-0"
+          >
+            Investigate
+            <ArrowRight className="w-3.5 h-3.5 group-hover:translate-x-0.5 transition-transform" />
+          </button>
         </div>
-      </div>
-
-      {/* Recommended action */}
-      <div className="px-5 py-4">
-        <p className="text-[10px] font-medium text-muted-foreground uppercase tracking-wider mb-1.5">
-          Recommended Action
-        </p>
-        <p className="text-sm text-foreground leading-relaxed">{signal.recommendedAction}</p>
-        <button
-          onClick={() => navigate('/signals/customer-concentration')}
-          className="mt-4 inline-flex items-center gap-1.5 text-xs font-semibold text-primary hover:text-primary/80 transition-colors group"
-        >
-          Investigate Signal
-          <ArrowRight className="w-3.5 h-3.5 group-hover:translate-x-0.5 transition-transform" />
-        </button>
       </div>
     </motion.div>
   );
@@ -457,19 +310,18 @@ function SignalCard({
 function DiligenceCoverage() {
   return (
     <div className="bg-card border border-card-border rounded-xl p-5">
-      <h2 className="text-sm font-semibold text-foreground mb-1">Diligence Coverage</h2>
-      <p className="text-xs text-muted-foreground mb-4">Coverage status by workstream</p>
-      <div className="space-y-2.5">
+      <h2 className="text-sm font-medium text-foreground mb-4">Diligence Coverage</h2>
+      <div className="space-y-0">
         {DILIGENCE_COVERAGE.map((item) => {
           const c = statusColors(item.status);
           return (
             <div
               key={item.area}
-              className="flex items-center justify-between py-2 border-b border-border last:border-0"
+              className="flex items-center justify-between py-2.5 border-b border-border last:border-0"
             >
               <div className="flex items-center gap-2.5">
-                <span className={cn('w-2 h-2 rounded-full flex-shrink-0', c.dot)} />
-                <span className="text-sm font-medium text-foreground">{item.area}</span>
+                <span className={cn('w-1.5 h-1.5 rounded-full flex-shrink-0', c.dot)} />
+                <span className="text-sm text-foreground">{item.area}</span>
               </div>
               <span className={cn('text-xs', c.text)}>{item.note}</span>
             </div>
@@ -485,26 +337,21 @@ function DiligenceCoverage() {
 function RecentEvidence() {
   return (
     <div className="bg-card border border-card-border rounded-xl p-5">
-      <h2 className="text-sm font-semibold text-foreground mb-1">Recent Evidence</h2>
-      <p className="text-xs text-muted-foreground mb-4">Latest source updates</p>
-      <div className="space-y-1">
+      <h2 className="text-sm font-medium text-foreground mb-4">Recent Evidence</h2>
+      <div className="space-y-0">
         {RECENT_EVIDENCE.map((item) => {
           const Icon = fileIcon(item.ext);
           return (
             <div
               key={item.id}
-              className="flex items-center gap-3 py-2.5 px-3 rounded-lg hover:bg-muted/50 transition-colors cursor-default group"
+              className="flex items-center gap-3 py-2.5 border-b border-border last:border-0 cursor-default"
             >
-              <div className="flex-shrink-0 w-7 h-7 rounded bg-muted border border-border flex items-center justify-center">
-                <Icon className="w-3.5 h-3.5 text-muted-foreground" />
-              </div>
+              <Icon className="w-4 h-4 text-muted-foreground flex-shrink-0" />
               <div className="flex-1 min-w-0">
                 <p className="text-xs font-medium text-foreground truncate">{item.name}</p>
                 <p className="text-[10px] text-muted-foreground">{item.updatedAt}</p>
               </div>
-              <span className="text-[10px] font-medium px-1.5 py-0.5 rounded bg-muted border border-border text-muted-foreground flex-shrink-0">
-                {item.category}
-              </span>
+              <span className="text-[10px] text-muted-foreground flex-shrink-0">{item.category}</span>
             </div>
           );
         })}
@@ -519,36 +366,31 @@ function WatchtowerActivity({ extraEvents }: { extraEvents: typeof NEW_ACTIVITIE
   const allEvents = [...extraEvents, ...WATCHTOWER_ACTIVITY];
   return (
     <div className="bg-card border border-card-border rounded-xl p-5">
-      <h2 className="text-sm font-semibold text-foreground mb-1">Watchtower Activity</h2>
-      <p className="text-xs text-muted-foreground mb-4">Continuous monitoring log — today</p>
+      <h2 className="text-sm font-medium text-foreground mb-4">Activity Log</h2>
       <div className="relative">
-        <div className="absolute left-[27px] top-2 bottom-2 w-px bg-border" />
+        <div className="absolute left-[43px] top-2 bottom-2 w-px bg-border" />
         <div className="space-y-4">
           {allEvents.map((item) => (
             <motion.div
               key={item.id}
-              initial={item.highlight ? { opacity: 0, x: -6 } : false}
+              initial={item.highlight ? { opacity: 0, x: -4 } : false}
               animate={{ opacity: 1, x: 0 }}
               transition={{ duration: 0.3 }}
               className="flex items-start gap-3"
             >
-              <div className="flex-shrink-0 w-[54px] text-right">
-                <span className="text-[10px] font-mono text-muted-foreground">{item.time}</span>
-              </div>
-              <div
-                className={cn(
-                  'flex-shrink-0 w-3.5 h-3.5 rounded-full border-2 mt-0.5 relative z-10',
-                  item.highlight
-                    ? 'border-[hsl(0,84%,60%)] bg-[hsl(0,84%,60%,0.2)]'
-                    : 'border-border bg-background',
-                )}
-              />
-              <p
-                className={cn(
-                  'text-xs leading-relaxed pt-0.5',
-                  item.highlight ? 'text-foreground font-medium' : 'text-foreground',
-                )}
-              >
+              <span className="flex-shrink-0 w-[38px] text-right text-[10px] font-mono text-muted-foreground pt-0.5">
+                {item.time}
+              </span>
+              <div className={cn(
+                'flex-shrink-0 w-3 h-3 rounded-full border-2 mt-1 relative z-10',
+                item.highlight
+                  ? 'border-[hsl(0,84%,60%)] bg-[hsl(0,84%,60%,0.2)]'
+                  : 'border-border bg-background',
+              )} />
+              <p className={cn(
+                'text-xs leading-relaxed',
+                item.highlight ? 'text-foreground' : 'text-muted-foreground',
+              )}>
                 {item.description}
               </p>
             </motion.div>
@@ -572,19 +414,15 @@ export default function Watchtower() {
 
   function startSimulation() {
     if (demoState !== 'idle') return;
-    // Clear any lingering timers
     timers.current.forEach(clearTimeout);
     timers.current = [];
-
     setDemoState('running');
     setActiveStep(1);
-
     DEMO_TIMINGS.slice(1).forEach((ms, i) => {
       const t = setTimeout(() => {
         if (i < DEMO_STEPS.length - 1) {
           setActiveStep(i + 2);
         } else {
-          // Final step — mark complete
           setActiveStep(DEMO_STEPS.length);
           setDemoState('complete');
           setShowNotification(true);
@@ -597,7 +435,6 @@ export default function Watchtower() {
     });
   }
 
-  // Cleanup on unmount
   useEffect(() => () => timers.current.forEach(clearTimeout), []);
 
   const signalHighlighted = demoState === 'complete';
@@ -606,47 +443,27 @@ export default function Watchtower() {
     <div className="animate-in fade-in duration-400">
       <NotificationToast visible={showNotification} />
 
-      <WatchtowerHeader
-        onSimulate={startSimulation}
-        simRunning={demoState === 'running'}
-      />
+      <WatchtowerHeader onSimulate={startSimulation} simRunning={demoState === 'running'} />
 
-      {/* Simulation panel */}
       <AnimatePresence>
         {demoState !== 'idle' && (
           <SimulationPanel activeStep={activeStep} isComplete={demoState === 'complete'} />
         )}
       </AnimatePresence>
 
-      {/* Executive summary row */}
-      <div className="grid grid-cols-4 gap-4 mb-8">
-        <StatusCard
-          label="Overall Diligence Risk"
-          value="AMBER"
-          sub="Risk increased since previous review"
-          highlight="amber"
-        />
-        <StatusCard
-          label="Material Signals"
-          value="3"
-          sub="2 new since yesterday"
-          highlight="amber"
-        />
-        <StatusCard label="Open Actions" value="7" sub="3 high priority" />
-        <StatusCard label="Sources Monitored" value="42" sub="5 updated today" />
-      </div>
+      <StatsBar />
 
       {/* Two-column body */}
-      <div className="grid grid-cols-[1fr_320px] gap-6 items-start">
+      <div className="grid grid-cols-[1fr_300px] gap-6 items-start">
         {/* LEFT — Material Signals */}
         <div>
           <div className="mb-5">
-            <h2 className="text-base font-semibold text-foreground">Material Signals</h2>
-            <p className="text-sm text-muted-foreground mt-0.5">
+            <h2 className="text-sm font-medium text-foreground">Material Signals</h2>
+            <p className="text-xs text-muted-foreground mt-0.5">
               Changes and contradictions requiring investment-team attention
             </p>
           </div>
-          <div className="space-y-5">
+          <div className="space-y-4">
             {MATERIAL_SIGNALS.map((signal, i) => (
               <SignalCard
                 key={signal.id}
@@ -659,7 +476,7 @@ export default function Watchtower() {
         </div>
 
         {/* RIGHT — panels */}
-        <div className="space-y-5">
+        <div className="space-y-4">
           <DiligenceCoverage />
           <RecentEvidence />
           <WatchtowerActivity extraEvents={extraActivities} />

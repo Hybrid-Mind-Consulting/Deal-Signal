@@ -1,0 +1,156 @@
+Build a new application called Deal Signal — Diligence Watchtower.
+
+Use the existing AI Ops Assistant project in this Replit workspace as the visual and UX reference only.
+
+Reuse its:
+
+typography
+spacing
+card styles
+navigation patterns
+button styles
+border radius
+overall layout proportions
+premium enterprise-dashboard aesthetic
+
+Do not copy:
+
+manufacturing terminology
+old business logic
+old prompts
+old data structures
+old workflows
+old content
+
+This is a completely new product for private equity investment teams.
+
+Product purpose
+
+Deal Signal is an AI-powered diligence monitoring application that helps investment teams identify:
+
+material changes in deal evidence
+contradictions between sources
+emerging diligence risks
+unanswered questions
+potential impact on the investment thesis
+recommended follow-up actions
+
+The product should feel like a serious institutional investment intelligence platform, not a generic AI chatbot.
+
+The core idea is that the system is proactive.
+
+Instead of waiting for a user to ask a question, it monitors incoming diligence evidence and surfaces important signals automatically.
+
+For this first build
+
+Do not build any real AI, integrations, APIs, authentication, file processing, or backend workflows yet.
+
+For now, build only:
+
+the application shell
+the navigation
+the visual design system
+realistic synthetic demo data
+placeholder pages for the future product areas
+Main navigation
+
+Create a left-hand navigation with:
+
+Portfolio
+Watchtower
+Signals
+Deal Brief
+Ask Watchtower
+Analysis Trace
+
+At the bottom of the sidebar include:
+
+Data Sources
+Settings
+Main demo company
+
+Use a fictional healthcare investment target called:
+
+NovaCura Therapeutics
+
+This should be the primary deal shown throughout the demo.
+
+Also include two secondary fictional deals:
+
+MediCore Diagnostics
+Vantage Bio
+Initial dashboard
+
+The default landing page should be Portfolio.
+
+Show three deal cards:
+
+NovaCura Therapeutics
+
+Sector: Specialty Pharma
+Stage: Diligence
+Status: Amber
+Material Signals: 3
+Open Actions: 7
+Sources Monitored: 42
+Last Updated: 14 Aug 2026, 14:32
+
+MediCore Diagnostics
+
+Sector: Diagnostics
+Stage: Early Diligence
+Status: Green
+Material Signals: 0
+Open Actions: 3
+Sources Monitored: 27
+Last Updated: 14 Aug 2026, 13:48
+
+Vantage Bio
+
+Sector: Biotechnology
+Stage: Confirmatory Diligence
+Status: Red
+Material Signals: 5
+Open Actions: 11
+Sources Monitored: 61
+Last Updated: 14 Aug 2026, 14:05
+
+Each deal card should feel clickable and visually premium.
+
+Visual direction
+
+The interface should feel:
+
+sophisticated
+restrained
+professional
+data-rich
+premium
+suitable for a private equity investment team
+
+Avoid:
+
+playful startup styling
+excessive gradients
+cartoonish icons
+oversized AI branding
+generic chatbot-first layouts
+excessive animations
+
+Use a clean desktop-first layout designed for a 1440px screen.
+
+Make risk status visually clear using:
+
+Green
+Amber
+Red
+
+Keep the styling consistent with the AI Ops Assistant reference project.
+
+Important
+
+Do not attempt to build the complete product in this step.
+
+The only goal of this iteration is to create a polished application shell and Portfolio landing page that establishes the visual language for the rest of the Deal Signal demo.
+
+Once this is complete, stop and wait for the next instruction.

@@ -1,0 +1,28 @@
+kind = "web"
+previewPath = "/"
+title = "Deal Signal — Diligence Watchtower"
+description = "An AI-powered diligence monitoring application for private equity investment teams. Monitors incoming diligence evidence and surfaces material signals, contradictions, emerging risks, and recommended follow-up actions. This first build is a polished frontend shell with synthetic demo data — no backend yet."
+version = "1.0.0"
+id = "artifacts/deal-signal"
+router = "path"
+
+[[services]]
+name = "web"
+paths = [ "/" ]
+localPort = 26059
+
+[services.development]
+run = "pnpm --filter @workspace/deal-signal run dev"
+
+[services.production]
+build = [ "pnpm", "--filter", "@workspace/deal-signal", "run", "build" ]
+serve = "static"
+publicDir = "artifacts/deal-signal/dist/public"
+
+[[services.production.rewrites]]
+from = "/*"
+to = "/index.html"
+
+[services.env]
+PORT = "26059"
+BASE_PATH = "/"

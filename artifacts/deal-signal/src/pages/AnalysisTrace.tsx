@@ -1,37 +1,415 @@
-import React from 'react';
+import React, { Fragment, useState } from 'react';
 import { PageHeader } from '@/components/layout/PageHeader';
 import { ANALYSIS_EVENTS } from '@/data/mock';
+import { AnimatePresence, motion } from 'framer-motion';
 import {
+  AlertTriangle,
+  ArrowDown,
+  ArrowLeft,
+  ArrowRight,
   BellRing,
+  BookOpen,
   BrainCircuit,
+  CheckCircle2,
+  ChevronDown,
+  ChevronUp,
+  Cpu,
   Database,
   FileSearch,
+  FileText,
   GitBranch,
+  Info,
+  ListChecks,
   Network,
   ShieldCheck,
   SlidersHorizontal,
 } from 'lucide-react';
-import { motion } from 'framer-motion';
+import { cn } from '@/lib/utils';
 
-// ─── Icon map ─────────────────────────────────────────────────────────────────
+// ─── Types ────────────────────────────────────────────────────────────────────
+
+type View = 'business' | 'technical';
+
+// ─── View toggle ──────────────────────────────────────────────────────────────
+
+function ViewToggle({ view, onChange }: { view: View; onChange: (v: View) => void }) {
+  return (
+    <div className="flex items-center gap-1 p-1 rounded-lg bg-card border border-card-border w-fit mb-8">
+      {(['business', 'technical'] as View[]).map((v) => (
+        <button
+          key={v}
+          onClick={() => onChange(v)}
+          className={cn(
+            'px-4 py-1.5 rounded-md text-xs font-semibold transition-colors',
+            view === v
+              ? 'bg-primary text-primary-foreground'
+              : 'text-muted-foreground hover:text-foreground',
+          )}
+        >
+          {v === 'business' ? 'Business View' : 'Technical View'}
+        </button>
+      ))}
+    </div>
+  );
+}
+
+// ─── Shared arrow connectors ──────────────────────────────────────────────────
+
+function RightArrow() {
+  return (
+    <div className="flex items-center self-center flex-shrink-0 px-0.5">
+      <ArrowRight className="w-4 h-4 text-border" />
+    </div>
+  );
+}
+
+function LeftArrow() {
+  return (
+    <div className="flex items-center self-center flex-shrink-0 px-0.5">
+      <ArrowLeft className="w-4 h-4 text-border" />
+    </div>
+  );
+}
+
+// ─────────────────────────────────────────────────────────────────────────────
+// BUSINESS VIEW
+// ─────────────────────────────────────────────────────────────────────────────
+
+const BIZ_ACCENT = {
+  blue:   { ring: 'bg-primary/10 border-primary/30',                 icon: 'text-primary',                card: 'border-primary/20' },
+  teal:   { ring: 'bg-[hsl(173,80%,40%,0.12)] border-[hsl(173,80%,40%,0.3)]', icon: 'text-[hsl(173,80%,40%)]', card: 'border-[hsl(173,80%,40%,0.2)]' },
+  purple: { ring: 'bg-[hsl(250,80%,65%,0.12)] border-[hsl(250,80%,65%,0.3)]', icon: 'text-[hsl(250,80%,65%)]', card: 'border-[hsl(250,80%,65%,0.2)]' },
+  red:    { ring: 'bg-[hsl(0,84%,60%,0.12)] border-[hsl(0,84%,60%,0.3)]',     icon: 'text-[hsl(0,84%,60%)]',  card: 'border-[hsl(0,84%,60%,0.25)]' },
+  amber:  { ring: 'bg-[hsl(38,92%,50%,0.12)] border-[hsl(38,92%,50%,0.3)]',   icon: 'text-[hsl(38,92%,50%)]', card: 'border-[hsl(38,92%,50%,0.2)]' },
+  green:  { ring: 'bg-[hsl(160,84%,39%,0.12)] border-[hsl(160,84%,39%,0.3)]', icon: 'text-[hsl(160,84%,39%)]',card: 'border-[hsl(160,84%,39%,0.2)]' },
+} as const;
+
+type BizAccent = keyof typeof BIZ_ACCENT;
+
+const BIZ_NODES: { id: string; label: string; icon: React.ElementType; accent: BizAccent; lines: string[] }[] = [
+  { id: 'n1', label: 'New Evidence',           icon: FileText,     accent: 'blue',   lines: ['July Management Accounts', 'Aug 2026'] },
+  { id: 'n2', label: 'Extract Key Data',        icon: FileSearch,   accent: 'teal',   lines: ['Customer A: £12.4m', 'Q2 Revenue: £40.0m', 'Concentration: 31%'] },
+  { id: 'n3', label: 'Retrieve Prior Evidence', icon: BookOpen,     accent: 'purple', lines: ['Management Presentation', 'May 2026', 'Previous: 18%'] },
+  { id: 'n4', label: 'Detect Contradiction',    icon: AlertTriangle,accent: 'red',    lines: ['18% → 31%', '+13 percentage points'] },
+  { id: 'n5', label: 'Assess Materiality',      icon: ShieldCheck,  accent: 'amber',  lines: ['Commercial risk', 'High materiality', '94% confidence'] },
+  { id: 'n6', label: 'Recommend Action',        icon: ListChecks,   accent: 'amber',  lines: ['Escalate for diligence review', '4 follow-up actions created'] },
+  { id: 'n7', label: 'Publish',                 icon: BellRing,     accent: 'green',  lines: ['Watchtower alert', 'Deal Brief updated'] },
+];
+
+// Node width class — must stay consistent for the down-connector alignment
+const NODE_W = 'w-40';
+const NODE_W_PX = 160; // keep in sync with w-40
+
+function BizNode({ node, delay }: { node: typeof BIZ_NODES[number]; delay: number }) {
+  const c = BIZ_ACCENT[node.accent];
+  const Icon = node.icon;
+  return (
+    <motion.div
+      initial={{ opacity: 0, y: 8 }}
+      animate={{ opacity: 1, y: 0 }}
+      transition={{ delay }}
+      className={cn(
+        'flex-shrink-0 rounded-xl border bg-card p-4 flex flex-col gap-2.5',
+        NODE_W,
+        c.card,
+      )}
+    >
+      <div className={cn('w-8 h-8 rounded-full border flex items-center justify-center', c.ring)}>
+        <Icon className={cn('w-4 h-4', c.icon)} />
+      </div>
+      <div>
+        <p className="text-[11px] font-bold text-foreground leading-tight mb-1.5">{node.label}</p>
+        <div className="space-y-0.5">
+          {node.lines.map((l, i) => (
+            <p key={i} className="text-[10px] text-muted-foreground leading-relaxed">{l}</p>
+          ))}
+        </div>
+      </div>
+    </motion.div>
+  );
+}
+
+function BusinessWorkflow() {
+  const row1 = BIZ_NODES.slice(0, 4);
+  const row2 = BIZ_NODES.slice(4); // [Assess, Recommend, Publish] — rendered RTL via flex-row-reverse
+
+  return (
+    <div>
+      {/* Row 1: left to right */}
+      <div className="flex items-start gap-1.5">
+        {row1.map((node, i) => (
+          <Fragment key={node.id}>
+            <BizNode node={node} delay={i * 0.07} />
+            {i < row1.length - 1 && <RightArrow />}
+          </Fragment>
+        ))}
+      </div>
+
+      {/* Down connector — centred under the rightmost node of row 1.
+          `justify-end` aligns the w-[NODE_W_PX] wrapper to the far right, which
+          matches the position of the first DOM element in the flex-row-reverse row 2. */}
+      <div className="flex justify-end my-1.5">
+        <div className="flex justify-center" style={{ width: NODE_W_PX }}>
+          <ArrowDown className="w-4 h-4 text-border" />
+        </div>
+      </div>
+
+      {/* Row 2: right to left via flex-row-reverse.
+          DOM order: [Assess, Recommend, Publish]
+          Display order: [Publish] ← [Recommend] ← [Assess]
+          Flow goes from Assess (far right) leftward to Publish. */}
+      <div className="flex items-start gap-1.5 flex-row-reverse">
+        {row2.map((node, i) => (
+          <Fragment key={node.id}>
+            <BizNode node={node} delay={0.30 + i * 0.07} />
+            {i < row2.length - 1 && <LeftArrow />}
+          </Fragment>
+        ))}
+      </div>
+    </div>
+  );
+}
+
+// ─────────────────────────────────────────────────────────────────────────────
+// TECHNICAL VIEW
+// ─────────────────────────────────────────────────────────────────────────────
+
+const TECH_NODES: {
+  id: string;
+  type: string;
+  label: string;
+  icon: React.ElementType;
+  accent?: 'blue' | 'green' | 'amber' | 'red';
+  lines?: string[];
+  special?: 'formula' | 'gate';
+}[] = [
+  { id: 't1', type: 'SOURCE',      label: 'Evidence Ingestion',         icon: Database,         lines: ['July Management Accounts', 'Aug 2026'] },
+  { id: 't2', type: 'PROCESSOR',   label: 'Extraction',                  icon: FileSearch,       lines: ['Customer revenue fields', 'Structured output'] },
+  { id: 't3', type: 'ROUTER',      label: 'Evidence Router',             icon: Network,          lines: ['Prior evidence lookup', 'Context retrieval'] },
+  { id: 't4', type: 'DETERMINISTIC',label: 'Deterministic Calculation',  icon: Cpu,  accent: 'blue', special: 'formula' },
+  { id: 't5', type: 'COMPARATOR',  label: 'Cross-source Comparison',     icon: GitBranch,        lines: ['Prev 18% vs latest 31%', 'Variance: +13 pp'] },
+  { id: 't6', type: 'EVALUATOR',   label: 'Materiality Evaluator',       icon: SlidersHorizontal,lines: ['Threshold: High', 'Confidence: 94%'] },
+  { id: 't7', type: 'GATE',        label: 'Quality / Evaluation Gate',   icon: CheckCircle2, accent: 'green', special: 'gate' },
+  { id: 't8', type: 'OUTPUT',      label: 'Watchtower Output',           icon: BellRing,  accent: 'amber', lines: ['Signal dispatched', 'Deal Brief updated'] },
+];
+
+const TECH_ACCENT_CLS: Record<string, { border: string; label: string; icon: string }> = {
+  blue:    { border: 'border-primary/30',                 label: 'text-primary',                icon: 'text-primary' },
+  green:   { border: 'border-[hsl(160,84%,39%,0.35)]',   label: 'text-[hsl(160,84%,39%)]',     icon: 'text-[hsl(160,84%,39%)]' },
+  amber:   { border: 'border-[hsl(38,92%,50%,0.35)]',    label: 'text-[hsl(38,92%,50%)]',      icon: 'text-[hsl(38,92%,50%)]' },
+  default: { border: 'border-border',                     label: 'text-muted-foreground',       icon: 'text-muted-foreground' },
+};
+
+function TechNode({ node, delay }: { node: typeof TECH_NODES[number]; delay: number }) {
+  const ac = TECH_ACCENT_CLS[node.accent ?? 'default'];
+  const Icon = node.icon;
+
+  return (
+    <motion.div
+      initial={{ opacity: 0, y: 8 }}
+      animate={{ opacity: 1, y: 0 }}
+      transition={{ delay }}
+      className={cn(
+        'flex-shrink-0 rounded-xl border bg-sidebar p-3.5 flex flex-col gap-2',
+        NODE_W,
+        ac.border,
+      )}
+    >
+      {/* Type tag + icon */}
+      <div className="flex items-center justify-between">
+        <span className={cn('text-[8px] font-bold uppercase tracking-widest font-mono', ac.label)}>
+          {node.type}
+        </span>
+        <Icon className={cn('w-3.5 h-3.5', ac.icon)} />
+      </div>
+
+      {/* Label */}
+      <p className="text-[11px] font-semibold text-foreground leading-tight">{node.label}</p>
+
+      {/* Special: formula */}
+      {node.special === 'formula' && (
+        <div className="mt-0.5 rounded bg-background border border-border px-2.5 py-1.5 font-mono">
+          <p className="text-[9px] text-muted-foreground mb-0.5">calculation</p>
+          <p className="text-[11px] font-bold text-primary">£12.4m ÷ £40.0m</p>
+          <p className="text-[11px] font-bold text-[hsl(0,84%,60%)]">= 31.0%</p>
+        </div>
+      )}
+
+      {/* Special: gate */}
+      {node.special === 'gate' && (
+        <div className="mt-0.5 space-y-1">
+          {['Source grounding', 'Evidence consistency', 'Relevance'].map((check) => (
+            <div key={check} className="flex items-center gap-1.5">
+              <CheckCircle2 className="w-3 h-3 text-[hsl(160,84%,39%)] flex-shrink-0" />
+              <span className="text-[9px] text-muted-foreground font-mono">{check}: <span className="text-[hsl(160,84%,39%)]">Passed</span></span>
+            </div>
+          ))}
+        </div>
+      )}
+
+      {/* Regular lines */}
+      {!node.special && node.lines && (
+        <div className="space-y-0.5 mt-0.5">
+          {node.lines.map((l, i) => (
+            <p key={i} className="text-[9px] text-muted-foreground font-mono leading-relaxed">{l}</p>
+          ))}
+        </div>
+      )}
+    </motion.div>
+  );
+}
+
+function TechnicalWorkflow() {
+  const row1 = TECH_NODES.slice(0, 4);
+  const row2 = TECH_NODES.slice(4); // [Cross-source, Materiality, Gate, Output] — rendered RTL
+
+  return (
+    <div>
+      {/* Row 1: LTR */}
+      <div className="flex items-start gap-1.5">
+        {row1.map((node, i) => (
+          <Fragment key={node.id}>
+            <TechNode node={node} delay={i * 0.06} />
+            {i < row1.length - 1 && <RightArrow />}
+          </Fragment>
+        ))}
+      </div>
+
+      {/* Down connector under rightmost node of row 1 (Deterministic Calculation) */}
+      <div className="flex justify-end my-1.5">
+        <div className="flex justify-center" style={{ width: NODE_W_PX }}>
+          <ArrowDown className="w-4 h-4 text-border" />
+        </div>
+      </div>
+
+      {/* Row 2: RTL — flow continues from Cross-source (rightmost display) leftward to Output.
+          DOM: [Cross-source, Materiality, Gate, Output]
+          Display: [Output] ← [Gate] ← [Materiality] ← [Cross-source] */}
+      <div className="flex items-start gap-1.5 flex-row-reverse">
+        {row2.map((node, i) => (
+          <Fragment key={node.id}>
+            <TechNode node={node} delay={0.26 + i * 0.06} />
+            {i < row2.length - 1 && <LeftArrow />}
+          </Fragment>
+        ))}
+      </div>
+
+      {/* Prototype note */}
+      <motion.div
+        initial={{ opacity: 0 }}
+        animate={{ opacity: 1 }}
+        transition={{ delay: 0.6 }}
+        className="mt-6 flex items-start gap-2.5 px-4 py-3 rounded-lg border border-border bg-muted/30 max-w-2xl"
+      >
+        <Info className="w-3.5 h-3.5 text-muted-foreground flex-shrink-0 mt-0.5" />
+        <p className="text-xs text-muted-foreground leading-relaxed">
+          <span className="font-semibold text-foreground">Prototype workflow</span> — production architecture can be orchestrated with governed agent workflows, deterministic business logic and evaluation tooling.
+        </p>
+      </motion.div>
+    </div>
+  );
+}
+
+// ─────────────────────────────────────────────────────────────────────────────
+// EVENT ICON (for expandable log)
+// ─────────────────────────────────────────────────────────────────────────────
 
 function EventIcon({ type }: { type: string }) {
   const cls = 'w-4 h-4';
   switch (type) {
-    case 'Ingestion':           return <Database className={cls} />;
-    case 'Extraction':          return <FileSearch className={cls} />;
-    case 'Context Retrieval':   return <BrainCircuit className={cls} />;
-    case 'Cross-Reference':     return <Network className={cls} />;
-    case 'Signal Classification': return <SlidersHorizontal className={cls} />;
-    case 'Evaluation':          return <ShieldCheck className={cls} />;
-    case 'Alert':               return <BellRing className={cls} />;
-    default:                    return <GitBranch className={cls} />;
+    case 'Ingestion':            return <Database className={cls} />;
+    case 'Extraction':           return <FileSearch className={cls} />;
+    case 'Context Retrieval':    return <BrainCircuit className={cls} />;
+    case 'Cross-Reference':      return <Network className={cls} />;
+    case 'Signal Classification':return <SlidersHorizontal className={cls} />;
+    case 'Evaluation':           return <ShieldCheck className={cls} />;
+    case 'Alert':                return <BellRing className={cls} />;
+    default:                     return <GitBranch className={cls} />;
   }
 }
 
-// ─── Page ─────────────────────────────────────────────────────────────────────
+// ─────────────────────────────────────────────────────────────────────────────
+// EXPANDABLE LOG
+// ─────────────────────────────────────────────────────────────────────────────
+
+function ExpandableLog() {
+  const [open, setOpen] = useState(false);
+
+  return (
+    <div className="mt-10 max-w-3xl">
+      <button
+        onClick={() => setOpen((o) => !o)}
+        className="flex items-center gap-2 text-xs font-semibold text-muted-foreground hover:text-foreground transition-colors group mb-4"
+      >
+        {open ? (
+          <ChevronUp className="w-4 h-4 group-hover:text-foreground transition-colors" />
+        ) : (
+          <ChevronDown className="w-4 h-4 group-hover:text-foreground transition-colors" />
+        )}
+        View detailed execution log
+      </button>
+
+      <AnimatePresence>
+        {open && (
+          <motion.div
+            key="log"
+            initial={{ opacity: 0, height: 0 }}
+            animate={{ opacity: 1, height: 'auto' }}
+            exit={{ opacity: 0, height: 0 }}
+            transition={{ duration: 0.2 }}
+            className="overflow-hidden"
+          >
+            <div className="relative border-l border-border ml-4 space-y-8 pb-8">
+              {ANALYSIS_EVENTS.map((event, idx) => (
+                <div key={event.id} className="relative pl-8">
+                  <div className="absolute -left-[17px] top-1 w-8 h-8 rounded-full bg-card border border-border flex items-center justify-center text-primary z-10">
+                    <EventIcon type={event.type} />
+                  </div>
+                  <div className="bg-card border border-card-border rounded-xl p-5">
+                    <div className="flex justify-between items-start mb-2 gap-4">
+                      <span className="text-xs font-bold uppercase tracking-widest text-foreground">{event.type}</span>
+                      <span className="text-xs font-mono text-muted-foreground flex-shrink-0">{event.timestamp}</span>
+                    </div>
+                    <p className="text-sm text-muted-foreground leading-relaxed">{event.description}</p>
+                    {event.details && event.details.length > 0 && (
+                      <ul className="mt-3 space-y-1.5">
+                        {event.details.map((d, i) => (
+                          <li key={i} className="flex items-start gap-2 text-xs text-muted-foreground">
+                            <span className="mt-1.5 w-1 h-1 rounded-full bg-primary flex-shrink-0" />
+                            {d}
+                          </li>
+                        ))}
+                      </ul>
+                    )}
+                    <div className="mt-4 pt-3 border-t border-border">
+                      <div className="bg-sidebar rounded flex items-center px-3 py-2">
+                        <span className="text-xs font-mono text-[hsl(215,20.2%,45%)]">
+                          {`{ "trace_id": "${event.traceId}", "status": "200 OK" }`}
+                        </span>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+              ))}
+              <div className="relative pl-8 pt-4 text-xs text-muted-foreground font-mono italic">
+                <div className="absolute -left-1.5 top-5 w-3 h-3 rounded-full border-2 border-border bg-background z-10" />
+                End of trace · 7 steps · 14 Aug 2026, 14:27
+              </div>
+            </div>
+          </motion.div>
+        )}
+      </AnimatePresence>
+    </div>
+  );
+}
+
+// ─────────────────────────────────────────────────────────────────────────────
+// PAGE
+// ─────────────────────────────────────────────────────────────────────────────
 
 export default function AnalysisTrace() {
+  const [view, setView] = useState<View>('business');
+
   return (
     <div className="animate-in fade-in duration-500">
       <PageHeader
@@ -39,80 +417,32 @@ export default function AnalysisTrace() {
         subtitle="System execution log — Customer concentration has increased materially · NovaCura Therapeutics"
       />
 
-      <div className="max-w-3xl">
-        {/* Signal context strip */}
-        <div className="mb-8 flex items-center gap-3 px-4 py-3 rounded-lg bg-card border border-card-border text-xs text-muted-foreground font-mono">
-          <span className="text-primary font-semibold">SIG-001</span>
-          <span className="text-border">|</span>
-          <span>Customer concentration has increased materially</span>
-          <span className="text-border">|</span>
-          <span>NovaCura Therapeutics</span>
-          <span className="text-border">|</span>
-          <span className="text-[hsl(38,92%,50%)]">HIGH · COMMERCIAL</span>
-        </div>
-
-        <div className="relative border-l border-border ml-4 space-y-8 pb-8">
-
-          {ANALYSIS_EVENTS.map((event, idx) => (
-            <motion.div
-              key={event.id}
-              initial={{ opacity: 0, x: -10 }}
-              animate={{ opacity: 1, x: 0 }}
-              transition={{ delay: idx * 0.07 }}
-              className="relative pl-8"
-            >
-              {/* Node dot */}
-              <div className="absolute -left-[17px] top-1 w-8 h-8 rounded-full bg-card border border-border flex items-center justify-center text-primary z-10">
-                <EventIcon type={event.type} />
-              </div>
-
-              <div className="bg-card border border-card-border rounded-xl p-5">
-                {/* Header row */}
-                <div className="flex justify-between items-start mb-2 gap-4">
-                  <span className="text-xs font-bold uppercase tracking-widest text-foreground">
-                    {event.type}
-                  </span>
-                  <span className="text-xs font-mono text-muted-foreground flex-shrink-0">
-                    {event.timestamp}
-                  </span>
-                </div>
-
-                {/* Description */}
-                <p className="text-sm text-muted-foreground leading-relaxed">
-                  {event.description}
-                </p>
-
-                {/* Detail bullets */}
-                {event.details && event.details.length > 0 && (
-                  <ul className="mt-3 space-y-1.5">
-                    {event.details.map((d, i) => (
-                      <li key={i} className="flex items-start gap-2 text-xs text-muted-foreground">
-                        <span className="mt-1.5 w-1 h-1 rounded-full bg-primary flex-shrink-0" />
-                        {d}
-                      </li>
-                    ))}
-                  </ul>
-                )}
-
-                {/* Trace ID pill */}
-                <div className="mt-4 pt-3 border-t border-border">
-                  <div className="bg-sidebar rounded flex items-center px-3 py-2">
-                    <span className="text-xs font-mono text-[hsl(215,20.2%,45%)]">
-                      {`{ "trace_id": "${event.traceId}", "status": "200 OK" }`}
-                    </span>
-                  </div>
-                </div>
-              </div>
-            </motion.div>
-          ))}
-
-          {/* End marker */}
-          <div className="relative pl-8 pt-4 text-xs text-muted-foreground font-mono italic">
-            <div className="absolute -left-1.5 top-5 w-3 h-3 rounded-full border-2 border-border bg-background z-10" />
-            End of trace · 7 steps · 14 Aug 2026, 14:27
-          </div>
-        </div>
+      {/* Signal context strip */}
+      <div className="mb-7 flex items-center gap-3 px-4 py-3 rounded-lg bg-card border border-card-border text-xs text-muted-foreground font-mono w-fit">
+        <span className="text-primary font-semibold">SIG-001</span>
+        <span className="text-border">|</span>
+        <span>Customer concentration has increased materially</span>
+        <span className="text-border">|</span>
+        <span>NovaCura Therapeutics</span>
+        <span className="text-border">|</span>
+        <span className="text-[hsl(38,92%,50%)]">HIGH · COMMERCIAL</span>
       </div>
+
+      <ViewToggle view={view} onChange={setView} />
+
+      <AnimatePresence mode="wait">
+        <motion.div
+          key={view}
+          initial={{ opacity: 0, y: 6 }}
+          animate={{ opacity: 1, y: 0 }}
+          exit={{ opacity: 0, y: -6 }}
+          transition={{ duration: 0.18 }}
+        >
+          {view === 'business' ? <BusinessWorkflow /> : <TechnicalWorkflow />}
+        </motion.div>
+      </AnimatePresence>
+
+      <ExpandableLog />
     </div>
   );
 }

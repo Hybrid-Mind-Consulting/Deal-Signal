@@ -4,7 +4,6 @@ import { ANALYSIS_EVENTS } from '@/data/mock';
 import { AnimatePresence, motion } from 'framer-motion';
 import {
   ArrowDown,
-  ArrowLeft,
   ArrowRight,
   BellRing,
   BrainCircuit,
@@ -20,12 +19,36 @@ import {
   Network,
   ShieldCheck,
   SlidersHorizontal,
+  X,
 } from 'lucide-react';
 import { cn } from '@/lib/utils';
 
 // ─── Types ─────────────────────────────────────────────────────────────────────
 
 type View = 'business' | 'technical';
+
+type NodeColor = 'slate' | 'violet' | 'amber' | 'green' | 'red';
+
+interface InspectorData {
+  name: string;
+  type: string;
+  inputs?: { label: string; value: string }[];
+  logic?: string;
+  output?: string;
+  status?: 'Passed' | 'Running';
+  checks?: { label: string; status: 'Passed' | 'Failed' }[];
+  notes?: string;
+}
+
+interface TechNodeDef {
+  id: string;
+  label: string;
+  typeLabel: string;
+  color: NodeColor;
+  icon: React.ElementType;
+  snippet?: React.ReactNode;
+  inspector: InspectorData;
+}
 
 // ─── View toggle ───────────────────────────────────────────────────────────────
 
@@ -48,20 +71,12 @@ function ViewToggle({ view, onChange }: { view: View; onChange: (v: View) => voi
   );
 }
 
-// ─── Shared arrow connectors ───────────────────────────────────────────────────
+// ─── Shared arrow ──────────────────────────────────────────────────────────────
 
 function RightArrow() {
   return (
     <div className="flex items-center self-center flex-shrink-0 px-0.5">
       <ArrowRight className="w-4 h-4 text-border" />
-    </div>
-  );
-}
-
-function LeftArrow() {
-  return (
-    <div className="flex items-center self-center flex-shrink-0 px-0.5">
-      <ArrowLeft className="w-4 h-4 text-border" />
     </div>
   );
 }
@@ -123,62 +138,269 @@ function BusinessWorkflow() {
 }
 
 // ─────────────────────────────────────────────────────────────────────────────
-// TECHNICAL VIEW
+// TECHNICAL VIEW — node-based workflow canvas
 // ─────────────────────────────────────────────────────────────────────────────
 
-const TECH_NODES: {
-  id: string; type: string; label: string; icon: React.ElementType;
-  accent?: 'blue' | 'green' | 'amber' | 'red'; lines?: string[]; special?: 'formula' | 'gate';
-}[] = [
-  { id: 't1', type: 'SOURCE',        label: 'Evidence Ingestion',        icon: Database,          lines: ['July Management Accounts', 'Aug 2026'] },
-  { id: 't2', type: 'PROCESSOR',     label: 'Extraction',                 icon: FileSearch,        lines: ['Customer revenue fields', 'Structured output'] },
-  { id: 't3', type: 'ROUTER',        label: 'Evidence Router',            icon: Network,           lines: ['Prior evidence lookup', 'Context retrieval'] },
-  { id: 't4', type: 'DETERMINISTIC', label: 'Deterministic Calculation',  icon: Cpu,   accent: 'blue',  special: 'formula' },
-  { id: 't5', type: 'COMPARATOR',    label: 'Cross-source Comparison',    icon: GitBranch,         lines: ['Prev 18% vs latest 31%', 'Variance: +13 pp'] },
-  { id: 't6', type: 'EVALUATOR',     label: 'Materiality Evaluator',      icon: SlidersHorizontal, lines: ['Threshold: High', 'Confidence: 94%'] },
-  { id: 't7', type: 'GATE',          label: 'Quality / Evaluation Gate',  icon: CheckCircle2, accent: 'green', special: 'gate' },
-  { id: 't8', type: 'OUTPUT',        label: 'Watchtower Output',          icon: BellRing,  accent: 'amber', lines: ['Signal dispatched', 'Deal Brief updated'] },
-];
-
-const NODE_W = 'w-40';
-const NODE_W_PX = 160;
-
-const TECH_ACCENT_CLS: Record<string, { border: string; label: string; icon: string }> = {
-  blue:    { border: 'border-primary/30',               label: 'text-primary',            icon: 'text-primary' },
-  green:   { border: 'border-[hsl(160,84%,39%,0.35)]',  label: 'text-[hsl(160,84%,39%)]', icon: 'text-[hsl(160,84%,39%)]' },
-  amber:   { border: 'border-[hsl(38,92%,50%,0.35)]',   label: 'text-[hsl(38,92%,50%)]',  icon: 'text-[hsl(38,92%,50%)]' },
-  default: { border: 'border-border',                    label: 'text-muted-foreground',   icon: 'text-muted-foreground' },
+const NODE_COLORS: Record<NodeColor, {
+  border: string; bg: string; iconBg: string; icon: string;
+  badge: string; badgeText: string; glow: string;
+}> = {
+  slate: {
+    border: 'border-sky-500/25',
+    bg: 'bg-sky-500/[0.04]',
+    iconBg: 'bg-sky-500/10 border-sky-500/25',
+    icon: 'text-sky-400',
+    badge: 'bg-sky-500/10',
+    badgeText: 'text-sky-400',
+    glow: 'shadow-sky-500/5',
+  },
+  violet: {
+    border: 'border-primary/30',
+    bg: 'bg-primary/[0.04]',
+    iconBg: 'bg-primary/10 border-primary/30',
+    icon: 'text-primary',
+    badge: 'bg-primary/10',
+    badgeText: 'text-primary',
+    glow: 'shadow-primary/5',
+  },
+  amber: {
+    border: 'border-[hsl(38,92%,50%,0.3)]',
+    bg: 'bg-[hsl(38,92%,50%,0.04)]',
+    iconBg: 'bg-[hsl(38,92%,50%,0.1)] border-[hsl(38,92%,50%,0.3)]',
+    icon: 'text-[hsl(38,92%,50%)]',
+    badge: 'bg-[hsl(38,92%,50%,0.1)]',
+    badgeText: 'text-[hsl(38,92%,50%)]',
+    glow: 'shadow-[hsl(38,92%,50%)]/5',
+  },
+  green: {
+    border: 'border-[hsl(160,84%,39%,0.3)]',
+    bg: 'bg-[hsl(160,84%,39%,0.04)]',
+    iconBg: 'bg-[hsl(160,84%,39%,0.1)] border-[hsl(160,84%,39%,0.3)]',
+    icon: 'text-[hsl(160,84%,39%)]',
+    badge: 'bg-[hsl(160,84%,39%,0.1)]',
+    badgeText: 'text-[hsl(160,84%,39%)]',
+    glow: 'shadow-[hsl(160,84%,39%)]/5',
+  },
+  red: {
+    border: 'border-[hsl(0,84%,60%,0.3)]',
+    bg: 'bg-[hsl(0,84%,60%,0.04)]',
+    iconBg: 'bg-[hsl(0,84%,60%,0.1)] border-[hsl(0,84%,60%,0.3)]',
+    icon: 'text-[hsl(0,84%,60%)]',
+    badge: 'bg-[hsl(0,84%,60%,0.1)]',
+    badgeText: 'text-[hsl(0,84%,60%)]',
+    glow: 'shadow-[hsl(0,84%,60%)]/5',
+  },
 };
 
-function TechNode({ node, delay }: { node: typeof TECH_NODES[number]; delay: number }) {
-  const ac = TECH_ACCENT_CLS[node.accent ?? 'default'];
+// ─── Node definitions ──────────────────────────────────────────────────────────
+
+const TECH_NODES: TechNodeDef[] = [
+  {
+    id: 'tn-1',
+    label: 'Evidence Ingestion',
+    typeLabel: 'SOURCE',
+    color: 'slate',
+    icon: Database,
+    inspector: {
+      name: 'Evidence Ingestion',
+      type: 'Source / Data Processing',
+      inputs: [{ label: 'Document', value: 'July Management Accounts — Aug 2026' }],
+      logic: 'Ingest new source document, validate format, extract metadata',
+      output: 'Structured document ready for extraction',
+      status: 'Passed',
+      notes: 'Source authenticated · Financial data category',
+    },
+  },
+  {
+    id: 'tn-2',
+    label: 'Extraction',
+    typeLabel: 'PROCESSOR',
+    color: 'slate',
+    icon: FileSearch,
+    inspector: {
+      name: 'Extraction',
+      type: 'Source / Data Processing',
+      inputs: [
+        { label: 'Document', value: 'July Management Accounts — Aug 2026' },
+      ],
+      logic: 'Identify and extract named entities, revenue figures, customer references',
+      output: 'Customer A revenue: £12.4m · Total Q2 revenue: £40.0m',
+      status: 'Passed',
+    },
+  },
+  {
+    id: 'tn-3',
+    label: 'Evidence Router',
+    typeLabel: 'ROUTER',
+    color: 'slate',
+    icon: Network,
+    inspector: {
+      name: 'Evidence Router',
+      type: 'Source / Data Processing',
+      inputs: [{ label: 'Extracted entities', value: 'Customer revenue data, concentration figures' }],
+      logic: 'Route extracted evidence to relevant downstream processors in parallel',
+      output: 'Dispatched to Prior Evidence Retrieval + Deterministic Calculation',
+      status: 'Passed',
+    },
+  },
+  {
+    id: 'tn-4',
+    label: 'Prior Evidence Retrieval',
+    typeLabel: 'AI CONTEXT',
+    color: 'violet',
+    icon: BrainCircuit,
+    inspector: {
+      name: 'Prior Evidence Retrieval',
+      type: 'AI / Context Reasoning',
+      inputs: [{ label: 'Query', value: 'Customer concentration · NovaCura Therapeutics' }],
+      logic: 'Vector search across document store for semantically related prior evidence',
+      output: 'Management Presentation May 2026 · Largest customer: 18%',
+      status: 'Passed',
+      notes: 'Cosine similarity > 0.82 · Retrieved 2 relevant documents',
+    },
+  },
+  {
+    id: 'tn-5',
+    label: 'Deterministic Calculation',
+    typeLabel: 'LOGIC',
+    color: 'amber',
+    icon: Cpu,
+    snippet: (
+      <div className="mt-1.5 rounded bg-background border border-border px-2.5 py-2 font-mono">
+        <p className="text-[9px] text-muted-foreground mb-1">formula</p>
+        <p className="text-[10px] font-bold text-[hsl(38,92%,50%)]">£12.4m ÷ £40.0m</p>
+        <p className="text-[10px] font-bold text-[hsl(0,84%,60%)] mt-0.5">= 31.0%</p>
+      </div>
+    ),
+    inspector: {
+      name: 'Deterministic Calculation',
+      type: 'Deterministic / Business Logic',
+      inputs: [
+        { label: 'Customer A revenue', value: '£12.4m' },
+        { label: 'Total Q2 revenue', value: '£40.0m' },
+      ],
+      logic: 'customer_revenue / total_revenue',
+      output: '31.0%',
+      status: 'Passed',
+    },
+  },
+  {
+    id: 'tn-6',
+    label: 'Cross-source Comparison',
+    typeLabel: 'COMPARATOR',
+    color: 'red',
+    icon: GitBranch,
+    inspector: {
+      name: 'Cross-source Comparison',
+      type: 'Contradiction / Material Issue',
+      inputs: [
+        { label: 'Prior evidence', value: '18% (Management Presentation, May 2026)' },
+        { label: 'Latest evidence', value: '31.0% (Management Accounts, Aug 2026)' },
+      ],
+      logic: 'Compute absolute and relative variance across source documents',
+      output: 'Variance: +13 pp · +72% relative · Contradiction detected',
+      status: 'Passed',
+      notes: 'Threshold exceeded · Escalation triggered',
+    },
+  },
+  {
+    id: 'tn-7',
+    label: 'Materiality Evaluator',
+    typeLabel: 'EVALUATOR',
+    color: 'amber',
+    icon: SlidersHorizontal,
+    inspector: {
+      name: 'Materiality Evaluator',
+      type: 'Deterministic / Business Logic',
+      inputs: [
+        { label: 'Variance', value: '+13 percentage points' },
+        { label: 'Category', value: 'Commercial · Customer concentration' },
+      ],
+      logic: 'Apply materiality thresholds by signal category and variance magnitude',
+      output: 'Materiality: High · Confidence: 94%',
+      status: 'Passed',
+    },
+  },
+  {
+    id: 'tn-8',
+    label: 'Quality / Evaluation Gate',
+    typeLabel: 'GATE',
+    color: 'green',
+    icon: ShieldCheck,
+    inspector: {
+      name: 'Quality / Evaluation Gate',
+      type: 'Evaluation / Governance',
+      checks: [
+        { label: 'Source grounding', status: 'Passed' },
+        { label: 'Evidence consistency', status: 'Passed' },
+        { label: 'Relevance', status: 'Passed' },
+        { label: 'Hallucination guard', status: 'Passed' },
+      ],
+      output: 'Signal approved for dispatch',
+      status: 'Passed',
+    },
+  },
+  {
+    id: 'tn-9',
+    label: 'Watchtower Output',
+    typeLabel: 'OUTPUT',
+    color: 'green',
+    icon: BellRing,
+    inspector: {
+      name: 'Watchtower Output',
+      type: 'Evaluation / Governance',
+      inputs: [{ label: 'Signal', value: 'Customer concentration has increased materially' }],
+      logic: 'Dispatch signal to deal team · Update Deal Brief · Create recommended actions',
+      output: 'SIG-001 dispatched · 4 actions created · Deal Brief updated',
+      status: 'Passed',
+    },
+  },
+];
+
+// Lookup by id
+const NODE_BY_ID = Object.fromEntries(TECH_NODES.map((n) => [n.id, n]));
+
+// ─── Technical node card ───────────────────────────────────────────────────────
+
+function TechNode({
+  node,
+  delay,
+  selected,
+  onSelect,
+}: {
+  node: TechNodeDef;
+  delay: number;
+  selected: boolean;
+  onSelect: (id: string) => void;
+}) {
+  const c = NODE_COLORS[node.color];
   const Icon = node.icon;
+
   return (
-    <motion.div
+    <motion.button
       initial={{ opacity: 0, y: 8 }}
       animate={{ opacity: 1, y: 0 }}
       transition={{ delay }}
-      className={cn('flex-shrink-0 rounded-xl border bg-sidebar p-3.5 flex flex-col gap-2', NODE_W, ac.border)}
+      onClick={() => onSelect(node.id)}
+      className={cn(
+        'flex-shrink-0 w-40 rounded-xl border p-3.5 flex flex-col gap-2 text-left transition-all duration-200 cursor-pointer shadow-lg',
+        c.border, c.bg, c.glow,
+        selected ? 'ring-2 ring-offset-2 ring-offset-background ring-primary/50 shadow-primary/10' : 'hover:brightness-110',
+      )}
     >
-      <div className="flex items-center justify-between">
-        <span className={cn('text-[8px] font-bold uppercase tracking-widest font-mono', ac.label)}>
-          {node.type}
+      <div className="flex items-center justify-between gap-1">
+        <span className={cn('text-[8px] font-bold uppercase tracking-widest font-mono px-1.5 py-0.5 rounded-sm', c.badge, c.badgeText)}>
+          {node.typeLabel}
         </span>
-        <Icon className={cn('w-3.5 h-3.5', ac.icon)} />
+        <Icon className={cn('w-3.5 h-3.5 flex-shrink-0', c.icon)} />
       </div>
       <p className="text-[11px] font-semibold text-foreground leading-tight">{node.label}</p>
-      {node.special === 'formula' && (
-        <div className="mt-0.5 rounded bg-background border border-border px-2.5 py-1.5 font-mono">
-          <p className="text-[9px] text-muted-foreground mb-0.5">calculation</p>
-          <p className="text-[11px] font-bold text-primary">£12.4m ÷ £40.0m</p>
-          <p className="text-[11px] font-bold text-[hsl(0,84%,60%)]">= 31.0%</p>
-        </div>
-      )}
-      {node.special === 'gate' && (
-        <div className="mt-0.5 space-y-1">
+      {node.snippet}
+      {node.id === 'tn-8' && (
+        <div className="space-y-1 mt-0.5">
           {['Source grounding', 'Evidence consistency', 'Relevance'].map((check) => (
             <div key={check} className="flex items-center gap-1.5">
-              <CheckCircle2 className="w-3 h-3 text-[hsl(160,84%,39%)] flex-shrink-0" />
+              <CheckCircle2 className="w-2.5 h-2.5 text-[hsl(160,84%,39%)] flex-shrink-0" />
               <span className="text-[9px] text-muted-foreground font-mono">
                 {check}: <span className="text-[hsl(160,84%,39%)]">Passed</span>
               </span>
@@ -186,55 +408,271 @@ function TechNode({ node, delay }: { node: typeof TECH_NODES[number]; delay: num
           ))}
         </div>
       )}
-      {!node.special && node.lines && (
-        <div className="space-y-0.5 mt-0.5">
-          {node.lines.map((l, i) => (
-            <p key={i} className="text-[9px] text-muted-foreground font-mono leading-relaxed">{l}</p>
-          ))}
+    </motion.button>
+  );
+}
+
+// ─── Connector dots ────────────────────────────────────────────────────────────
+
+function ConnectorH() {
+  return (
+    <div className="flex items-center self-center flex-shrink-0 px-0.5">
+      <div className="flex items-center gap-1">
+        <div className="w-3 h-px bg-border" />
+        <ArrowRight className="w-3.5 h-3.5 text-border" />
+      </div>
+    </div>
+  );
+}
+
+// ─── Inspector panel ───────────────────────────────────────────────────────────
+
+function InspectorPanel({ nodeId, onClose }: { nodeId: string; onClose: () => void }) {
+  const node = NODE_BY_ID[nodeId];
+  const insp = node.inspector;
+  const c = NODE_COLORS[node.color];
+  const Icon = node.icon;
+
+  return (
+    <motion.div
+      initial={{ opacity: 0, x: 20 }}
+      animate={{ opacity: 1, x: 0 }}
+      exit={{ opacity: 0, x: 20 }}
+      transition={{ duration: 0.2 }}
+      className="w-72 flex-shrink-0 rounded-xl border border-card-border bg-card shadow-xl flex flex-col overflow-hidden"
+    >
+      {/* Header */}
+      <div className={cn('px-4 pt-4 pb-3 border-b border-border flex items-start gap-3', c.bg)}>
+        <div className={cn('w-7 h-7 rounded-lg border flex items-center justify-center flex-shrink-0 mt-0.5', c.iconBg)}>
+          <Icon className={cn('w-3.5 h-3.5', c.icon)} />
         </div>
-      )}
+        <div className="flex-1 min-w-0">
+          <p className="text-sm font-semibold text-foreground leading-tight">{insp.name}</p>
+          <p className={cn('text-[10px] mt-0.5', c.badgeText)}>{insp.type}</p>
+        </div>
+        <button onClick={onClose} className="text-muted-foreground hover:text-foreground transition-colors flex-shrink-0">
+          <X className="w-3.5 h-3.5" />
+        </button>
+      </div>
+
+      {/* Body */}
+      <div className="flex-1 overflow-y-auto p-4 space-y-4 text-xs">
+        {insp.inputs && (
+          <div>
+            <p className="text-[10px] font-semibold uppercase tracking-wider text-muted-foreground mb-2">Input</p>
+            <div className="space-y-1.5">
+              {insp.inputs.map((inp) => (
+                <div key={inp.label} className="flex items-start gap-2">
+                  <span className="text-muted-foreground min-w-0 flex-shrink-0">{inp.label}:</span>
+                  <span className="text-foreground font-medium">{inp.value}</span>
+                </div>
+              ))}
+            </div>
+          </div>
+        )}
+
+        {insp.logic && (
+          <div>
+            <p className="text-[10px] font-semibold uppercase tracking-wider text-muted-foreground mb-2">Logic / Process</p>
+            <p className="text-foreground font-mono text-[11px] bg-background border border-border rounded-lg px-3 py-2 leading-relaxed">
+              {insp.logic}
+            </p>
+          </div>
+        )}
+
+        {insp.checks && (
+          <div>
+            <p className="text-[10px] font-semibold uppercase tracking-wider text-muted-foreground mb-2">Checks</p>
+            <div className="space-y-1.5">
+              {insp.checks.map((check) => (
+                <div key={check.label} className="flex items-center justify-between">
+                  <span className="text-muted-foreground">{check.label}</span>
+                  <span className={cn(
+                    'text-[10px] font-semibold',
+                    check.status === 'Passed' ? 'text-[hsl(160,84%,39%)]' : 'text-[hsl(0,84%,60%)]',
+                  )}>
+                    {check.status}
+                  </span>
+                </div>
+              ))}
+            </div>
+          </div>
+        )}
+
+        {insp.output && (
+          <div>
+            <p className="text-[10px] font-semibold uppercase tracking-wider text-muted-foreground mb-2">Output</p>
+            <p className="text-foreground leading-relaxed">{insp.output}</p>
+          </div>
+        )}
+
+        {insp.notes && (
+          <div className="rounded-lg bg-muted/20 border border-border px-3 py-2">
+            <p className="text-muted-foreground leading-relaxed">{insp.notes}</p>
+          </div>
+        )}
+
+        <div className="flex items-center justify-between pt-1">
+          <p className="text-[10px] font-semibold uppercase tracking-wider text-muted-foreground">Execution Status</p>
+          {insp.status && (
+            <div className="flex items-center gap-1.5">
+              <CheckCircle2 className="w-3 h-3 text-[hsl(160,84%,39%)]" />
+              <span className="text-[hsl(160,84%,39%)] font-semibold text-[10px]">{insp.status}</span>
+            </div>
+          )}
+        </div>
+      </div>
     </motion.div>
   );
 }
 
+// ─── Technical workflow canvas ─────────────────────────────────────────────────
+
 function TechnicalWorkflow() {
-  const row1 = TECH_NODES.slice(0, 4);
-  const row2 = TECH_NODES.slice(4);
+  const [selectedId, setSelectedId] = useState<string | null>(null);
+
+  function handleSelect(id: string) {
+    setSelectedId((prev) => (prev === id ? null : id));
+  }
+
+  const row1 = TECH_NODES.slice(0, 3); // Evidence Ingestion, Extraction, Evidence Router
+  const branchLeft = TECH_NODES[3];    // Prior Evidence Retrieval
+  const branchRight = TECH_NODES[4];   // Deterministic Calculation
+  const row3 = TECH_NODES.slice(5);    // Cross-source Comparison → Watchtower Output
 
   return (
-    <div>
-      <div className="flex items-start gap-1.5">
-        {row1.map((node, i) => (
-          <Fragment key={node.id}>
-            <TechNode node={node} delay={i * 0.06} />
-            {i < row1.length - 1 && <RightArrow />}
-          </Fragment>
-        ))}
-      </div>
-      <div className="flex justify-end my-1.5">
-        <div className="flex justify-center" style={{ width: NODE_W_PX }}>
-          <ArrowDown className="w-4 h-4 text-border" />
+    <div className="flex gap-6 items-start">
+      {/* Canvas */}
+      <div className="flex-1 min-w-0">
+        {/* Subtle grid background */}
+        <div
+          className="rounded-2xl border border-border p-6 relative"
+          style={{
+            backgroundImage: 'radial-gradient(circle, hsl(var(--border) / 0.5) 1px, transparent 1px)',
+            backgroundSize: '20px 20px',
+          }}
+        >
+          {/* Click hint */}
+          <p className="text-[10px] text-muted-foreground/60 mb-4 font-mono">
+            Click any node to inspect · {TECH_NODES.length} nodes · 9 edges
+          </p>
+
+          {/* Row 1: linear chain */}
+          <div className="flex items-start gap-1">
+            {row1.map((node, i) => (
+              <Fragment key={node.id}>
+                <TechNode node={node} delay={i * 0.06} selected={selectedId === node.id} onSelect={handleSelect} />
+                {i < row1.length - 1 && <ConnectorH />}
+              </Fragment>
+            ))}
+          </div>
+
+          {/* Branch connectors from Evidence Router down */}
+          <div className="flex mt-2 mb-2" style={{ paddingLeft: '342px' }}>
+            {/* Left branch: down + left to Prior Evidence */}
+            <div className="relative" style={{ width: '180px', height: '28px' }}>
+              {/* Vertical line down from center-ish */}
+              <div className="absolute left-[40px] top-0 bottom-0 w-px bg-border" />
+              {/* Horizontal line going left */}
+              <div className="absolute left-0 right-[calc(100%-41px)] bottom-0 h-px bg-border" />
+              {/* Vertical line down on left side */}
+              <div className="absolute left-0 bottom-0" style={{ top: '50%' }}>
+                <div className="w-px bg-border" style={{ height: '14px' }} />
+              </div>
+            </div>
+            {/* Right branch: down + right to Deterministic Calc */}
+            <div className="relative" style={{ width: '180px', height: '28px' }}>
+              <div className="absolute left-[40px] top-0 bottom-0 w-px bg-border" />
+              <div className="absolute left-[41px] right-0 bottom-0 h-px bg-border" />
+              <div className="absolute right-0 bottom-0" style={{ top: '50%' }}>
+                <div className="w-px bg-border" style={{ height: '14px' }} />
+              </div>
+            </div>
+          </div>
+
+          {/* Row 2: Branch nodes */}
+          <div className="flex gap-2 mb-2" style={{ paddingLeft: '302px' }}>
+            <TechNode node={branchLeft} delay={0.22} selected={selectedId === branchLeft.id} onSelect={handleSelect} />
+            <div className="w-14 self-center flex items-center justify-center">
+              <div className="w-full h-px bg-border" />
+            </div>
+            <TechNode node={branchRight} delay={0.28} selected={selectedId === branchRight.id} onSelect={handleSelect} />
+          </div>
+
+          {/* Merge connectors down to Row 3 */}
+          <div className="flex mb-2" style={{ paddingLeft: '302px' }}>
+            <div className="relative" style={{ width: '180px', height: '28px' }}>
+              <div className="absolute left-[80px] top-0 bottom-0 w-px bg-border" />
+              <div className="absolute left-[80px] right-0 bottom-0 h-px bg-border" />
+            </div>
+            <div className="w-14" />
+            <div className="relative" style={{ width: '180px', height: '28px' }}>
+              <div className="absolute left-[80px] top-0 bottom-0 w-px bg-border" />
+              <div className="absolute left-0 right-[calc(100%-80px)] bottom-0 h-px bg-border" />
+            </div>
+          </div>
+
+          {/* Merge arrow */}
+          <div className="flex mb-2" style={{ paddingLeft: '462px' }}>
+            <ArrowDown className="w-4 h-4 text-border" />
+          </div>
+
+          {/* Row 3: linear chain */}
+          <div className="flex items-start gap-1">
+            {row3.map((node, i) => (
+              <Fragment key={node.id}>
+                <TechNode node={node} delay={0.34 + i * 0.06} selected={selectedId === node.id} onSelect={handleSelect} />
+                {i < row3.length - 1 && <ConnectorH />}
+              </Fragment>
+            ))}
+          </div>
         </div>
+
+        {/* Legend */}
+        <motion.div
+          initial={{ opacity: 0 }}
+          animate={{ opacity: 1 }}
+          transition={{ delay: 0.7 }}
+          className="mt-4 flex items-center flex-wrap gap-4 px-1"
+        >
+          {(
+            [
+              { color: 'slate', label: 'Source / Data Processing' },
+              { color: 'violet', label: 'AI / Context Reasoning' },
+              { color: 'amber', label: 'Deterministic / Business Logic' },
+              { color: 'green', label: 'Evaluation / Governance' },
+              { color: 'red', label: 'Contradiction / Material Issue' },
+            ] as { color: NodeColor; label: string }[]
+          ).map(({ color, label }) => (
+            <div key={color} className="flex items-center gap-1.5">
+              <div className={cn('w-2 h-2 rounded-full', NODE_COLORS[color].icon.replace('text-', 'bg-').split(' ')[0])}
+                style={{ background: color === 'slate' ? 'hsl(199, 89%, 60%)' : color === 'violet' ? 'hsl(265, 42%, 66%)' : color === 'amber' ? 'hsl(38, 92%, 50%)' : color === 'green' ? 'hsl(160, 84%, 39%)' : 'hsl(0, 84%, 60%)' }}
+              />
+              <span className="text-[10px] text-muted-foreground">{label}</span>
+            </div>
+          ))}
+        </motion.div>
+
+        {/* Prototype disclaimer */}
+        <motion.div
+          initial={{ opacity: 0 }}
+          animate={{ opacity: 1 }}
+          transition={{ delay: 0.8 }}
+          className="mt-4 flex items-start gap-2.5 px-4 py-3 rounded-lg border border-border bg-muted/20 max-w-2xl"
+        >
+          <Info className="w-3.5 h-3.5 text-muted-foreground flex-shrink-0 mt-0.5" />
+          <p className="text-xs text-muted-foreground leading-relaxed">
+            <span className="font-medium text-foreground">Prototype workflow</span> — production architecture can be orchestrated with governed agent workflows, deterministic business logic and evaluation tooling.
+          </p>
+        </motion.div>
       </div>
-      <div className="flex items-start gap-1.5 flex-row-reverse">
-        {row2.map((node, i) => (
-          <Fragment key={node.id}>
-            <TechNode node={node} delay={0.26 + i * 0.06} />
-            {i < row2.length - 1 && <LeftArrow />}
-          </Fragment>
-        ))}
-      </div>
-      <motion.div
-        initial={{ opacity: 0 }}
-        animate={{ opacity: 1 }}
-        transition={{ delay: 0.6 }}
-        className="mt-6 flex items-start gap-2.5 px-4 py-3 rounded-lg border border-border bg-muted/20 max-w-2xl"
-      >
-        <Info className="w-3.5 h-3.5 text-muted-foreground flex-shrink-0 mt-0.5" />
-        <p className="text-xs text-muted-foreground leading-relaxed">
-          <span className="font-medium text-foreground">Prototype workflow</span> — production architecture can be orchestrated with governed agent workflows, deterministic business logic and evaluation tooling.
-        </p>
-      </motion.div>
+
+      {/* Inspector panel */}
+      <AnimatePresence>
+        {selectedId && (
+          <InspectorPanel key={selectedId} nodeId={selectedId} onClose={() => setSelectedId(null)} />
+        )}
+      </AnimatePresence>
     </div>
   );
 }

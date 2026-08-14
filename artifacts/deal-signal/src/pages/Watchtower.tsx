@@ -11,6 +11,7 @@ import {
   FileType2,
   Loader2,
   RefreshCw,
+  RotateCcw,
   Zap,
 } from 'lucide-react';
 import {
@@ -31,7 +32,11 @@ const DEMO_STEPS = [
   { label: 'Material signal detected',         sub: 'Customer concentration increased from 18% to 31%' },
 ];
 
-const DEMO_TIMINGS = [0, 900, 1800, 2700, 3600];
+// Step timing in ms: step 1 @ 0ms, step 2 @ 900ms, step 3 @ 1800ms, complete @ 3200ms
+const DEMO_TIMINGS = [0, 900, 1800, 3200];
+// Signal pulse happens at step 4 complete
+const VALUE_ANIMATE_AT = 2600; // ms — when to start animating 18→31
+const SIGNAL_PULSE_AT = 3200; // ms — when to pulse the signal card
 
 const NEW_ACTIVITIES = [
   { id: 'demo-a1', time: '14:27', description: 'New evidence ingested: July Management Accounts — Aug 2026', highlight: true },
@@ -216,7 +221,17 @@ function SimulationPanel({ activeStep, isComplete }: { activeStep: number; isCom
 
 // ─── Page header ───────────────────────────────────────────────────────────────
 
-function WatchtowerHeader({ onSimulate, simRunning }: { onSimulate: () => void; simRunning: boolean }) {
+function WatchtowerHeader({
+  onSimulate,
+  onReset,
+  simRunning,
+  demoState,
+}: {
+  onSimulate: () => void;
+  onReset: () => void;
+  simRunning: boolean;
+  demoState: 'idle' | 'running' | 'complete';
+}) {
   const amber = statusColors('Amber');
   return (
     <div className="flex items-start justify-between mb-7">
@@ -241,14 +256,25 @@ function WatchtowerHeader({ onSimulate, simRunning }: { onSimulate: () => void; 
           <RefreshCw className="w-3.5 h-3.5" />
           Refresh
         </button>
+        {demoState === 'complete' && (
+          <button
+            onClick={onReset}
+            className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-md border border-border text-sm text-muted-foreground hover:text-foreground transition-colors"
+          >
+            <RotateCcw className="w-3.5 h-3.5" />
+            Reset demo
+          </button>
+        )}
         <button
           onClick={onSimulate}
-          disabled={simRunning}
+          disabled={simRunning || demoState === 'complete'}
           className={cn(
             'inline-flex items-center gap-1.5 px-3 py-1.5 rounded-md border text-sm font-medium transition-colors',
             simRunning
               ? 'border-primary/30 bg-primary/8 text-primary cursor-not-allowed'
-              : 'border-primary/40 bg-primary/10 text-primary hover:bg-primary/16 hover:border-primary/60',
+              : demoState === 'complete'
+                ? 'border-border text-muted-foreground opacity-50 cursor-default'
+                : 'border-primary/40 bg-primary/10 text-primary hover:bg-primary/16 hover:border-primary/60',
           )}
         >
           {simRunning ? <Loader2 className="w-3.5 h-3.5 animate-spin" /> : <Zap className="w-3.5 h-3.5" />}
@@ -261,12 +287,12 @@ function WatchtowerHeader({ onSimulate, simRunning }: { onSimulate: () => void; 
 
 // ─── Stats bar ─────────────────────────────────────────────────────────────────
 
-function StatsBar() {
+function StatsBar({ openActionsBonus }: { openActionsBonus: number }) {
   const stats = [
-    { label: 'Diligence Risk',    value: 'Amber', sub: 'Risk elevated',       highlight: 'amber' as const },
-    { label: 'Material Signals',  value: '3',     sub: '2 new since yesterday', highlight: 'amber' as const },
-    { label: 'Open Actions',      value: '7',     sub: '3 high priority',      highlight: undefined },
-    { label: 'Sources Monitored', value: '42',    sub: '5 updated today',      highlight: undefined },
+    { label: 'Diligence Risk',    value: 'Amber',        sub: 'Risk elevated',       highlight: 'amber' as const },
+    { label: 'Material Signals',  value: '3',            sub: '2 new since yesterday', highlight: 'amber' as const },
+    { label: 'Open Actions',      value: String(7 + openActionsBonus), sub: '3 high priority',      highlight: undefined },
+    { label: 'Sources Monitored', value: '42',           sub: '5 updated today',      highlight: undefined },
   ];
   return (
     <div className="flex items-stretch border border-card-border rounded-xl divide-x divide-border mb-8">
@@ -274,7 +300,7 @@ function StatsBar() {
         <div key={s.label} className="flex-1 px-6 py-4">
           <p className="text-xs text-muted-foreground mb-1.5">{s.label}</p>
           <p className={cn(
-            'text-xl font-bold leading-none',
+            'text-xl font-bold leading-none transition-all duration-500',
             s.highlight === 'amber' ? 'text-[hsl(38,92%,50%)]' : 'text-foreground',
           )}>
             {s.value}
@@ -288,7 +314,19 @@ function StatsBar() {
 
 // ─── Hero signal card (full detail) ───────────────────────────────────────────
 
-function SignalCard({ signal, index, highlighted }: { signal: MaterialSignal; index: number; highlighted?: boolean }) {
+function SignalCard({
+  signal,
+  index,
+  highlighted,
+  pulseOnce,
+  animateValue,
+}: {
+  signal: MaterialSignal;
+  index: number;
+  highlighted?: boolean;
+  pulseOnce?: boolean;
+  animateValue?: boolean;
+}) {
   const [, navigate] = useLocation();
   const colors = priorityColors(signal.priority);
 
@@ -300,10 +338,23 @@ function SignalCard({ signal, index, highlighted }: { signal: MaterialSignal; in
       className={cn(
         'bg-card border border-card-border rounded-xl border-l-[3px] overflow-hidden transition-all duration-500',
         colors.glow,
-        highlighted && 'ring-1 ring-[hsl(0,84%,60%,0.4)] shadow-md shadow-[hsl(0,84%,60%,0.06)]',
+        highlighted && 'ring-1 ring-[hsl(0,84%,60%,0.35)] shadow-md shadow-[hsl(0,84%,60%,0.06)]',
       )}
     >
-      <div className="px-5 py-5">
+      {/* Pulse highlight overlay */}
+      <AnimatePresence>
+        {pulseOnce && (
+          <motion.div
+            initial={{ opacity: 0.3 }}
+            animate={{ opacity: 0 }}
+            exit={{ opacity: 0 }}
+            transition={{ duration: 1.8, ease: 'easeOut' }}
+            className="absolute inset-0 rounded-xl bg-[hsl(0,84%,60%,0.08)] pointer-events-none z-10"
+          />
+        )}
+      </AnimatePresence>
+
+      <div className="relative px-5 py-5">
         {/* Top row */}
         <div className="flex items-center justify-between mb-3">
           <div className="flex items-center gap-2.5">
@@ -330,7 +381,26 @@ function SignalCard({ signal, index, highlighted }: { signal: MaterialSignal; in
           <ArrowRight className="w-4 h-4 text-muted-foreground/40 flex-shrink-0" />
           <div>
             <p className="text-[11px] text-muted-foreground mb-1">{signal.latestLabel}</p>
-            <p className={cn('text-2xl font-bold', colors.value)}>{signal.latestValue}</p>
+            <AnimatePresence mode="wait">
+              {animateValue ? (
+                <motion.p
+                  key="animated"
+                  initial={{ opacity: 0, scale: 0.9 }}
+                  animate={{ opacity: 1, scale: 1 }}
+                  transition={{ duration: 0.4, type: 'spring', stiffness: 200 }}
+                  className={cn('text-2xl font-bold', colors.value)}
+                >
+                  {signal.latestValue}
+                </motion.p>
+              ) : (
+                <motion.p
+                  key="static"
+                  className={cn('text-2xl font-bold', colors.value)}
+                >
+                  {signal.latestValue}
+                </motion.p>
+              )}
+            </AnimatePresence>
           </div>
         </div>
 
@@ -356,7 +426,7 @@ function SignalCard({ signal, index, highlighted }: { signal: MaterialSignal; in
 
 // ─── Compact signal row (secondary signals) ────────────────────────────────────
 
-function CompactSignalRow({ signal, index, highlighted }: { signal: MaterialSignal; index: number; highlighted?: boolean }) {
+function CompactSignalRow({ signal, index }: { signal: MaterialSignal; index: number }) {
   const [, navigate] = useLocation();
   const colors = priorityColors(signal.priority);
 
@@ -368,7 +438,6 @@ function CompactSignalRow({ signal, index, highlighted }: { signal: MaterialSign
       className={cn(
         'bg-card border border-card-border rounded-xl border-l-[3px] overflow-hidden',
         colors.glow,
-        highlighted && 'ring-1 ring-[hsl(0,84%,60%,0.4)]',
       )}
     >
       <div className="px-5 py-3.5 flex items-center gap-4 min-w-0">
@@ -525,11 +594,18 @@ function WatchtowerActivity({ extraEvents }: { extraEvents: typeof NEW_ACTIVITIE
 
 type DemoState = 'idle' | 'running' | 'complete';
 
+// Shared open-actions bonus — updated from SignalDetail actions
+export let _openActionsBonus = 0;
+export function incrementOpenActions() { _openActionsBonus += 1; }
+
 export default function Watchtower() {
   const [demoState, setDemoState] = useState<DemoState>('idle');
   const [activeStep, setActiveStep] = useState(0);
   const [showNotification, setShowNotification] = useState(false);
   const [extraActivities, setExtraActivities] = useState<typeof NEW_ACTIVITIES>([]);
+  const [signalPulse, setSignalPulse] = useState(false);
+  const [valueAnimated, setValueAnimated] = useState(false);
+  const [openActionsBonus] = useState(0); // will be reactive via re-render
   const timers = useRef<ReturnType<typeof setTimeout>[]>([]);
 
   function startSimulation() {
@@ -538,21 +614,45 @@ export default function Watchtower() {
     timers.current = [];
     setDemoState('running');
     setActiveStep(1);
+    setSignalPulse(false);
+    setValueAnimated(false);
+
+    // Step advances
     DEMO_TIMINGS.slice(1).forEach((ms, i) => {
       const t = setTimeout(() => {
-        if (i < DEMO_STEPS.length - 1) {
-          setActiveStep(i + 2);
-        } else {
-          setActiveStep(DEMO_STEPS.length);
-          setDemoState('complete');
-          setShowNotification(true);
-          setExtraActivities(NEW_ACTIVITIES);
-          const hide = setTimeout(() => setShowNotification(false), 5000);
-          timers.current.push(hide);
-        }
+        setActiveStep(i + 2);
       }, ms);
       timers.current.push(t);
     });
+
+    // Animate value change (18→31) mid-sequence
+    const tVal = setTimeout(() => {
+      setValueAnimated(true);
+    }, VALUE_ANIMATE_AT);
+    timers.current.push(tVal);
+
+    // Complete + pulse signal
+    const tComplete = setTimeout(() => {
+      setDemoState('complete');
+      setShowNotification(true);
+      setExtraActivities(NEW_ACTIVITIES);
+      setSignalPulse(true);
+      const hide = setTimeout(() => setShowNotification(false), 5000);
+      const clearPulse = setTimeout(() => setSignalPulse(false), 2500);
+      timers.current.push(hide, clearPulse);
+    }, SIGNAL_PULSE_AT);
+    timers.current.push(tComplete);
+  }
+
+  function resetDemo() {
+    timers.current.forEach(clearTimeout);
+    timers.current = [];
+    setDemoState('idle');
+    setActiveStep(0);
+    setShowNotification(false);
+    setExtraActivities([]);
+    setSignalPulse(false);
+    setValueAnimated(false);
   }
 
   useEffect(() => () => timers.current.forEach(clearTimeout), []);
@@ -563,13 +663,18 @@ export default function Watchtower() {
     <div className="animate-in fade-in duration-400">
       <NotificationToast visible={showNotification} />
 
-      <WatchtowerHeader onSimulate={startSimulation} simRunning={demoState === 'running'} />
+      <WatchtowerHeader
+        onSimulate={startSimulation}
+        onReset={resetDemo}
+        simRunning={demoState === 'running'}
+        demoState={demoState}
+      />
 
       {demoState !== 'idle' && (
         <SimulationPanel activeStep={activeStep} isComplete={demoState === 'complete'} />
       )}
 
-      <StatsBar />
+      <StatsBar openActionsBonus={openActionsBonus} />
 
       {/* Two-column body */}
       <div className="grid grid-cols-[1fr_300px] gap-6 items-start">
@@ -584,18 +689,20 @@ export default function Watchtower() {
           <div className="space-y-3">
             {MATERIAL_SIGNALS.map((signal, i) =>
               i === 0 ? (
-                <SignalCard
-                  key={signal.id}
-                  signal={signal}
-                  index={i}
-                  highlighted={signalHighlighted}
-                />
+                <div key={signal.id} className="relative">
+                  <SignalCard
+                    signal={signal}
+                    index={i}
+                    highlighted={signalHighlighted}
+                    pulseOnce={signalPulse}
+                    animateValue={valueAnimated}
+                  />
+                </div>
               ) : (
                 <CompactSignalRow
                   key={signal.id}
                   signal={signal}
                   index={i}
-                  highlighted={false}
                 />
               )
             )}

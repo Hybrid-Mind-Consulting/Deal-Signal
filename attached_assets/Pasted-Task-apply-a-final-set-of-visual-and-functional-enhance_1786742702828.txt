@@ -1,0 +1,256 @@
+Task: apply a final set of visual and functional enhancements to Deal Signal.
+
+Preserve the current AI Assistant-aligned design system:
+
+* graphite dark theme
+* Inter typography
+* violet brand/accent colour
+* semantic red / amber / green risk colours
+* current sidebar/navigation
+* current routes
+* current NovaCura data and signal logic
+
+Do not redesign the overall app architecture.
+
+## 1. Analysis Trace — Technical View
+
+Upgrade **Technical View** into a more visually expressive workflow canvas inspired by the imported AI Assistant design system.
+
+Keep **Business View** simple and unchanged in concept.
+
+Technical View should feel like opening the bonnet of the system.
+
+Use a node-based workflow layout with clear directional connectors:
+
+**Evidence Ingestion**
+→ **Extraction**
+→ **Evidence Router**
+
+Then branch into:
+
+* **Prior Evidence Retrieval**
+* **Deterministic Calculation**
+
+Merge into:
+
+**Cross-source Comparison**
+→ **Materiality Evaluator**
+→ **Quality / Evaluation Gate**
+→ **Watchtower Output**
+
+Use the current signal data:
+
+* Customer A revenue: £12.4m
+* Q2 revenue: £40.0m
+* deterministic calculation: 31.0%
+* previous understanding: 18%
+* variance: +13 percentage points
+* confidence: 94%
+
+Visually distinguish node types:
+
+* source/data processing: cool blue/slate
+* AI/context reasoning: violet
+* deterministic/business logic: amber
+* evaluation/governance: green
+* contradiction/material issue: red
+
+Add:
+
+* subtle directional connectors
+* small consistent icons
+* restrained node glow/highlight
+* very subtle workflow canvas/grid treatment
+* clear spacing between stages
+
+Do not make the screen visually noisy.
+
+### Node inspector
+
+Make Technical View nodes clickable.
+
+Clicking a node should open a compact right-side inspector showing:
+
+* node name
+* node type
+* input
+* logic/process
+* output
+* execution status
+
+Example for Deterministic Calculation:
+
+Input:
+
+* Customer A revenue: £12.4m
+* Q2 revenue: £40.0m
+
+Logic:
+`customer_revenue / total_revenue`
+
+Output:
+31.0%
+
+Status:
+Passed
+
+Example for Quality / Evaluation Gate:
+
+Checks:
+
+* Source grounding: Passed
+* Evidence consistency: Passed
+* Relevance: Passed
+
+Keep the existing detailed execution log available below as progressive disclosure.
+
+Preserve the existing prototype disclaimer.
+
+## 2. Watchtower — New Evidence Motion
+
+Improve the existing **Simulate New Evidence** interaction with restrained motion.
+
+When clicked:
+
+1. show New evidence detected
+2. show analysis/cross-reference progress
+3. animate or briefly emphasise the 18% → 31% change
+4. subtly highlight/pulse the high-priority customer concentration signal once
+5. show the completed status:
+   **Evidence analysis complete · New high-priority commercial signal detected**
+
+Keep the animation sequence approximately 3–5 seconds.
+
+Do not use flashy or decorative animation.
+
+The user must be able to reset/re-run the demo reliably.
+
+Add a subtle:
+**Reset demo**
+control, preferably in Settings or unobtrusively near the simulation controls.
+
+## 3. Evidence Drawer
+
+Make evidence sources clickable from the Signal Detail page.
+
+Clicking an evidence item should open a compact side drawer rather than navigating away.
+
+For:
+
+**Management Presentation — May 2026**
+
+show:
+
+* Source type: Management supplied
+* Relevant statement: “No single customer represents more than 20% of group revenue.”
+* Extracted understanding: Largest customer = 18%
+* Linked signal: Customer concentration has increased materially
+
+For:
+
+**July Management Accounts — Aug 2026**
+
+show:
+
+* Source type: Financial data
+* Last updated: 14 Aug 2026, 14:22
+* Customer A revenue: £12.4m
+* Total Q2 revenue: £40.0m
+* Calculated concentration: 31.0%
+* Linked signal: Customer concentration has increased materially
+
+Keep the drawer minimal and evidence-led.
+
+## 4. Create Action Interaction
+
+Make the existing recommended diligence actions interactive.
+
+Clicking **Create Action** should open a compact action drawer/modal.
+
+For the first action, pre-populate:
+
+Action:
+**Request 24 months of customer-level revenue**
+
+Owner:
+**Deal Team**
+
+Priority:
+**High**
+
+Timing:
+**Before next IC review**
+
+Purpose:
+Determine whether the Q2 concentration is seasonal or structural.
+
+Primary button:
+**Create Action**
+
+After creation:
+
+* change the relevant action state to **Created ✓**
+* increment the Watchtower Open Actions count by 1
+* show a subtle success notification
+
+Use the same interaction pattern for the other existing recommended actions.
+
+Do not build real task-management integrations.
+
+## 5. Signal Lifecycle
+
+Add a compact lifecycle status to the customer concentration signal:
+
+**New → Investigating → Resolved**
+
+Default state:
+**New**
+
+When an action is created or the user selects Investigate, allow the signal to move to:
+**Investigating**
+
+Provide a simple demo control to mark it:
+**Resolved**
+
+Do not remove the historical evidence or trace when resolved.
+
+The lifecycle should feel like an investment-team workflow, not a ticketing system.
+
+## 6. Deal Brief — Changes Since Last Review
+
+Add a small section near the top of the Deal Brief:
+
+**Changes since previous brief**
+
+Show:
+
+* Customer concentration escalated to High
+* FY27 growth assumption updated
+
+Keep this visually light and secondary to the Executive Summary.
+
+When **Regenerate Deal Brief** is used, show a short staged update:
+
+* collecting current Watchtower state
+* validating current signals
+* updating brief
+* brief updated
+
+Retain the controlled snapshot concept.
+
+## General constraints
+
+Do not:
+
+* add new risks
+* invent new NovaCura facts
+* change the three existing material signals
+* replace the current design system
+* add charts or dashboard clutter
+* build real external integrations
+* change routes or navigation structure
+
+The goal is to make Deal Signal feel like:
+**a calm investment product on the surface, with a sophisticated and visually compelling technical system underneath.**
+
+When complete, stop.

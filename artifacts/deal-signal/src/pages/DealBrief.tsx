@@ -3,6 +3,7 @@ import { PageHeader } from '@/components/layout/PageHeader';
 import { AnimatePresence, motion } from 'framer-motion';
 import {
   AlertTriangle,
+  ArrowUp,
   CheckCircle2,
   Clock,
   FileDown,
@@ -18,7 +19,7 @@ const REGEN_STEPS = [
   { label: 'Collecting current Watchtower state' },
   { label: 'Validating active material signals' },
   { label: 'Updating executive brief' },
-  { label: 'Deal Brief updated' },
+  { label: 'Brief updated' },
 ];
 
 const STEP_TIMINGS_MS = [0, 800, 1650, 2500, 3300];
@@ -34,6 +35,55 @@ function RiskItem({ title, description }: { title: string; description: string }
         <span className="text-sm text-muted-foreground leading-relaxed">{description}</span>
       </div>
     </li>
+  );
+}
+
+// ─── Changes since previous brief ─────────────────────────────────────────────
+
+const CHANGES = [
+  {
+    id: 'ch-1',
+    label: 'Customer concentration escalated to High',
+    severity: 'high' as const,
+  },
+  {
+    id: 'ch-2',
+    label: 'FY27 growth assumption updated',
+    severity: 'medium' as const,
+  },
+];
+
+function ChangesSinceBrief({ isUpdated }: { isUpdated: boolean }) {
+  return (
+    <motion.div
+      initial={{ opacity: 0 }}
+      animate={{ opacity: 1 }}
+      transition={{ delay: 0.05 }}
+      className="mb-10 flex items-start gap-3 px-4 py-3.5 rounded-xl border border-border bg-muted/10"
+    >
+      <div className="flex-shrink-0 mt-0.5">
+        <ArrowUp className="w-3.5 h-3.5 text-muted-foreground" />
+      </div>
+      <div className="flex-1 min-w-0">
+        <p className="text-[10px] font-semibold uppercase tracking-wider text-muted-foreground mb-2">
+          Changes since previous brief
+          {isUpdated && (
+            <span className="ml-2 text-[hsl(160,84%,39%)] normal-case font-normal tracking-normal">· refreshed</span>
+          )}
+        </p>
+        <div className="flex flex-wrap gap-x-5 gap-y-1.5">
+          {CHANGES.map((ch) => (
+            <div key={ch.id} className="flex items-center gap-1.5">
+              <span className={cn(
+                'w-1.5 h-1.5 rounded-full flex-shrink-0',
+                ch.severity === 'high' ? 'bg-[hsl(0,84%,60%)]' : 'bg-[hsl(38,92%,50%)]',
+              )} />
+              <p className="text-xs text-foreground">{ch.label}</p>
+            </div>
+          ))}
+        </div>
+      </div>
+    </motion.div>
   );
 }
 
@@ -54,7 +104,7 @@ function RegenPanel({ activeStep, isComplete }: { activeStep: number; isComplete
             ? <CheckCircle2 className="w-3.5 h-3.5 text-[hsl(160,84%,39%)]" />
             : <Loader2 className="w-3.5 h-3.5 text-primary animate-spin" />}
           <span className="text-xs font-medium text-foreground">
-            {isComplete ? 'Deal Brief regenerated' : 'Regenerating Deal Brief…'}
+            {isComplete ? 'Deal Brief updated' : 'Regenerating Deal Brief…'}
           </span>
         </div>
 
@@ -164,7 +214,7 @@ export default function DealBrief() {
       {/* Document — clean prose, no card wrapper */}
       <div className="max-w-2xl">
         {/* Timestamp + controlled snapshot */}
-        <div className="flex flex-col gap-2 mb-10">
+        <div className="flex flex-col gap-2 mb-8">
           <div className="flex items-center gap-2 text-xs text-muted-foreground w-fit">
             <Clock className="w-3.5 h-3.5 flex-shrink-0" />
             Generated from Watchtower evidence — 14 Aug 2026, 14:32
@@ -188,6 +238,9 @@ export default function DealBrief() {
             )}
           </AnimatePresence>
         </div>
+
+        {/* Changes since last brief — secondary, light treatment */}
+        <ChangesSinceBrief isUpdated={isComplete} />
 
         <div className="space-y-14">
 

@@ -294,7 +294,7 @@ function SignalCard({
           {signal.recommendedAction}
         </p>
         <button
-          onClick={() => navigate('/signals')}
+          onClick={() => navigate('/signals/customer-concentration')}
           className="mt-4 inline-flex items-center gap-1.5 text-xs font-semibold text-primary hover:text-primary/80 transition-colors group"
         >
           Investigate Signal

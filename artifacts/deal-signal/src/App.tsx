@@ -20,6 +20,7 @@ import AskWatchtower from '@/pages/AskWatchtower';
 import AnalysisTrace from '@/pages/AnalysisTrace';
 import DataSources from '@/pages/DataSources';
 import Settings from '@/pages/Settings';
+import SignalDetail from '@/pages/SignalDetail';
 
 const queryClient = new QueryClient();
 
@@ -36,6 +37,7 @@ function Router() {
           <Route path="/deal-brief" component={DealBrief} />
           <Route path="/ask-watchtower" component={AskWatchtower} />
           <Route path="/analysis-trace" component={AnalysisTrace} />
+          <Route path="/signals/customer-concentration" component={SignalDetail} />
           <Route path="/data-sources" component={DataSources} />
           <Route path="/settings" component={Settings} />
           <Route component={NotFound} />

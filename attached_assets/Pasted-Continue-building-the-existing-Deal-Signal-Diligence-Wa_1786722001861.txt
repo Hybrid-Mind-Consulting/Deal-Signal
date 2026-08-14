@@ -1,0 +1,433 @@
+Continue building the existing Deal Signal — Diligence Watchtower application.
+
+Do not redesign the established visual language. The overall design is working well.
+
+Before adding further functionality, make the product internally consistent and then build the detailed investigation experience for the highest-priority signal.
+
+PART 1 — GLOBAL CLEAN-UP
+Remove Formula Bar
+
+There is an unwanted floating label reading:
+
+Formula Bar
+
+appearing on multiple pages.
+
+Remove this element globally from the application.
+
+It should not appear anywhere.
+
+PART 2 — LOCK THE NOVACURA DEMO STORY
+
+NovaCura Therapeutics should have one consistent fictional investment story across every page.
+
+Use the following as the source of truth:
+
+NovaCura Therapeutics
+
+Sector: Specialty Pharma
+
+Transaction Stage: Diligence
+
+Transaction Type: Potential majority investment
+
+Business profile:
+
+NovaCura Therapeutics is a profitable specialty pharmaceutical company commercialising and developing therapies in specialist care markets.
+
+The investment team is evaluating a potential majority investment.
+
+The company has an existing commercial revenue base and a pipeline of growth opportunities.
+
+The current diligence process covers:
+
+Commercial
+Financial
+Regulatory
+Legal
+Technology
+Management
+
+Do not position NovaCura as:
+
+a Series C fundraising company
+an early-stage biotech
+a venture capital investment
+a pre-revenue clinical-stage company
+
+Do not invent additional major transaction facts unless instructed.
+
+PART 3 — STANDARDISE THE THREE MATERIAL SIGNALS
+
+Across the entire application, the three active material signals for NovaCura must be:
+
+Signal 1 — High
+
+Customer concentration has increased materially
+
+Category: Commercial
+
+Previous understanding: 18%
+
+Latest evidence: 31%
+
+Summary:
+
+The largest customer now represents 31% of Q2 revenue versus 18% stated in the management presentation.
+
+Signal 2 — Medium
+
+FY27 growth assumption exceeds current run-rate
+
+Category: Financial
+
+Investment model assumption: 14% growth
+
+Latest run-rate: 8%
+
+Summary:
+
+The investment model assumes 14% FY27 revenue growth while the latest trading data implies an annualised run-rate closer to 8%.
+
+Signal 3 — Medium
+
+Regulatory milestone timing is inconsistent
+
+Category: Regulatory
+
+Management guidance: Q1 2027
+
+Latest evidence: Q2 2027
+
+Summary:
+
+Management guidance implies a Q1 2027 regulatory milestone while the latest regulatory submission indicates a likely Q2 2027 decision window.
+
+PART 4 — FIX THE SIGNALS PAGE
+
+Update the existing Signals page.
+
+Remove the currently invented signals including:
+
+Regulatory Risk relating to an FDA facility inspection
+Financial Discrepancy relating to COGS
+Management Change / CMO resignation
+IP Litigation
+
+Replace them with the three standardised NovaCura signals above.
+
+The Signals page should show all detected signals in a compact list format.
+
+For each signal include:
+
+Priority
+Category
+Title
+Short description
+Detection time
+Confidence
+Status
+View Signal
+
+Use:
+
+Customer concentration has increased materially
+
+Priority: High
+Category: Commercial
+Status: New
+Confidence: 94%
+
+FY27 growth assumption exceeds current run-rate
+
+Priority: Medium
+Category: Financial
+Status: Updated
+Confidence: 89%
+
+Regulatory milestone timing is inconsistent
+
+Priority: Medium
+Category: Regulatory
+Status: New
+Confidence: 86%
+
+PART 5 — FIX THE DEAL BRIEF
+
+Keep the existing Deal Brief page structure and styling, but rewrite the content so it matches the NovaCura story and Watchtower findings.
+
+Executive Summary
+
+Use:
+
+NovaCura Therapeutics is a profitable specialty pharmaceutical business operating across specialist care markets. The investment team is evaluating a potential majority investment, with diligence focused on the sustainability of commercial growth, financial assumptions and selected regulatory milestones. Recent evidence has increased the overall diligence assessment to Amber, with three material issues currently requiring investment-team attention.
+
+Investment Thesis
+
+Use:
+
+The opportunity is underpinned by an established commercial platform, specialist market positioning and potential for continued organic growth. The investment case assumes further expansion across existing products and selected pipeline opportunities. Current diligence is focused on validating the durability of that growth and the downside resilience of the base case.
+
+Do not state a specific MOIC or valuation unless instructed.
+
+Key Risks
+
+Show the current three Watchtower issues:
+
+Customer Concentration
+
+Latest evidence indicates the largest customer represents 31% of Q2 revenue versus 18% previously understood.
+
+Growth Assumptions
+
+FY27 base-case revenue growth of 14% is above the latest annualised trading run-rate of approximately 8%.
+
+Regulatory Timing
+
+Latest evidence suggests a key regulatory milestone may occur in Q2 2027 rather than Q1 2027.
+
+Add a small label:
+
+Generated from Watchtower evidence — 14 Aug 2026, 14:32
+
+This should reinforce that the Deal Brief is a frozen output based on the current evidence state.
+
+PART 6 — BUILD SIGNAL DETAIL
+
+Now create the detailed investigation screen for:
+
+Customer concentration has increased materially
+
+This is the most important screen in the demo.
+
+Clicking Investigate Signal from the Watchtower or View Signal from the Signals page should open this screen.
+
+Preserve the existing application shell and sidebar.
+
+SIGNAL DETAIL HEADER
+
+At the top display:
+
+NovaCura Therapeutics / Commercial
+
+Customer concentration has increased materially
+
+Badges:
+
+HIGH PRIORITY
+
+NEW
+
+On the right:
+
+Detected 14 Aug 2026, 14:27
+
+Under the title:
+
+The largest customer now represents 31% of Q2 revenue, versus 18% stated in the management presentation.
+
+SECTION 1 — WHAT CHANGED
+
+Create a visually strong comparison panel.
+
+Left:
+
+Previous Understanding
+
+18%
+
+Largest customer share of revenue
+
+Source:
+
+Management Presentation — May 2026
+
+Right:
+
+Latest Evidence
+
+31%
+
+Largest customer share of Q2 revenue
+
+Source:
+
+July Management Accounts — Aug 2026
+
+Between the two values show a visual arrow or change indicator:
+
++13 percentage points
+
++72% relative increase
+
+Use a high-risk visual treatment on the latest value.
+
+SECTION 2 — WHY IT MATTERS
+
+Create a concise investment interpretation panel.
+
+Heading:
+
+Why this matters
+
+Text:
+
+The latest trading data indicates materially greater customer concentration than the investment team previously understood. If structural rather than seasonal, this increases revenue dependency on a single counterparty and may weaken downside resilience in the base investment case.
+
+Add three impact tags:
+
+Revenue resilience
+Customer dependency
+Downside case
+SECTION 3 — EVIDENCE
+
+Create an evidence table or evidence cards.
+
+Evidence 1
+
+Management Presentation — May 2026
+
+Relevant statement:
+
+“No single customer represents more than 20% of group revenue.”
+
+Extracted metric:
+
+Largest customer: 18%
+
+Evidence type:
+
+Management supplied
+
+Evidence 2
+
+July Management Accounts — Aug 2026
+
+Relevant finding:
+
+Customer A generated £12.4m of £40.0m Q2 revenue.
+
+Calculated metric:
+
+31.0%
+
+Evidence type:
+
+Financial data
+
+Show a status:
+
+Contradiction detected
+
+Make the source cards clickable-looking, although they do not need real document functionality yet.
+
+SECTION 4 — WATCHTOWER ASSESSMENT
+
+Create an assessment panel showing:
+
+Materiality
+
+High
+
+Confidence
+
+94%
+
+Evidence strength
+
+Strong
+
+Signal type
+
+Cross-source contradiction
+
+Diligence area
+
+Commercial
+
+Below this include:
+
+Watchtower Assessment
+
+The discrepancy is sufficiently large to warrant further investigation. The current evidence does not establish whether the increase is caused by seasonality, timing or a structural change in the customer mix. The signal should therefore remain open until customer-level revenue history and contractual exposure have been reviewed.
+
+Do not present speculation as fact.
+
+SECTION 5 — RECOMMENDED DILIGENCE ACTIONS
+
+Create a prominent panel:
+
+Recommended Next Actions
+Request monthly customer-level revenue for the previous 24 months
+
+Purpose:
+Determine whether Q2 concentration is seasonal or structural.
+
+Review Customer A contract terms
+
+Purpose:
+Assess duration, renewal dates, termination rights and pricing exposure.
+
+Stress-test customer loss in the investment model
+
+Purpose:
+Quantify EBITDA, cash flow and leverage impact if the largest customer churns or reduces volumes.
+
+Validate management explanation
+
+Purpose:
+Reconcile the 18% statement in the management presentation with the latest trading data.
+
+Each action should have a button:
+
+Create Action
+
+The button does not require backend functionality yet.
+
+SECTION 6 — INVESTIGATE FURTHER
+
+At the bottom of the screen create a compact contextual question box:
+
+Investigate this signal
+
+Placeholder:
+
+Ask a follow-up question about this signal...
+
+Above the input show three suggested questions:
+
+What is the downside impact if Customer A leaves?
+Has customer concentration increased over time?
+Which contracts contribute most to concentration risk?
+
+Do not turn this into a full generic chatbot page.
+
+This interface is specifically for deeper investigation of the current signal.
+
+SECTION 7 — VIEW ANALYSIS TRACE
+
+Add a secondary button near the header or assessment section:
+
+View Analysis Trace
+
+Clicking this should navigate to the Analysis Trace page.
+
+The Analysis Trace page will be improved later to show the reasoning path specifically for this customer-concentration signal.
+
+IMPORTANT
+
+The objective of this screen is to demonstrate:
+
+Evidence → contradiction → materiality → investment implication → next action
+
+It must feel evidence-led and controlled.
+
+Do not make the page look like an AI chatbot.
+
+Do not add new fictional risks.
+
+Do not change the three agreed NovaCura signals.
+
+Do not build real backend integrations yet.
+
+Once the alignment changes and Customer Concentration Signal Detail screen are complete, stop and wait for the next instruction.

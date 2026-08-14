@@ -1,0 +1,136 @@
+Task: simplify the existing Deal Signal UI to feel more minimal, premium and calm while preserving the current AI Assistant-aligned design system.
+
+Do not change:
+
+* colours or theme tokens
+* typography
+* sidebar/navigation
+* routes
+* underlying data
+* functionality
+* NovaCura story
+* existing interactions
+
+This is a **layout and information-hierarchy pass only**.
+
+### Watchtower
+
+Make the customer concentration signal the clear hero.
+
+Keep this signal expanded and prominent:
+**Customer concentration has increased materially**
+
+Compress the other two signals into compact rows/cards showing only:
+
+* severity
+* category
+* title
+* key comparison
+* confidence
+* Investigate link
+
+Do not show long descriptions or source lists on the compact signals.
+
+Reduce the right-side information density:
+
+* keep **Diligence Coverage**
+* keep **Recent Evidence**
+* make **Activity Log** collapsed by default behind a “View activity” control
+
+When the Simulate New Evidence sequence completes, collapse the four-step analysis panel into a slim status bar:
+**Evidence analysis complete · New high-priority commercial signal detected**
+with an optional “View process” control.
+
+### Signals
+
+Make each signal row more compact.
+
+Show:
+
+* severity
+* category
+* title
+* one-line evidence summary
+* confidence
+* View Signal
+
+De-emphasise timestamps and secondary metadata.
+
+### Signal Detail
+
+Make the **18% → 31%** comparison the visual focal point of the page.
+
+Reduce nested cards and unnecessary borders.
+
+The initial viewport should primarily show:
+
+* signal title
+* severity/category
+* 18% → 31%
+* +13 percentage points
+* one short “Why this matters” statement
+* primary action: **Investigate**
+
+Move supporting information lower down using progressive disclosure where appropriate:
+
+* Evidence
+* Watchtower Assessment
+* Recommended Actions
+* Investigate this signal
+
+Do not remove this information.
+
+### Deal Brief
+
+Keep the editorial/document style.
+
+Use a slightly narrower reading column and stronger whitespace between:
+
+* Executive Summary
+* Investment Thesis
+* Key Risks
+* Diligence Status
+
+Avoid adding cards or additional UI chrome.
+
+### Ask Watchtower
+
+Reduce response verbosity.
+
+Format responses as:
+
+* short conclusion
+* 1–2 evidence points
+* caveat if evidence is incomplete
+* recommended next step
+
+Keep the existing chat layout.
+
+### Analysis Trace — Business View
+
+Simplify the visible workflow to five main stages:
+
+**Evidence → Extract → Compare → Assess → Act**
+
+Each node should contain only a short title and one key fact.
+
+Do not show detailed technical language in Business View.
+
+Keep the current **Technical View** available for deeper inspection.
+
+### General
+
+Across all pages:
+
+* use whitespace instead of borders where possible
+* avoid cards inside cards
+* reduce repeated metadata
+* reduce unnecessary explanatory text
+* preserve semantic red / amber / green status colours
+* preserve purple as the primary action/brand colour
+* keep important actions visually obvious
+* do not remove functionality
+
+The goal is that a user can understand each page in **3–5 seconds** before choosing to drill deeper.
+
+When complete, stop.

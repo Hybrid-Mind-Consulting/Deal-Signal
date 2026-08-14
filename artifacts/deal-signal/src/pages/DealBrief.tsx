@@ -162,7 +162,7 @@ export default function DealBrief() {
       </AnimatePresence>
 
       {/* Document — clean prose, no card wrapper */}
-      <div className="max-w-3xl">
+      <div className="max-w-2xl">
         {/* Timestamp + controlled snapshot */}
         <div className="flex flex-col gap-2 mb-10">
           <div className="flex items-center gap-2 text-xs text-muted-foreground w-fit">
@@ -189,7 +189,7 @@ export default function DealBrief() {
           </AnimatePresence>
         </div>
 
-        <div className="space-y-10">
+        <div className="space-y-14">
 
           <motion.section initial={{ opacity: 0 }} animate={{ opacity: 1 }} transition={{ delay: 0.1 }}>
             <p className="text-[10px] font-semibold uppercase tracking-widest text-muted-foreground mb-3">

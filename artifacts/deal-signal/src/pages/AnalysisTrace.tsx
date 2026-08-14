@@ -3,12 +3,10 @@ import { PageHeader } from '@/components/layout/PageHeader';
 import { ANALYSIS_EVENTS } from '@/data/mock';
 import { AnimatePresence, motion } from 'framer-motion';
 import {
-  AlertTriangle,
   ArrowDown,
   ArrowLeft,
   ArrowRight,
   BellRing,
-  BookOpen,
   BrainCircuit,
   CheckCircle2,
   ChevronDown,
@@ -19,18 +17,17 @@ import {
   FileText,
   GitBranch,
   Info,
-  ListChecks,
   Network,
   ShieldCheck,
   SlidersHorizontal,
 } from 'lucide-react';
 import { cn } from '@/lib/utils';
 
-// ─── Types ────────────────────────────────────────────────────────────────────
+// ─── Types ─────────────────────────────────────────────────────────────────────
 
 type View = 'business' | 'technical';
 
-// ─── View toggle ──────────────────────────────────────────────────────────────
+// ─── View toggle ───────────────────────────────────────────────────────────────
 
 function ViewToggle({ view, onChange }: { view: View; onChange: (v: View) => void }) {
   return (
@@ -51,7 +48,7 @@ function ViewToggle({ view, onChange }: { view: View; onChange: (v: View) => voi
   );
 }
 
-// ─── Shared arrow connectors ──────────────────────────────────────────────────
+// ─── Shared arrow connectors ───────────────────────────────────────────────────
 
 function RightArrow() {
   return (
@@ -70,34 +67,28 @@ function LeftArrow() {
 }
 
 // ─────────────────────────────────────────────────────────────────────────────
-// BUSINESS VIEW
+// BUSINESS VIEW — 5 simplified stages
 // ─────────────────────────────────────────────────────────────────────────────
 
 const BIZ_ACCENT = {
-  blue:   { ring: 'bg-primary/10 border-primary/30',                                icon: 'text-primary',                card: 'border-primary/20' },
-  teal:   { ring: 'bg-[hsl(173,80%,40%,0.12)] border-[hsl(173,80%,40%,0.3)]',      icon: 'text-[hsl(173,80%,40%)]',     card: 'border-[hsl(173,80%,40%,0.2)]' },
-  purple: { ring: 'bg-[hsl(250,80%,65%,0.12)] border-[hsl(250,80%,65%,0.3)]',      icon: 'text-[hsl(250,80%,65%)]',     card: 'border-[hsl(250,80%,65%,0.2)]' },
-  red:    { ring: 'bg-[hsl(0,84%,60%,0.12)] border-[hsl(0,84%,60%,0.3)]',          icon: 'text-[hsl(0,84%,60%)]',       card: 'border-[hsl(0,84%,60%,0.25)]' },
-  amber:  { ring: 'bg-[hsl(38,92%,50%,0.12)] border-[hsl(38,92%,50%,0.3)]',        icon: 'text-[hsl(38,92%,50%)]',      card: 'border-[hsl(38,92%,50%,0.2)]' },
-  green:  { ring: 'bg-[hsl(160,84%,39%,0.12)] border-[hsl(160,84%,39%,0.3)]',      icon: 'text-[hsl(160,84%,39%)]',     card: 'border-[hsl(160,84%,39%,0.2)]' },
+  blue:  { ring: 'bg-primary/10 border-primary/30',                               icon: 'text-primary',                card: 'border-primary/20' },
+  teal:  { ring: 'bg-[hsl(173,80%,40%,0.12)] border-[hsl(173,80%,40%,0.3)]',     icon: 'text-[hsl(173,80%,40%)]',    card: 'border-[hsl(173,80%,40%,0.2)]' },
+  red:   { ring: 'bg-[hsl(0,84%,60%,0.12)] border-[hsl(0,84%,60%,0.3)]',         icon: 'text-[hsl(0,84%,60%)]',      card: 'border-[hsl(0,84%,60%,0.25)]' },
+  amber: { ring: 'bg-[hsl(38,92%,50%,0.12)] border-[hsl(38,92%,50%,0.3)]',       icon: 'text-[hsl(38,92%,50%)]',     card: 'border-[hsl(38,92%,50%,0.2)]' },
+  green: { ring: 'bg-[hsl(160,84%,39%,0.12)] border-[hsl(160,84%,39%,0.3)]',     icon: 'text-[hsl(160,84%,39%)]',    card: 'border-[hsl(160,84%,39%,0.2)]' },
 } as const;
 
 type BizAccent = keyof typeof BIZ_ACCENT;
 
-const BIZ_NODES: { id: string; label: string; icon: React.ElementType; accent: BizAccent; lines: string[] }[] = [
-  { id: 'n1', label: 'New Evidence',           icon: FileText,      accent: 'blue',   lines: ['July Management Accounts', 'Aug 2026'] },
-  { id: 'n2', label: 'Extract Key Data',        icon: FileSearch,    accent: 'teal',   lines: ['Customer A: £12.4m', 'Q2 Revenue: £40.0m', 'Concentration: 31%'] },
-  { id: 'n3', label: 'Retrieve Prior Evidence', icon: BookOpen,      accent: 'purple', lines: ['Management Presentation', 'May 2026', 'Previous: 18%'] },
-  { id: 'n4', label: 'Detect Contradiction',    icon: AlertTriangle, accent: 'red',    lines: ['18% → 31%', '+13 percentage points'] },
-  { id: 'n5', label: 'Assess Materiality',      icon: ShieldCheck,   accent: 'amber',  lines: ['Commercial risk', 'High materiality', '94% confidence'] },
-  { id: 'n6', label: 'Recommend Action',        icon: ListChecks,    accent: 'amber',  lines: ['Escalate for diligence review', '4 follow-up actions created'] },
-  { id: 'n7', label: 'Publish',                 icon: BellRing,      accent: 'green',  lines: ['Watchtower alert', 'Deal Brief updated'] },
+const BIZ_STAGES: { id: string; label: string; icon: React.ElementType; accent: BizAccent; fact: string }[] = [
+  { id: 's1', label: 'Evidence', icon: FileText,    accent: 'blue',  fact: 'July Management Accounts · Aug 2026' },
+  { id: 's2', label: 'Extract',  icon: FileSearch,  accent: 'teal',  fact: 'Customer A: 31% of Q2 revenue' },
+  { id: 's3', label: 'Compare',  icon: GitBranch,   accent: 'red',   fact: '18% → 31% · +13 percentage points' },
+  { id: 's4', label: 'Assess',   icon: ShieldCheck, accent: 'amber', fact: 'High materiality · 94% confidence' },
+  { id: 's5', label: 'Act',      icon: BellRing,    accent: 'green', fact: 'Signal raised · 4 actions created' },
 ];
 
-const NODE_W = 'w-40';
-const NODE_W_PX = 160;
-
-function BizNode({ node, delay }: { node: typeof BIZ_NODES[number]; delay: number }) {
+function BizNode({ node, delay }: { node: typeof BIZ_STAGES[number]; delay: number }) {
   const c = BIZ_ACCENT[node.accent];
   const Icon = node.icon;
   return (
@@ -105,50 +96,28 @@ function BizNode({ node, delay }: { node: typeof BIZ_NODES[number]; delay: numbe
       initial={{ opacity: 0, y: 8 }}
       animate={{ opacity: 1, y: 0 }}
       transition={{ delay }}
-      className={cn('flex-shrink-0 rounded-xl border bg-card p-4 flex flex-col gap-2.5', NODE_W, c.card)}
+      className={cn('flex-shrink-0 rounded-xl border bg-card p-4 flex flex-col gap-3 w-44', c.card)}
     >
       <div className={cn('w-8 h-8 rounded-full border flex items-center justify-center', c.ring)}>
         <Icon className={cn('w-4 h-4', c.icon)} />
       </div>
       <div>
-        <p className="text-[11px] font-semibold text-foreground leading-tight mb-1.5">{node.label}</p>
-        <div className="space-y-0.5">
-          {node.lines.map((l, i) => (
-            <p key={i} className="text-[10px] text-muted-foreground leading-relaxed">{l}</p>
-          ))}
-        </div>
+        <p className="text-sm font-semibold text-foreground leading-tight mb-1.5">{node.label}</p>
+        <p className="text-[11px] text-muted-foreground leading-relaxed">{node.fact}</p>
       </div>
     </motion.div>
   );
 }
 
 function BusinessWorkflow() {
-  const row1 = BIZ_NODES.slice(0, 4);
-  const row2 = BIZ_NODES.slice(4);
-
   return (
-    <div>
-      <div className="flex items-start gap-1.5">
-        {row1.map((node, i) => (
-          <Fragment key={node.id}>
-            <BizNode node={node} delay={i * 0.07} />
-            {i < row1.length - 1 && <RightArrow />}
-          </Fragment>
-        ))}
-      </div>
-      <div className="flex justify-end my-1.5">
-        <div className="flex justify-center" style={{ width: NODE_W_PX }}>
-          <ArrowDown className="w-4 h-4 text-border" />
-        </div>
-      </div>
-      <div className="flex items-start gap-1.5 flex-row-reverse">
-        {row2.map((node, i) => (
-          <Fragment key={node.id}>
-            <BizNode node={node} delay={0.30 + i * 0.07} />
-            {i < row2.length - 1 && <LeftArrow />}
-          </Fragment>
-        ))}
-      </div>
+    <div className="flex items-start gap-1.5 flex-wrap">
+      {BIZ_STAGES.map((stage, i) => (
+        <Fragment key={stage.id}>
+          <BizNode node={stage} delay={i * 0.08} />
+          {i < BIZ_STAGES.length - 1 && <RightArrow />}
+        </Fragment>
+      ))}
     </div>
   );
 }
@@ -170,6 +139,9 @@ const TECH_NODES: {
   { id: 't7', type: 'GATE',          label: 'Quality / Evaluation Gate',  icon: CheckCircle2, accent: 'green', special: 'gate' },
   { id: 't8', type: 'OUTPUT',        label: 'Watchtower Output',          icon: BellRing,  accent: 'amber', lines: ['Signal dispatched', 'Deal Brief updated'] },
 ];
+
+const NODE_W = 'w-40';
+const NODE_W_PX = 160;
 
 const TECH_ACCENT_CLS: Record<string, { border: string; label: string; icon: string }> = {
   blue:    { border: 'border-primary/30',               label: 'text-primary',            icon: 'text-primary' },
@@ -268,7 +240,7 @@ function TechnicalWorkflow() {
 }
 
 // ─────────────────────────────────────────────────────────────────────────────
-// EVENT ICON (for expandable log)
+// EVENT ICON
 // ─────────────────────────────────────────────────────────────────────────────
 
 function EventIcon({ type }: { type: string }) {
@@ -298,9 +270,7 @@ function ExpandableLog() {
         onClick={() => setOpen((o) => !o)}
         className="flex items-center gap-2 text-xs text-muted-foreground hover:text-foreground transition-colors group mb-4"
       >
-        {open
-          ? <ChevronUp className="w-4 h-4" />
-          : <ChevronDown className="w-4 h-4" />}
+        {open ? <ChevronUp className="w-4 h-4" /> : <ChevronDown className="w-4 h-4" />}
         View detailed execution log
       </button>
 

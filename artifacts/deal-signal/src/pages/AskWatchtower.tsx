@@ -9,26 +9,52 @@ const SUGGESTED = [
   'Which contracts contribute most to concentration risk?',
 ];
 
-const CONVERSATION = [
+type UserMessage = { id: string; role: 'user'; text: string };
+type SystemMessage = {
+  id: string;
+  role: 'system';
+  conclusion: string;
+  evidence: string[];
+  caveat?: string;
+  nextStep: string;
+};
+type Message = UserMessage | SystemMessage;
+
+const CONVERSATION: Message[] = [
   {
     id: 'msg-1',
-    role: 'user' as const,
+    role: 'user',
     text: 'What is driving the increase in customer concentration?',
   },
   {
     id: 'msg-2',
-    role: 'system' as const,
-    text: 'The latest July Management Accounts show Customer A generated £12.4m of £40.0m Q2 revenue, representing 31% of total revenue. The previous management presentation indicated the largest customer represented 18%. The available evidence does not yet establish whether this change is seasonal, timing-related or structural.',
+    role: 'system',
+    conclusion:
+      'Customer A now represents 31% of Q2 revenue, up from 18% stated in the management presentation — a 13 percentage point increase.',
+    evidence: [
+      'July Management Accounts (Aug 2026): Customer A generated £12.4m of £40.0m Q2 revenue.',
+      'Management Presentation (May 2026) stated no single customer exceeded 20% of group revenue.',
+    ],
+    caveat:
+      'The available evidence does not establish whether this change is seasonal, timing-related or structural.',
+    nextStep:
+      'Request 24 months of customer-level revenue to determine whether Q2 concentration is seasonal or structural.',
   },
   {
     id: 'msg-3',
-    role: 'user' as const,
+    role: 'user',
     text: 'What happens if Customer A reduces volumes by 50%?',
   },
   {
     id: 'msg-4',
-    role: 'system' as const,
-    text: 'A 50% reduction in Customer A volumes would remove approximately £6.2m of quarterly revenue based on the latest run-rate. The current demo does not yet contain enough cost and margin data to calculate a reliable EBITDA impact. Recommended next step: run a downside scenario using the investment model and latest customer-level gross margin data.',
+    role: 'system',
+    conclusion:
+      'A 50% reduction in Customer A volumes would remove approximately £6.2m of quarterly revenue at the current run-rate.',
+    evidence: ['Customer A: £12.4m Q2 revenue × 50% = £6.2m reduction.'],
+    caveat:
+      'Insufficient cost and margin data to calculate a reliable EBITDA impact from the available evidence.',
+    nextStep:
+      'Run a downside scenario using the investment model with the latest customer-level gross margin data.',
   },
 ];
 
@@ -43,7 +69,9 @@ export default function AskWatchtower() {
       <div className="flex items-center gap-2 mb-6 text-xs text-muted-foreground">
         <TrendingUp className="w-3.5 h-3.5 text-primary flex-shrink-0" />
         <span>Context:</span>
-        <span className="text-foreground font-medium">Customer concentration signal · NovaCura Therapeutics</span>
+        <span className="text-foreground font-medium">
+          Customer concentration signal · NovaCura Therapeutics
+        </span>
       </div>
 
       {/* Conversation */}
@@ -70,14 +98,45 @@ export default function AskWatchtower() {
               className="flex justify-start"
             >
               <div className="bg-sidebar border border-sidebar-border rounded-2xl rounded-tl-sm px-5 py-4 max-w-2xl">
-                <div className="flex items-center gap-2 mb-2.5">
+                <div className="flex items-center gap-2 mb-3">
                   <Terminal className="w-3 h-3 text-primary" />
-                  <span className="text-[10px] font-semibold uppercase tracking-widest text-primary">Watchtower</span>
+                  <span className="text-[10px] font-semibold uppercase tracking-widest text-primary">
+                    Watchtower
+                  </span>
                 </div>
-                <p className="text-sm leading-relaxed text-muted-foreground">{msg.text}</p>
+
+                <div className="space-y-3">
+                  {/* Conclusion */}
+                  <p className="text-sm text-foreground font-medium leading-relaxed">
+                    {msg.conclusion}
+                  </p>
+
+                  {/* Evidence points */}
+                  {msg.evidence.length > 0 && (
+                    <ul className="space-y-1.5">
+                      {msg.evidence.map((e, i) => (
+                        <li key={i} className="flex items-start gap-2 text-xs text-muted-foreground">
+                          <span className="mt-1.5 w-1 h-1 rounded-full bg-primary flex-shrink-0" />
+                          {e}
+                        </li>
+                      ))}
+                    </ul>
+                  )}
+
+                  {/* Caveat */}
+                  {msg.caveat && (
+                    <p className="text-xs text-muted-foreground italic">{msg.caveat}</p>
+                  )}
+
+                  {/* Recommended next step */}
+                  <div className="flex items-start gap-2 pt-2 border-t border-border">
+                    <TrendingUp className="w-3 h-3 text-primary flex-shrink-0 mt-0.5" />
+                    <p className="text-xs font-medium text-primary leading-relaxed">{msg.nextStep}</p>
+                  </div>
+                </div>
               </div>
             </motion.div>
-          )
+          ),
         )}
       </div>
 

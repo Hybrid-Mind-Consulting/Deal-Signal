@@ -45,7 +45,7 @@ export default function Signals() {
                 ps.accent,
               )}
             >
-              <div className="px-5 py-4 flex items-start gap-6">
+              <div className="px-5 py-3 flex items-start gap-6">
                 {/* Left: badge + title + summary */}
                 <div className="flex-1 min-w-0">
                   <div className="flex items-center gap-2 mb-2">

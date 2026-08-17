@@ -202,7 +202,7 @@ const NODE_COLORS: Record<NodeColor, {
 const DEAL_SIGNAL_NODES: TechNodeDef[] = [
   {
     id: 'ev-trigger',
-    label: 'Evidence Event / Trigger',
+    label: 'Evidence Trigger',
     typeLabel: 'TRIGGER',
     color: 'slate',
     icon: Database,
@@ -248,7 +248,7 @@ const DEAL_SIGNAL_NODES: TechNodeDef[] = [
   },
   {
     id: 'ctx-route',
-    label: 'Context & Evidence Routing',
+    label: 'Context Routing',
     typeLabel: 'ROUTER',
     color: 'slate',
     icon: Network,
@@ -329,7 +329,7 @@ const DEAL_SIGNAL_NODES: TechNodeDef[] = [
   },
   {
     id: 'mat-eval',
-    label: 'Materiality Evaluator',
+    label: 'Materiality Evaluation',
     typeLabel: 'EVALUATOR',
     color: 'amber',
     icon: SlidersHorizontal,
@@ -502,41 +502,23 @@ function TechNode({
 
   return (
     <motion.button
-      initial={{ opacity: 0, y: 8 }}
+      initial={{ opacity: 0, y: 6 }}
       animate={{ opacity: 1, y: 0 }}
       transition={{ delay }}
       onClick={() => onSelect(node.id)}
       className={cn(
-        'flex-shrink-0 w-36 rounded-xl border p-3 flex flex-col gap-2 text-left transition-all duration-200 cursor-pointer shadow-lg',
+        'flex-shrink-0 w-28 rounded-lg border p-2 flex flex-col gap-1.5 text-left transition-all duration-200 cursor-pointer shadow-md',
         c.border, c.bg, c.glow,
-        selected ? 'ring-2 ring-offset-2 ring-offset-background ring-primary/50 shadow-primary/10' : 'hover:brightness-110',
+        selected ? 'ring-2 ring-offset-1 ring-offset-background ring-primary/50 shadow-primary/10' : 'hover:brightness-110',
       )}
     >
       <div className="flex items-center justify-between gap-1">
-        <span className={cn('text-[7px] font-bold uppercase tracking-widest font-mono px-1.5 py-0.5 rounded-sm', c.badge, c.badgeText)}>
+        <span className={cn('text-[7px] font-bold uppercase tracking-widest font-mono px-1 py-0.5 rounded-sm', c.badge, c.badgeText)}>
           {node.typeLabel}
         </span>
-        <Icon className={cn('w-3 h-3 flex-shrink-0', c.icon)} />
+        <Icon className={cn('w-2.5 h-2.5 flex-shrink-0', c.icon)} />
       </div>
-      <p className="text-[11px] font-semibold text-foreground leading-tight">{node.label}</p>
-      {node.snippet}
-      {node.id === 'gov-gate' && (
-        <div className="space-y-1 mt-0.5">
-          {['Source grounding', 'Evidence consistency', 'Relevance'].map((check) => (
-            <div key={check} className="flex items-center gap-1.5">
-              <CheckCircle2 className="w-2.5 h-2.5 text-[hsl(160,84%,39%)] flex-shrink-0" />
-              <span className="text-[9px] text-muted-foreground font-mono">
-                {check.split(' ')[0]}: <span className="text-[hsl(160,84%,39%)]">Passed</span>
-              </span>
-            </div>
-          ))}
-        </div>
-      )}
-      {node.id === 'gho-src' && (
-        <p className="text-[9px] text-muted-foreground/70 italic leading-tight mt-0.5">
-          Existing connected evidence
-        </p>
-      )}
+      <p className="text-[10px] font-semibold text-foreground leading-tight">{node.label}</p>
     </motion.button>
   );
 }
@@ -559,31 +541,31 @@ function GhoNode({
 
   return (
     <motion.button
-      initial={{ opacity: 0, y: 6 }}
+      initial={{ opacity: 0, y: 4 }}
       animate={{ opacity: 1, y: 0 }}
       transition={{ delay }}
       onClick={() => onSelect(node.id)}
       className={cn(
-        'w-full rounded-xl border-2 border-dashed p-3 flex flex-col gap-1.5 text-left transition-all duration-200 cursor-pointer',
+        'w-full rounded-lg border-2 border-dashed p-2 flex flex-col gap-1 text-left transition-all duration-200 cursor-pointer',
         isGHO
           ? 'border-sky-500/30 bg-sky-500/[0.03] hover:bg-sky-500/[0.06]'
           : 'border-[hsl(160,84%,39%,0.3)] bg-[hsl(160,84%,39%,0.03)] hover:bg-[hsl(160,84%,39%,0.06)]',
-        selected && 'ring-2 ring-offset-2 ring-offset-background ring-primary/50',
+        selected && 'ring-2 ring-offset-1 ring-offset-background ring-primary/50',
       )}
     >
       <div className="flex items-center justify-between gap-1">
         <span className={cn(
-          'text-[7px] font-bold uppercase tracking-widest font-mono px-1.5 py-0.5 rounded-sm',
+          'text-[7px] font-bold uppercase tracking-widest font-mono px-1 py-0.5 rounded-sm',
           isGHO ? 'bg-sky-500/10 text-sky-400' : 'bg-[hsl(160,84%,39%,0.1)] text-[hsl(160,84%,39%)]',
         )}>
           {node.badge}
         </span>
-        <Icon className={cn('w-3 h-3 flex-shrink-0', isGHO ? 'text-sky-400' : 'text-[hsl(160,84%,39%)]')} />
+        <Icon className={cn('w-2.5 h-2.5 flex-shrink-0', isGHO ? 'text-sky-400' : 'text-[hsl(160,84%,39%)]')} />
       </div>
-      <p className="text-[11px] font-semibold text-foreground leading-tight">{node.label}</p>
-      <p className="text-[9px] text-muted-foreground">{node.sublabel}</p>
+      <p className="text-[10px] font-semibold text-foreground leading-tight">{node.label}</p>
+      <p className="text-[9px] text-muted-foreground leading-tight">{node.sublabel}</p>
       {node.connectorLabel && (
-        <span className="self-start text-[8px] font-mono font-bold px-1.5 py-0.5 rounded border border-primary/30 text-primary bg-primary/5">
+        <span className="self-start text-[7px] font-mono font-bold px-1 py-0.5 rounded border border-primary/30 text-primary bg-primary/5">
           {node.connectorLabel}
         </span>
       )}
@@ -595,11 +577,9 @@ function GhoNode({
 
 function ConnectorH() {
   return (
-    <div className="flex items-center self-center flex-shrink-0 px-0.5">
-      <div className="flex items-center gap-1">
-        <div className="w-3 h-px bg-border" />
-        <ArrowRight className="w-3.5 h-3.5 text-border" />
-      </div>
+    <div className="self-center flex-shrink-0 flex items-center" style={{ width: '24px' }}>
+      <div className="flex-1 h-px bg-border/60" />
+      <ArrowRight className="w-3 h-3 text-border/60 flex-shrink-0" />
     </div>
   );
 }
@@ -627,7 +607,7 @@ function InspectorPanel({ nodeId, onClose }: { nodeId: string; onClose: () => vo
       animate={{ opacity: 1, x: 0 }}
       exit={{ opacity: 0, x: 20 }}
       transition={{ duration: 0.2 }}
-      className="w-72 flex-shrink-0 rounded-xl border border-card-border bg-card shadow-xl flex flex-col overflow-hidden"
+      className="w-60 flex-shrink-0 rounded-xl border border-card-border bg-card shadow-xl flex flex-col overflow-hidden"
     >
       {/* Header */}
       <div className={cn('px-4 pt-4 pb-3 border-b border-border flex items-start gap-3', headerBg)}>
@@ -748,92 +728,81 @@ function TechnicalWorkflow() {
   // Deal Signal rows
   const row1 = DEAL_SIGNAL_NODES.slice(0, 3);  // trigger, extract, orchestrate
   const branchLeft  = DEAL_SIGNAL_NODES[3];     // context routing
-  const branchLeft2 = DEAL_SIGNAL_NODES[4];     // GHO sources
+  const branchLeft2 = DEAL_SIGNAL_NODES[4];     // retrieve context
   const branchRight = DEAL_SIGNAL_NODES[5];     // deterministic
   const row3 = DEAL_SIGNAL_NODES.slice(6);      // comparison → publish
 
+  // ── Position constants (node=112px w-28, connectorH=24px, gap=0) ──────────
+  // Row 1: 112 + 24 + 112 + 24 + 112 = 384px
+  // Orchestration centre: 112+24+112+24+56 = 328px
+  // Branch left col: 0–112px  centre=56px
+  // Spacer: 96px → right col: 208–320px  centre=264px
+  // Fork bar: 56→328  Join bar: 56→264
+
   return (
     <div>
-      {/* Disclaimer note */}
+      {/* Disclaimer */}
       <motion.p
         initial={{ opacity: 0 }}
         animate={{ opacity: 1 }}
         transition={{ delay: 0.05 }}
-        className="text-[9px] text-muted-foreground/50 italic mb-4 px-1"
+        className="text-[9px] text-muted-foreground/50 italic mb-3 px-1"
       >
         Illustrative integration architecture — final deployment would align to GHO's existing systems, security and integration standards.
       </motion.p>
 
       {/* Canvas + inspector */}
-      <div className="flex gap-6 items-start">
+      <div className="flex gap-4 items-start">
+
         {/* Swimlane canvas */}
         <div className="flex-1 min-w-0">
           <div
-            className="rounded-2xl border border-border overflow-hidden relative"
+            className="rounded-2xl border border-border overflow-hidden"
             style={{
               backgroundImage: 'radial-gradient(circle, hsl(var(--border) / 0.5) 1px, transparent 1px)',
               backgroundSize: '20px 20px',
             }}
           >
-            <div className="flex min-h-[520px]">
+            <div className="flex">
 
               {/* ── LEFT: GHO Existing Environment ── */}
-              <div className="w-44 flex-shrink-0 flex flex-col p-4 bg-sky-500/[0.02]"
+              <div className="w-44 flex-shrink-0 flex flex-col p-3 bg-sky-500/[0.02]"
                    style={{ borderRight: '1px dashed hsl(var(--border))' }}>
-                <p className="text-[8px] font-bold uppercase tracking-widest text-sky-400 mb-4">
+                <p className="text-[8px] font-bold uppercase tracking-widest text-sky-400 mb-3">
                   GHO Existing Environment
                 </p>
 
-                {/* Data sources */}
-                <div className="space-y-2 mb-4">
-                  {[
-                    { label: 'SharePoint / Document Repos' },
-                    { label: 'Financial Data' },
-                    { label: 'CRM / Deal Data' },
-                    { label: 'External / Public Data' },
-                  ].map(({ label }) => (
-                    <div key={label} className="flex items-center gap-1.5 px-2 py-1 rounded-md border border-sky-500/15 bg-sky-500/[0.04]">
+                <div className="space-y-1.5 mb-3">
+                  {['SharePoint / Document Repos', 'Financial Data', 'CRM / Deal Data', 'External / Public Data'].map((label) => (
+                    <div key={label} className="flex items-center gap-1.5 px-2 py-1 rounded border border-sky-500/15 bg-sky-500/[0.04]">
                       <span className="w-1 h-1 rounded-full bg-sky-400/50 flex-shrink-0" />
                       <span className="text-[9px] text-sky-300/70 leading-tight">{label}</span>
                     </div>
                   ))}
                 </div>
 
-                {/* Arrow down */}
                 <div className="flex justify-center my-1">
                   <ArrowDown className="w-3 h-3 text-sky-500/30" />
                 </div>
 
-                {/* Sana node */}
-                <GhoNode
-                  node={GHO_INPUT_NODE}
-                  delay={0.06}
-                  selected={selectedId === GHO_INPUT_NODE.id}
-                  onSelect={handleSelect}
-                />
+                <GhoNode node={GHO_INPUT_NODE} delay={0.06} selected={selectedId === GHO_INPUT_NODE.id} onSelect={handleSelect} />
 
-                {/* Spacer + boundary arrow */}
                 <div className="flex-1" />
-                <div className="flex items-center justify-end gap-1.5 mt-4 pr-1">
+                <div className="flex items-center justify-end gap-1.5 mt-3 pr-1">
                   <span className="text-[8px] font-semibold text-sky-400/60 tracking-wide">triggers</span>
                   <ArrowRight className="w-4 h-4 text-sky-500/60" />
                 </div>
               </div>
 
               {/* ── CENTER: Deal Signal Proactive Intelligence ── */}
-              <div className="flex-1 flex flex-col p-4 bg-primary/[0.01]"
+              <div className="flex-1 flex flex-col p-3 bg-primary/[0.01]"
                    style={{ borderRight: '1px dashed hsl(var(--border))' }}>
-                <p className="text-[8px] font-bold uppercase tracking-widest text-primary mb-4">
+                <p className="text-[8px] font-bold uppercase tracking-widest text-primary mb-3">
                   Deal Signal Proactive Intelligence
                 </p>
 
-                {/* Click hint */}
-                <p className="text-[9px] text-muted-foreground/50 mb-4 font-mono">
-                  Click any node to inspect
-                </p>
-
-                {/* Row 1: trigger → extraction → orchestration */}
-                <div className="flex items-start gap-1 mb-2">
+                {/* Row 1: trigger → extraction → orchestration (no gap — explicit widths) */}
+                <div className="flex items-start">
                   {row1.map((node, i) => (
                     <Fragment key={node.id}>
                       <TechNode node={node} delay={0.08 + i * 0.06} selected={selectedId === node.id} onSelect={handleSelect} />
@@ -842,61 +811,52 @@ function TechnicalWorkflow() {
                   ))}
                 </div>
 
-                {/* Fork connector: stem from Orchestration (428px) → horizontal bar 72–428px → drops to both branches */}
-                <div className="relative" style={{ height: '28px' }}>
-                  {/* Vertical stem down from Orchestration centre (428px) */}
-                  <div className="absolute w-px bg-border" style={{ left: '428px', top: '0', height: '14px' }} />
-                  {/* Horizontal fork bar: 72px → 428px */}
-                  <div className="absolute h-px bg-border" style={{ left: '72px', width: '356px', top: '14px' }} />
-                  {/* Left drop at 72px */}
-                  <div className="absolute w-px bg-border" style={{ left: '72px', top: '14px', bottom: '0' }} />
-                  {/* Right drop at 344px */}
-                  <div className="absolute w-px bg-border" style={{ left: '344px', top: '14px', bottom: '0' }} />
+                {/* Fork connector
+                    Stem from Orchestration centre (328px) down 10px
+                    Horizontal bar: left=56px, width=272px (56→328)
+                    Drops at left-branch centre (56px) and right-branch centre (264px) */}
+                <div className="relative" style={{ height: '20px' }}>
+                  <div className="absolute w-px bg-border" style={{ left: '328px', top: '0', height: '10px' }} />
+                  <div className="absolute h-px bg-border" style={{ left: '56px', width: '272px', top: '10px' }} />
+                  <div className="absolute w-px bg-border" style={{ left: '56px',  top: '10px', bottom: '0' }} />
+                  <div className="absolute w-px bg-border" style={{ left: '264px', top: '10px', bottom: '0' }} />
                 </div>
 
-                {/* Row 2: parallel branches — left col 0px, spacer 128px, right col 272px */}
+                {/* Row 2: parallel branches
+                    Left col 0–112px (centre 56) | spacer 96px | right col 208–320px (centre 264) */}
                 <div className="flex">
-                  {/* Left branch: Context Routing + Retrieve Context stacked (centre 72px) */}
-                  <div style={{ width: '144px', flexShrink: 0 }} className="flex flex-col gap-1">
-                    <TechNode node={branchLeft} delay={0.26} selected={selectedId === branchLeft.id} onSelect={handleSelect} />
-                    <div className="flex justify-center">
-                      <ArrowDown className="w-3 h-3 text-border" />
-                    </div>
+                  <div style={{ width: '112px', flexShrink: 0 }} className="flex flex-col gap-1">
+                    <TechNode node={branchLeft}  delay={0.26} selected={selectedId === branchLeft.id}  onSelect={handleSelect} />
+                    <div className="flex justify-center"><ArrowDown className="w-3 h-3 text-border" /></div>
                     <TechNode node={branchLeft2} delay={0.30} selected={selectedId === branchLeft2.id} onSelect={handleSelect} />
                   </div>
-
-                  {/* Spacer */}
-                  <div style={{ width: '128px', flexShrink: 0 }} />
-
-                  {/* Right branch: Deterministic Analysis (centre 344px) — stretches to match left branch height */}
-                  <div style={{ width: '144px', flexShrink: 0 }} className="flex flex-col">
+                  <div style={{ width: '96px', flexShrink: 0 }} />
+                  <div style={{ width: '112px', flexShrink: 0 }} className="flex flex-col">
                     <TechNode node={branchRight} delay={0.32} selected={selectedId === branchRight.id} onSelect={handleSelect} />
-                    {/* Equalizer: vertical line filling remaining height to align with left branch bottom */}
+                    {/* Equalizer line stretches to match left-branch height */}
                     <div className="flex-1 flex justify-center pt-1 min-h-[8px]">
                       <div className="w-px bg-border/50" />
                     </div>
                   </div>
                 </div>
 
-                {/* Join connector: stems from branches → horizontal bar 72–344px → single drop into Row 3 */}
-                <div className="relative" style={{ height: '28px' }}>
-                  {/* Left stem up from left branch (72px) */}
-                  <div className="absolute w-px bg-border" style={{ left: '72px', top: '0', height: '14px' }} />
-                  {/* Right stem up from right branch (344px) */}
-                  <div className="absolute w-px bg-border" style={{ left: '344px', top: '0', height: '14px' }} />
-                  {/* Horizontal join bar: 72px → 344px */}
-                  <div className="absolute h-px bg-border" style={{ left: '72px', width: '272px', top: '14px' }} />
-                  {/* Single drop from join into Row 3 at 72px */}
-                  <div className="absolute w-px bg-border" style={{ left: '72px', top: '14px', bottom: '0' }} />
+                {/* Join connector
+                    Stems from left (56px) and right (264px), bar: left=56, width=208 (56→264)
+                    Single drop at 56px into Row 3 */}
+                <div className="relative" style={{ height: '20px' }}>
+                  <div className="absolute w-px bg-border" style={{ left: '56px',  top: '0', height: '10px' }} />
+                  <div className="absolute w-px bg-border" style={{ left: '264px', top: '0', height: '10px' }} />
+                  <div className="absolute h-px bg-border" style={{ left: '56px', width: '208px', top: '10px' }} />
+                  <div className="absolute w-px bg-border" style={{ left: '56px', top: '10px', bottom: '0' }} />
                 </div>
 
-                {/* Arrow into Row 3 (centred on 72px → left edge of cross-source comparison node) */}
-                <div style={{ paddingLeft: '65px', marginBottom: '4px' }}>
-                  <ArrowDown className="w-3.5 h-3.5 text-border" />
+                {/* Arrow into Row 3 — centred at 56px, arrow w-3=12px → paddingLeft=50px */}
+                <div style={{ paddingLeft: '50px', marginBottom: '4px' }}>
+                  <ArrowDown className="w-3 h-3 text-border" />
                 </div>
 
                 {/* Row 3: comparison → materiality → gate → publish */}
-                <div className="flex items-start gap-1">
+                <div className="flex items-start">
                   {row3.map((node, i) => (
                     <Fragment key={node.id}>
                       <TechNode node={node} delay={0.38 + i * 0.06} selected={selectedId === node.id} onSelect={handleSelect} />
@@ -905,68 +865,61 @@ function TechnicalWorkflow() {
                   ))}
                 </div>
 
-                {/* Publish → right boundary arrow */}
-                <div className="flex items-center justify-end gap-1 mt-4 pr-1">
+                <div className="flex items-center justify-end gap-1.5 mt-3 pr-1">
                   <span className="text-[8px] text-muted-foreground/40 italic">dispatch</span>
                   <ArrowRight className="w-3.5 h-3.5 text-[hsl(160,84%,39%)]/30" />
                 </div>
               </div>
 
-              {/* ── RIGHT: GHO User Channels ── */}
-              <div className="w-60 flex-shrink-0 flex flex-col p-4 bg-[hsl(160,84%,39%,0.02)]">
-                <p className="text-[8px] font-bold uppercase tracking-widest text-[hsl(160,84%,39%)] mb-4">
+              {/* ── RIGHT: GHO User Channels / Outputs ── */}
+              <div className="w-60 flex-shrink-0 flex flex-col p-3 bg-[hsl(160,84%,39%,0.02)]">
+                <p className="text-[8px] font-bold uppercase tracking-widest text-[hsl(160,84%,39%)] mb-3">
                   GHO User Channels / Outputs
                 </p>
 
-                <div className="flex flex-col gap-3">
+                <div className="flex flex-col gap-2">
                   {GHO_OUTPUT_NODES.map((node, i) => (
-                    <GhoNode
-                      key={node.id}
-                      node={node}
-                      delay={0.5 + i * 0.06}
-                      selected={selectedId === node.id}
-                      onSelect={handleSelect}
-                    />
+                    <GhoNode key={node.id} node={node} delay={0.5 + i * 0.06} selected={selectedId === node.id} onSelect={handleSelect} />
                   ))}
                 </div>
 
-                {/* Claude note */}
-                <p className="text-[8px] text-muted-foreground/40 italic mt-3 leading-relaxed">
-                  Expose governed diligence capability through existing AI interface
+                <p className="text-[8px] text-muted-foreground/40 italic mt-2 leading-relaxed">
+                  Governed diligence via existing AI interface
                 </p>
               </div>
 
             </div>
           </div>
 
-          {/* Legend */}
+          {/* Legend + inspect hint */}
           <motion.div
             initial={{ opacity: 0 }}
             animate={{ opacity: 1 }}
             transition={{ delay: 0.7 }}
-            className="mt-4 flex items-center flex-wrap gap-4 px-1"
+            className="mt-3 flex items-center flex-wrap gap-3 px-1"
           >
             {(
               [
-                { color: 'slate', label: 'Source / Data Processing' },
+                { color: 'slate',  label: 'Source / Data Processing' },
                 { color: 'violet', label: 'AI / Context Reasoning' },
-                { color: 'amber', label: 'Deterministic / Business Logic' },
-                { color: 'green', label: 'Evaluation / Governance' },
-                { color: 'red', label: 'Contradiction / Material Issue' },
+                { color: 'amber',  label: 'Deterministic / Logic' },
+                { color: 'green',  label: 'Evaluation / Governance' },
+                { color: 'red',    label: 'Contradiction / Material Issue' },
               ] as { color: NodeColor; label: string }[]
             ).map(({ color, label }) => (
               <div key={color} className="flex items-center gap-1.5">
                 <div
-                  className="w-2 h-2 rounded-full"
-                  style={{ background: color === 'slate' ? 'hsl(199, 89%, 60%)' : color === 'violet' ? 'hsl(265, 42%, 66%)' : color === 'amber' ? 'hsl(38, 92%, 50%)' : color === 'green' ? 'hsl(160, 84%, 39%)' : 'hsl(0, 84%, 60%)' }}
+                  className="w-2 h-2 rounded-full flex-shrink-0"
+                  style={{ background: color === 'slate' ? 'hsl(199,89%,60%)' : color === 'violet' ? 'hsl(265,42%,66%)' : color === 'amber' ? 'hsl(38,92%,50%)' : color === 'green' ? 'hsl(160,84%,39%)' : 'hsl(0,84%,60%)' }}
                 />
-                <span className="text-[10px] text-muted-foreground">{label}</span>
+                <span className="text-[9px] text-muted-foreground">{label}</span>
               </div>
             ))}
             <div className="flex items-center gap-1.5">
-              <div className="w-2 h-2 rounded-sm border border-dashed border-sky-500/50" />
-              <span className="text-[10px] text-muted-foreground">Existing GHO component</span>
+              <div className="w-2 h-2 rounded-sm border border-dashed border-sky-500/50 flex-shrink-0" />
+              <span className="text-[9px] text-muted-foreground">Existing GHO component</span>
             </div>
+            <span className="text-[9px] text-muted-foreground/40 italic ml-auto">Click any node to inspect</span>
           </motion.div>
 
           {/* Prototype disclaimer */}
@@ -974,10 +927,10 @@ function TechnicalWorkflow() {
             initial={{ opacity: 0 }}
             animate={{ opacity: 1 }}
             transition={{ delay: 0.8 }}
-            className="mt-4 flex items-start gap-2.5 px-4 py-3 rounded-lg border border-border bg-muted/20 max-w-2xl"
+            className="mt-3 flex items-start gap-2 px-3 py-2.5 rounded-lg border border-border bg-muted/20 max-w-2xl"
           >
-            <Info className="w-3.5 h-3.5 text-muted-foreground flex-shrink-0 mt-0.5" />
-            <p className="text-xs text-muted-foreground leading-relaxed">
+            <Info className="w-3 h-3 text-muted-foreground flex-shrink-0 mt-0.5" />
+            <p className="text-[11px] text-muted-foreground leading-relaxed">
               <span className="font-medium text-foreground">Prototype workflow</span> — production architecture can be orchestrated with governed agent workflows, deterministic business logic and evaluation tooling.
             </p>
           </motion.div>

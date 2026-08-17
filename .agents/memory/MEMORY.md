@@ -1,0 +1,1 @@
+- [Technical View layout constants](tech-view-layout.md) — node/connector pixel positions for the AnalysisTrace swimlane diagram

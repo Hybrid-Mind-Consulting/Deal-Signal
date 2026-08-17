@@ -1,0 +1,155 @@
+Refine ONLY the Analysis Trace → Technical View layout.
+
+Do not change the architecture concept, colours, page chrome, or functional behaviour outside Technical View.
+
+The current issue is that the technical workflow is partially cut off and does not fit cleanly within the visible viewport. The diagram must work as a presentation-ready architecture overview that is fully understandable without scrolling.
+
+GOAL:
+Redesign the Technical View so the full architecture workflow fits cleanly in one visible screen area, above the fold, with no important nodes or outputs cut off.
+
+1. CORE LAYOUT FIX
+
+Rebuild the technical architecture as a compact “fit-to-view” diagram.
+
+The entire architecture overview must be fully visible inside the main canvas without vertical clipping.
+
+Do not require scrolling to understand the workflow.
+
+Reduce wasted vertical space and rebalance the composition so the full workflow fits comfortably.
+
+2. PRIORITISE OVERVIEW, NOT DETAIL
+
+The technical view should show:
+- one complete architecture overview
+- concise node labels
+- clear directional flow
+- minimal text inside nodes
+
+Do not overload the overview with too much explanatory text.
+
+Detailed explanations should appear only when a node is clicked, in a right-side inspector panel.
+
+3. RESTRUCTURE THE PAGE
+
+Use this structure:
+
+A. Small top header area:
+- Business View / Technical View toggle
+- one-line caption:
+  “Illustrative integration architecture — final deployment would align to GHO’s existing systems, security and integration standards.”
+
+B. Main architecture canvas:
+- large enough to contain the full workflow
+- no clipped nodes
+- no hidden bottom section
+- no awkward overflow
+
+C. Optional footer area below the canvas:
+- legend
+- prototype disclaimer
+
+These footer items must not push the architecture itself out of view.
+
+4. TIGHTEN THE DIAGRAM
+
+Make the nodes smaller and more compact.
+
+Reduce internal padding inside nodes.
+
+Use shorter labels where appropriate, while preserving meaning.
+
+Keep these labels:
+
+LEFT / GHO EXISTING ENVIRONMENT
+- SharePoint / Document Repositories
+- Financial Data
+- CRM / Deal Data
+- External / Public Data
+- Sana
+
+CENTER / DEAL SIGNAL — PROACTIVE INTELLIGENCE
+- Evidence Trigger
+- Evidence Extraction
+- Signal Orchestration
+- Context Routing
+- Retrieve Context
+- Deterministic Analysis
+- Cross-source Comparison
+- Materiality Evaluation
+- Quality / Governance Gate
+- Publish Governed Signal
+
+RIGHT / GHO USER CHANNEL OUTPUTS
+- Watchtower
+- Deal Brief
+- Sana
+- Claude
+
+Shorten verbose sublabels if needed.
+
+5. CHANGE THE DIAGRAM SHAPE
+
+Recompose the architecture to use a wider, more horizontal layout so it fits naturally on screen.
+
+Preferred flow:
+
+Top row:
+Evidence Trigger → Evidence Extraction → Signal Orchestration
+
+Middle row:
+Context Routing → Retrieve Context
+Deterministic Analysis
+
+Bottom row:
+Cross-source Comparison → Materiality Evaluation → Quality / Governance Gate → Publish Governed Signal
+
+Right side:
+Outputs fan out to Watchtower, Deal Brief, Sana, Claude
+
+Make the overall diagram feel like a clean landscape architecture map, not a tall flowchart.
+
+6. FIX OUTPUT COLUMN
+
+The right-side output area is too cramped.
+
+Give the outputs enough width so the labels are readable and not visually squeezed.
+
+Keep them visually aligned and clearly downstream from Publish Governed Signal.
+
+7. INSPECTOR BEHAVIOUR
+
+If node inspection is supported, keep it.
+
+But the default overview state must remain fully visible and complete.
+
+Opening a node detail panel must not obscure or cut off core workflow understanding.
+
+If needed, slightly reduce the width of the inspector panel.
+
+8. LEGEND + DISCLAIMER
+
+Keep the colour legend and prototype disclaimer, but visually separate them from the main canvas.
+
+They should sit below the architecture and should not cause the workflow to overflow or be truncated.
+
+9. DO NOT CHANGE THE STORY
+
+Preserve the same architectural story:
+
+GHO data sources
+→ Sana / existing environment
+→ Deal Signal governed workflow
+→ Watchtower / Deal Brief / Sana / Claude outputs
+
+Do not introduce any new systems or vendors.
+
+This is strictly a layout and fit-to-screen refinement.
+
+10. SUCCESS CRITERIA
+
+When Technical View opens:
+- the full workflow is visible
+- no section is cut off
+- the user can understand the architecture in under 10 seconds
+- scrolling is not required to grasp the end-to-end flow
+- detailed information is available only on click, not forced into the overview

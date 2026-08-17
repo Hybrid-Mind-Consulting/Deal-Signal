@@ -1,0 +1,257 @@
+We are refining the existing Deal Signal prototype.
+
+IMPORTANT:
+Do not redesign the application.
+Do not change the approved design system, NovaCura story, current signals, routes, sidebar or architecture.
+
+This task is specifically to make the two existing question-and-answer experiences functional:
+
+1. “Investigate this Signal” on the Customer Concentration Signal Detail page
+2. The standalone “Ask Watchtower” page
+
+This remains a controlled prototype. Do not build a real LLM integration or external data integration.
+
+--------------------------------------------------
+1. SIGNAL DETAIL — INVESTIGATE THIS SIGNAL
+--------------------------------------------------
+
+The existing text input and Send button currently do not work reliably.
+
+Fix them.
+
+The user must be able to:
+
+- click one of the suggested questions
+- have that question populate the input
+- click Send
+- press Enter to send
+- type their own supported question
+- receive a visible Watchtower response without navigating away
+
+Disable Send only while a response is being generated.
+
+Show a brief subtle thinking state:
+“Reviewing current evidence…”
+
+Duration approximately 0.5–1 second.
+
+Then show the response below the input or in a compact conversational panel.
+
+--------------------------------------------------
+2. SUPPORT THESE SIGNAL-SPECIFIC QUESTIONS
+--------------------------------------------------
+
+Question:
+
+“What is the downside impact if Customer A leaves?”
+
+Response:
+
+“Customer A currently represents approximately £12.4m of £40.0m quarterly revenue. A complete customer loss would therefore put approximately 31% of current quarterly revenue at risk.
+
+The current evidence does not contain sufficient customer-level margin, replacement-volume or cost data to calculate a reliable EBITDA impact.
+
+Recommended next step: run a downside scenario using the investment model and latest customer-level gross margin data.”
+
+--------------------------------------------------
+
+Question:
+
+“Has customer concentration increased over time?”
+
+Response:
+
+“The available evidence confirms that the latest Q2 concentration of 31% is above the 18% understanding recorded in the May Management Presentation.
+
+However, two observation points are not sufficient to establish a historical trend.
+
+Additional evidence required: monthly customer-level revenue for the previous 24 months.”
+
+Show a small secondary action:
+
+“Search connected sources”
+
+If clicked, simulate a short search:
+“Searching connected diligence sources…”
+
+Then return:
+
+“No sufficiently complete 24-month customer-level revenue series found.”
+
+Recommended action:
+“Request monthly customer-level revenue history”
+
+--------------------------------------------------
+
+Question:
+
+“Which contracts contribute most to concentration risk?”
+
+Response:
+
+“The current evidence identifies Customer A as the largest revenue exposure, but the connected evidence available in this prototype does not contain sufficient contract-level revenue attribution to rank individual contracts reliably.
+
+Recommended next evidence:
+Customer A contract terms and customer-level revenue by contract.”
+
+--------------------------------------------------
+
+Question:
+
+“What evidence supports this signal?”
+
+Response:
+
+“Two sources currently support the signal:
+
+• Management Presentation — May 2026: largest customer understood to represent 18% of revenue.
+• July Management Accounts — Aug 2026: Customer A generated £12.4m of £40.0m Q2 revenue, equal to 31%.
+
+The signal is therefore based on a cross-source contradiction of +13 percentage points.”
+
+--------------------------------------------------
+
+Question:
+
+“What should we do next?”
+
+Response:
+
+“Four diligence actions are recommended:
+
+• Request 24 months of monthly customer-level revenue
+• Review Customer A contract terms
+• Stress-test customer loss in the investment model
+• Reconcile the discrepancy with management”
+
+--------------------------------------------------
+3. GROUNDED FALLBACK
+--------------------------------------------------
+
+For unsupported questions, do not invent an answer.
+
+Return:
+
+“I don’t have enough grounded evidence in the current diligence sources to answer that reliably.”
+
+Then show:
+
+“Try asking about:
+• customer concentration
+• supporting evidence
+• downside exposure
+• historical trend
+• recommended diligence actions”
+
+This fallback is intentional and should demonstrate controlled, governed behaviour.
+
+--------------------------------------------------
+4. ASK WATCHTOWER PAGE
+--------------------------------------------------
+
+Make the standalone Ask Watchtower input and Send button fully functional.
+
+Support click, Enter key and suggested-question chips.
+
+Keep the existing concise response format:
+
+Conclusion
+→ Evidence
+→ Caveat where needed
+→ Recommended next step
+
+Support these questions:
+
+“What is driving the increase in customer concentration?”
+
+“What happens if Customer A reduces volumes by 50%?”
+
+“What happens if Customer A leaves?”
+
+“Has customer concentration increased over time?”
+
+“Which contracts contribute most to concentration risk?”
+
+“What evidence supports the customer concentration signal?”
+
+“What are the current material diligence risks?”
+
+“What has changed since the previous review?”
+
+“What should the deal team investigate next?”
+
+--------------------------------------------------
+5. CURRENT MATERIAL RISKS RESPONSE
+--------------------------------------------------
+
+For:
+
+“What are the current material diligence risks?”
+
+Return:
+
+“Three material signals currently require attention:
+
+HIGH — Commercial
+Customer concentration increased from 18% to 31%.
+
+MEDIUM — Financial
+FY27 growth assumption is 14% versus an approximately 8% current run-rate.
+
+MEDIUM — Regulatory
+Management guidance indicates Q1 2027 while the latest evidence indicates Q2 2027.”
+
+--------------------------------------------------
+6. CHANGES SINCE PREVIOUS REVIEW
+--------------------------------------------------
+
+For:
+
+“What has changed since the previous review?”
+
+Return:
+
+“Two material changes have been identified:
+
+• Customer concentration escalated to High following the latest management accounts.
+• FY27 growth assumption was updated following the latest trading evidence.
+
+The overall diligence assessment remains Amber.”
+
+--------------------------------------------------
+7. IMPORTANT PRODUCT PRINCIPLE
+--------------------------------------------------
+
+Do not make Watchtower behave like a generic chatbot.
+
+The experience should demonstrate:
+
+grounded evidence
+→ contextual follow-up
+→ recognition of missing information
+→ retrieval/search of additional connected evidence where appropriate
+→ recommended next action
+
+The system should explicitly refuse to invent unsupported facts.
+
+--------------------------------------------------
+8. SUCCESS CRITERIA
+--------------------------------------------------
+
+Both Send buttons work.
+
+Enter key works.
+
+Suggested prompts work.
+
+Responses render correctly.
+
+The system can identify when additional data is required.
+
+The user can simulate searching connected sources.
+
+Unsupported questions receive a grounded fallback rather than invented answers.
+
+Do not modify any other screens.
+
+Stop after implementing and testing.

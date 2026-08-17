@@ -1,0 +1,98 @@
+Refine ONLY the existing Simulate New Evidence process on the NovaCura Watchtower page.
+
+Do not redesign the page or change any data, signals, styling, routes or other functionality.
+
+The current staged evidence sequence is now slow enough, but it needs to be controllable during a live client demo and must remain visible after completion.
+
+1. DURING THE SEQUENCE
+
+Add compact controls inside the evidence-process area:
+
+Pause
+Resume
+Next step
+
+Behaviour:
+
+- The process should auto-run by default using the existing timing.
+- Clicking Pause freezes the process on the currently active stage.
+- Nothing should disappear or advance while paused.
+- The active stage remains visibly highlighted.
+- Completed stages remain visible.
+- Clicking Resume continues automatic progression.
+- Clicking Next step advances exactly one stage while remaining paused.
+
+Keep these controls subtle and consistent with the existing Deal Signal design system.
+
+Do not make them look like media-player controls.
+
+2. AFTER COMPLETION
+
+When all stages have completed:
+
+DO NOT automatically hide or remove the process.
+
+Leave the full completed process visible on screen.
+
+Show the existing success summary:
+
+“Evidence analysis complete · New high-priority commercial signal detected”
+
+All completed steps should remain visible underneath so the presenter can talk through them.
+
+Add these small controls:
+
+“Hide process”
+“Replay process”
+
+Hide process:
+- collapses the completed steps
+- leaves only the green summary bar visible
+- changes the control to “View process”
+
+View process:
+- restores all completed stages
+
+Replay process:
+- resets only the process animation
+- reruns the same staged sequence
+- does not change the underlying signal count or create duplicate data
+
+3. DEMO RELIABILITY
+
+Keep Reset demo working.
+
+Reset demo should return the Watchtower to its pre-simulation state.
+
+The process must be repeatable without page refresh or duplicate signals.
+
+4. KEEP CURRENT STAGES
+
+Retain the current sequence and content:
+
+New evidence detected
+→ Extracting key data
+→ Calculating customer concentration
+→ Checking relevant prior evidence
+→ Prior evidence identified
+→ Cross-source comparison
+→ Materiality assessment
+→ High-priority signal detected
+
+Do not shorten or replace these stages.
+
+5. SUCCESS CRITERIA
+
+In a live presentation the presenter must be able to:
+
+- start the evidence simulation
+- pause on any stage
+- explain what is happening
+- manually advance one step
+- resume the process
+- finish the sequence
+- leave the entire completed process visible
+- hide it only when desired
+- replay it if asked
+
+Stop after implementing and testing this interaction.

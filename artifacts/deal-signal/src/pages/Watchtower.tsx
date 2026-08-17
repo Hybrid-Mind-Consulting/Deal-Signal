@@ -1,4 +1,4 @@
-import React, { useEffect, useRef, useState } from 'react';
+import React, { useCallback, useEffect, useRef, useState } from 'react';
 import { useLocation } from 'wouter';
 import { motion, AnimatePresence } from 'framer-motion';
 import {
@@ -22,7 +22,7 @@ import {
 } from '@/data/mock';
 import { cn } from '@/lib/utils';
 
-// ─── Demo sequence — 8 deliberate stages ~1.2s apart ──────────────────────────
+// ─── Demo sequence — 8 stages ──────────────────────────────────────────────────
 
 type StepType = 'ingestion' | 'extraction' | 'deterministic' | 'retrieval' | 'comparison' | 'evaluation' | 'signal';
 
@@ -87,10 +87,8 @@ const DEMO_STEPS: DemoStep[] = [
   },
 ];
 
-// Step start times in ms (~1200ms per step, ~9.6s total)
-const STEP_OFFSETS_MS = [0, 1200, 2400, 3700, 4900, 6100, 7300, 8500];
-const COMPLETE_AT_MS  = 9600;
-const VALUE_ANIMATE_AT_MS = 6100; // when cross-source comparison step becomes active
+const STEP_DURATION_MS = 1200; // ms between automatic step advances
+const VALUE_STEP = 6;           // step number that triggers 18→31 animation
 
 const NEW_ACTIVITIES = [
   { id: 'demo-a1', time: '14:27', description: 'New evidence ingested: July Management Accounts — Aug 2026', highlight: true },
@@ -132,7 +130,7 @@ function statusColors(status: 'Green' | 'Amber' | 'Red') {
 
 function fileIcon(ext: string) {
   if (ext === 'xlsx') return FileSpreadsheet;
-  if (ext === 'docx') return FileType2;
+  if (ext === 'docx') return FileText;
   return FileText;
 }
 
@@ -164,8 +162,6 @@ function NotificationToast({ visible }: { visible: boolean }) {
 type RefreshPhase = 'idle' | 'checking' | 'sourcing' | 'done';
 
 function RefreshBanner({ phase }: { phase: RefreshPhase }) {
-  const green = 'hsl(160,84%,39%)';
-
   return (
     <AnimatePresence>
       {(phase === 'sourcing' || phase === 'done') && (
@@ -182,16 +178,9 @@ function RefreshBanner({ phase }: { phase: RefreshPhase }) {
               ? 'border-[hsl(160,84%,39%,0.3)] bg-[hsl(160,84%,39%,0.05)]'
               : 'border-border bg-muted/10',
           )}>
-            {phase === 'sourcing' && (
-              <Loader2 className="w-3.5 h-3.5 text-muted-foreground animate-spin flex-shrink-0" />
-            )}
-            {phase === 'done' && (
-              <CheckCircle2 className="w-3.5 h-3.5 flex-shrink-0" style={{ color: green }} />
-            )}
-            <span className={cn(
-              'text-xs transition-colors duration-300',
-              phase === 'done' ? 'text-foreground' : 'text-muted-foreground',
-            )}>
+            {phase === 'sourcing' && <Loader2 className="w-3.5 h-3.5 text-muted-foreground animate-spin flex-shrink-0" />}
+            {phase === 'done'     && <CheckCircle2 className="w-3.5 h-3.5 text-[hsl(160,84%,39%)] flex-shrink-0" />}
+            <span className={cn('text-xs transition-colors duration-300', phase === 'done' ? 'text-foreground' : 'text-muted-foreground')}>
               {phase === 'sourcing' && 'Checking 42 monitored sources'}
               {phase === 'done'     && '5 sources updated · No additional material changes detected'}
             </span>
@@ -202,7 +191,34 @@ function RefreshBanner({ phase }: { phase: RefreshPhase }) {
   );
 }
 
-// ─── Simulation step row ───────────────────────────────────────────────────────
+// ─── Inline text control button ────────────────────────────────────────────────
+
+function CtrlBtn({
+  onClick,
+  disabled,
+  children,
+}: {
+  onClick: () => void;
+  disabled?: boolean;
+  children: React.ReactNode;
+}) {
+  return (
+    <button
+      onClick={onClick}
+      disabled={disabled}
+      className={cn(
+        'text-xs transition-colors',
+        disabled
+          ? 'text-muted-foreground/40 cursor-default'
+          : 'text-muted-foreground hover:text-foreground',
+      )}
+    >
+      {children}
+    </button>
+  );
+}
+
+// ─── Single step row ───────────────────────────────────────────────────────────
 
 function SimStepRow({ step, state }: { step: DemoStep; state: 'done' | 'active' | 'pending' }) {
   const isDone    = state === 'done';
@@ -213,23 +229,19 @@ function SimStepRow({ step, state }: { step: DemoStep; state: 'done' | 'active' 
     <motion.div
       initial={isActive ? { opacity: 0, x: -4 } : undefined}
       animate={{ opacity: 1, x: 0 }}
-      transition={{ duration: 0.25 }}
+      transition={{ duration: 0.22 }}
       className={cn(
         'flex items-start gap-3 px-3.5 py-3 rounded-lg border transition-all duration-300',
-        isDone    ? 'bg-[hsl(160,84%,39%,0.04)] border-[hsl(160,84%,39%,0.18)]'
-        : isActive  ? 'bg-primary/[0.04] border-primary/40 shadow-sm shadow-primary/10'
+        isDone    ? 'bg-[hsl(160,84%,39%,0.04)] border-[hsl(160,84%,39%,0.2)]'
+        : isActive  ? 'bg-primary/[0.04] border-primary/45 shadow-sm shadow-primary/10'
         :              'border-border/50 opacity-40',
       )}
     >
       {/* Icon */}
-      <div className="flex-shrink-0 mt-0.5">
+      <div className="flex-shrink-0 mt-[1px]">
         {isDone   && <CheckCircle2 className="w-3.5 h-3.5 text-[hsl(160,84%,39%)]" />}
         {isActive && <Loader2      className="w-3.5 h-3.5 text-primary animate-spin" />}
-        {isPending && (
-          <span className="flex items-center justify-center w-3.5 h-3.5">
-            <span className="w-2.5 h-2.5 rounded-full border border-border/70" />
-          </span>
-        )}
+        {isPending && <span className="flex items-center justify-center w-3.5 h-3.5"><span className="w-2.5 h-2.5 rounded-full border border-border/70" /></span>}
       </div>
 
       {/* Content */}
@@ -243,7 +255,6 @@ function SimStepRow({ step, state }: { step: DemoStep; state: 'done' | 'active' 
           {step.label}
         </p>
 
-        {/* Sub-lines — show when done or active */}
         {(isDone || isActive) && (
           <div className="mt-1 space-y-0.5">
             {step.lines.map((line, i) => (
@@ -270,34 +281,57 @@ function SimStepRow({ step, state }: { step: DemoStep; state: 'done' | 'active' 
 
 // ─── Simulation panel ──────────────────────────────────────────────────────────
 
-function SimulationPanel({ activeStep, isComplete }: { activeStep: number; isComplete: boolean }) {
-  const [showProcess, setShowProcess] = useState(false);
+interface SimulationPanelProps {
+  activeStep: number;
+  isComplete: boolean;
+  isPaused: boolean;
+  onPause: () => void;
+  onResume: () => void;
+  onNextStep: () => void;
+  onReplay: () => void;
+}
+
+function SimulationPanel({
+  activeStep,
+  isComplete,
+  isPaused,
+  onPause,
+  onResume,
+  onNextStep,
+  onReplay,
+}: SimulationPanelProps) {
+  // Completed steps are shown by default so the presenter can walk through them
+  const [showProcess, setShowProcess] = useState(true);
+
+  // When switching back to running (replay), reset showProcess for next completion
+  useEffect(() => {
+    if (!isComplete) setShowProcess(true);
+  }, [isComplete]);
+
+  const atLastStep = activeStep >= DEMO_STEPS.length;
 
   return (
     <div className="mb-7">
       <AnimatePresence mode="wait">
         {isComplete ? (
-          // ── Completed state: slim success bar + expandable process ──
-          <motion.div
-            key="complete"
-            initial={{ opacity: 0 }}
-            animate={{ opacity: 1 }}
-            transition={{ duration: 0.3 }}
-          >
+          // ── Completed ──────────────────────────────────────────────────────
+          <motion.div key="complete" initial={{ opacity: 0 }} animate={{ opacity: 1 }} transition={{ duration: 0.3 }}>
+            {/* Success bar */}
             <div className="flex items-center gap-3 px-4 py-2.5 rounded-lg border border-[hsl(160,84%,39%,0.25)] bg-[hsl(160,84%,39%,0.05)]">
               <CheckCircle2 className="w-3.5 h-3.5 text-[hsl(160,84%,39%)] flex-shrink-0" />
               <span className="text-xs text-foreground flex-1">
                 Evidence analysis complete · New high-priority commercial signal detected
               </span>
-              <button
-                onClick={() => setShowProcess((o) => !o)}
-                className="text-xs text-muted-foreground hover:text-foreground transition-colors flex-shrink-0"
-              >
-                {showProcess ? 'Hide process' : 'View process'}
-              </button>
+              <div className="flex items-center gap-2.5 flex-shrink-0">
+                <CtrlBtn onClick={() => setShowProcess((o) => !o)}>
+                  {showProcess ? 'Hide process' : 'View process'}
+                </CtrlBtn>
+                <span className="text-border">·</span>
+                <CtrlBtn onClick={onReplay}>Replay process</CtrlBtn>
+              </div>
             </div>
 
-            {/* Expandable: all 8 steps shown as completed */}
+            {/* Expandable completed steps — visible by default */}
             <AnimatePresence>
               {showProcess && (
                 <motion.div
@@ -317,7 +351,7 @@ function SimulationPanel({ activeStep, isComplete }: { activeStep: number; isCom
             </AnimatePresence>
           </motion.div>
         ) : (
-          // ── Running state: vertical step list ──
+          // ── Running / paused ───────────────────────────────────────────────
           <motion.div
             key="running"
             initial={{ opacity: 0, height: 0 }}
@@ -327,13 +361,36 @@ function SimulationPanel({ activeStep, isComplete }: { activeStep: number; isCom
             className="overflow-hidden"
           >
             <div className="border border-card-border rounded-xl p-4">
-              {/* Header */}
+              {/* Header row */}
               <div className="flex items-center gap-2 mb-4">
-                <Loader2 className="w-3.5 h-3.5 text-primary animate-spin" />
-                <span className="text-xs font-medium text-foreground">Analysing new evidence…</span>
-                <span className="text-xs text-muted-foreground ml-auto tabular-nums">
+                {isPaused
+                  ? <span className="w-3.5 h-3.5 flex-shrink-0 flex items-center justify-center">
+                      <span className="w-2 h-2 rounded-sm bg-muted-foreground/50" />
+                    </span>
+                  : <Loader2 className="w-3.5 h-3.5 text-primary animate-spin flex-shrink-0" />
+                }
+                <span className="text-xs font-medium text-foreground">
+                  {isPaused ? 'Paused' : 'Analysing new evidence…'}
+                </span>
+                <span className="text-xs text-muted-foreground tabular-nums ml-1">
                   {activeStep}/{DEMO_STEPS.length}
                 </span>
+
+                {/* Spacer */}
+                <div className="flex-1" />
+
+                {/* Controls */}
+                <div className="flex items-center gap-2.5">
+                  {isPaused ? (
+                    <CtrlBtn onClick={onResume}>Resume</CtrlBtn>
+                  ) : (
+                    <CtrlBtn onClick={onPause}>Pause</CtrlBtn>
+                  )}
+                  <span className="text-border text-xs">·</span>
+                  <CtrlBtn onClick={onNextStep} disabled={atLastStep && !isPaused}>
+                    Next step
+                  </CtrlBtn>
+                </div>
               </div>
 
               {/* Step list */}
@@ -397,7 +454,7 @@ function WatchtowerHeader({
       </div>
 
       <div className="flex items-center gap-2">
-        {/* Refresh button */}
+        {/* Refresh */}
         <button
           onClick={onRefresh}
           disabled={isRefreshing}
@@ -408,14 +465,12 @@ function WatchtowerHeader({
               : 'border-border text-muted-foreground hover:text-foreground hover:border-border/80',
           )}
         >
-          {isRefreshing
-            ? <Loader2 className="w-3.5 h-3.5 animate-spin" />
-            : <RefreshCw className="w-3.5 h-3.5" />}
+          {isRefreshing ? <Loader2 className="w-3.5 h-3.5 animate-spin" /> : <RefreshCw className="w-3.5 h-3.5" />}
           {refreshPhase === 'checking' ? 'Checking sources…' : 'Refresh'}
         </button>
 
         {/* Reset demo */}
-        {demoState === 'complete' && (
+        {demoState !== 'idle' && (
           <button
             onClick={onReset}
             className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-md border border-border text-sm text-muted-foreground hover:text-foreground transition-colors"
@@ -449,21 +504,17 @@ function WatchtowerHeader({
 // ─── Stats bar ─────────────────────────────────────────────────────────────────
 
 function StatsBar() {
-  const stats = [
-    { label: 'Diligence Risk',    value: 'Amber', sub: 'Risk elevated',        highlight: 'amber' as const },
-    { label: 'Material Signals',  value: '3',     sub: '2 new since yesterday', highlight: 'amber' as const },
-    { label: 'Open Actions',      value: '7',     sub: '3 high priority',       highlight: undefined },
-    { label: 'Sources Monitored', value: '42',    sub: '5 updated today',       highlight: undefined },
-  ];
   return (
     <div className="flex items-stretch border border-card-border rounded-xl divide-x divide-border mb-8">
-      {stats.map((s) => (
+      {[
+        { label: 'Diligence Risk',    value: 'Amber', sub: 'Risk elevated',        highlight: true },
+        { label: 'Material Signals',  value: '3',     sub: '2 new since yesterday', highlight: true },
+        { label: 'Open Actions',      value: '7',     sub: '3 high priority',       highlight: false },
+        { label: 'Sources Monitored', value: '42',    sub: '5 updated today',       highlight: false },
+      ].map((s) => (
         <div key={s.label} className="flex-1 px-6 py-4">
           <p className="text-xs text-muted-foreground mb-1.5">{s.label}</p>
-          <p className={cn(
-            'text-xl font-bold leading-none',
-            s.highlight === 'amber' ? 'text-[hsl(38,92%,50%)]' : 'text-foreground',
-          )}>
+          <p className={cn('text-xl font-bold leading-none', s.highlight ? 'text-[hsl(38,92%,50%)]' : 'text-foreground')}>
             {s.value}
           </p>
           <p className="text-xs text-muted-foreground mt-1.5">{s.sub}</p>
@@ -476,11 +527,7 @@ function StatsBar() {
 // ─── Hero signal card ──────────────────────────────────────────────────────────
 
 function SignalCard({
-  signal,
-  index,
-  highlighted,
-  pulseOnce,
-  animateValue,
+  signal, index, highlighted, pulseOnce, animateValue,
 }: {
   signal: MaterialSignal;
   index: number;
@@ -502,7 +549,6 @@ function SignalCard({
         highlighted && 'ring-1 ring-[hsl(0,84%,60%,0.35)] shadow-md shadow-[hsl(0,84%,60%,0.06)]',
       )}
     >
-      {/* One-time pulse overlay */}
       <AnimatePresence>
         {pulseOnce && (
           <motion.div
@@ -602,9 +648,7 @@ function CompactSignalRow({ signal, index }: { signal: MaterialSignal; index: nu
           <ArrowRight className="w-3 h-3 text-muted-foreground/40" />
           <span className={cn('text-sm font-semibold', colors.value)}>{signal.latestValue}</span>
         </div>
-        <span className={cn('text-xs flex-shrink-0 tabular-nums', colors.mat)}>
-          {signal.confidence}% conf.
-        </span>
+        <span className={cn('text-xs flex-shrink-0 tabular-nums', colors.mat)}>{signal.confidence}% conf.</span>
         <button
           onClick={() => navigate('/signals/customer-concentration')}
           className="inline-flex items-center gap-1 text-xs font-medium text-primary hover:text-primary/80 transition-colors group flex-shrink-0"
@@ -706,9 +750,7 @@ function WatchtowerActivity({ extraEvents }: { extraEvents: typeof NEW_ACTIVITIE
                     </span>
                     <div className={cn(
                       'flex-shrink-0 w-3 h-3 rounded-full border-2 mt-1 relative z-10',
-                      item.highlight
-                        ? 'border-[hsl(0,84%,60%)] bg-[hsl(0,84%,60%,0.2)]'
-                        : 'border-border bg-background',
+                      item.highlight ? 'border-[hsl(0,84%,60%)] bg-[hsl(0,84%,60%,0.2)]' : 'border-border bg-background',
                     )} />
                     <p className={cn('text-xs leading-relaxed', item.highlight ? 'text-foreground' : 'text-muted-foreground')}>
                       {item.description}
@@ -729,93 +771,152 @@ function WatchtowerActivity({ extraEvents }: { extraEvents: typeof NEW_ACTIVITIE
 type DemoState = 'idle' | 'running' | 'complete';
 
 export default function Watchtower() {
-  const [demoState, setDemoState]             = useState<DemoState>('idle');
-  const [activeStep, setActiveStep]           = useState(0);
+  const [demoState, setDemoState]               = useState<DemoState>('idle');
+  const [activeStep, setActiveStep]             = useState(0);
+  const [isPaused, setIsPaused]                 = useState(false);
   const [showNotification, setShowNotification] = useState(false);
-  const [extraActivities, setExtraActivities] = useState<typeof NEW_ACTIVITIES>([]);
-  const [signalPulse, setSignalPulse]         = useState(false);
-  const [valueAnimated, setValueAnimated]     = useState(false);
+  const [extraActivities, setExtraActivities]   = useState<typeof NEW_ACTIVITIES>([]);
+  const [signalPulse, setSignalPulse]           = useState(false);
+  const [valueAnimated, setValueAnimated]       = useState(false);
 
-  // Refresh state
-  const [refreshPhase, setRefreshPhase]       = useState<RefreshPhase>('idle');
-  const [lastRefreshed, setLastRefreshed]     = useState('14 Aug 2026, 14:32');
+  // Refresh
+  const [refreshPhase, setRefreshPhase]   = useState<RefreshPhase>('idle');
+  const [lastRefreshed, setLastRefreshed] = useState('14 Aug 2026, 14:32');
 
-  const timers = useRef<ReturnType<typeof setTimeout>[]>([]);
+  // Refs for pauseable timer chain
+  const activeStepRef   = useRef(0);
+  const isPausedRef     = useRef(false);
+  const pendingStep     = useRef<ReturnType<typeof setTimeout> | null>(null);
+  const notifTimers     = useRef<ReturnType<typeof setTimeout>[]>([]);
+  const refreshTimers   = useRef<ReturnType<typeof setTimeout>[]>([]);
+  // Guard: only fire notification + activities on the first completion per sim run
+  const firstRunRef     = useRef(true);
 
-  // ── Simulation ─────────────────────────────────────────────────────────────
+  function setActiveStepSync(n: number) {
+    activeStepRef.current = n;
+    setActiveStep(n);
+  }
 
-  function startSimulation() {
-    if (demoState !== 'idle') return;
-    timers.current.forEach(clearTimeout);
-    timers.current = [];
-    setDemoState('running');
-    setActiveStep(1);
-    setSignalPulse(false);
-    setValueAnimated(false);
+  function clearPendingStep() {
+    if (pendingStep.current) {
+      clearTimeout(pendingStep.current);
+      pendingStep.current = null;
+    }
+  }
 
-    // Advance step at each offset
-    STEP_OFFSETS_MS.slice(1).forEach((ms, i) => {
-      const t = setTimeout(() => setActiveStep(i + 2), ms);
-      timers.current.push(t);
-    });
-
-    // Animate the 18→31 value when cross-source comparison activates
-    const tVal = setTimeout(() => setValueAnimated(true), VALUE_ANIMATE_AT_MS);
-    timers.current.push(tVal);
-
-    // Complete: signal pulse + notification + activities
-    const tComplete = setTimeout(() => {
-      setDemoState('complete');
+  const triggerComplete = useCallback(() => {
+    setDemoState('complete');
+    if (firstRunRef.current) {
+      firstRunRef.current = false;
       setShowNotification(true);
       setExtraActivities(NEW_ACTIVITIES);
       setSignalPulse(true);
-      const hide       = setTimeout(() => setShowNotification(false), 5000);
-      const clearPulse = setTimeout(() => setSignalPulse(false), 2500);
-      timers.current.push(hide, clearPulse);
-    }, COMPLETE_AT_MS);
-    timers.current.push(tComplete);
+      const t1 = setTimeout(() => setShowNotification(false), 5000);
+      const t2 = setTimeout(() => setSignalPulse(false), 2500);
+      notifTimers.current.push(t1, t2);
+    }
+  }, []);
+
+  const scheduleNextAdvance = useCallback(() => {
+    clearPendingStep();
+    if (isPausedRef.current) return;
+
+    pendingStep.current = setTimeout(() => {
+      const next = activeStepRef.current + 1;
+
+      if (next === VALUE_STEP) {
+        setValueAnimated(true);
+      }
+
+      if (next > DEMO_STEPS.length) {
+        triggerComplete();
+      } else {
+        setActiveStepSync(next);
+        scheduleNextAdvance();
+      }
+    }, STEP_DURATION_MS);
+  }, [triggerComplete]);
+
+  // ── Public controls ─────────────────────────────────────────────────────────
+
+  function startSimulation() {
+    if (demoState !== 'idle') return;
+    firstRunRef.current = true;
+    isPausedRef.current = false;
+    setIsPaused(false);
+    setDemoState('running');
+    setActiveStepSync(1);
+    setSignalPulse(false);
+    setValueAnimated(false);
+    scheduleNextAdvance();
+  }
+
+  function pauseSimulation() {
+    isPausedRef.current = true;
+    setIsPaused(true);
+    clearPendingStep();
+  }
+
+  function resumeSimulation() {
+    isPausedRef.current = false;
+    setIsPaused(false);
+    scheduleNextAdvance();
+  }
+
+  function nextStep() {
+    // Advance exactly one step while remaining paused
+    clearPendingStep();
+    const next = activeStepRef.current + 1;
+    if (next === VALUE_STEP) setValueAnimated(true);
+    if (next > DEMO_STEPS.length) {
+      triggerComplete();
+    } else {
+      setActiveStepSync(next);
+      // stays paused — do not call scheduleNextAdvance
+    }
+  }
+
+  function replayProcess() {
+    // Reset only the process animation; keep data changes (value, activities, highlighted signal)
+    clearPendingStep();
+    isPausedRef.current = false;
+    setIsPaused(false);
+    setDemoState('running');
+    setActiveStepSync(1);
+    // firstRunRef stays false — no duplicate notifications / activities
+    scheduleNextAdvance();
   }
 
   function resetDemo() {
-    timers.current.forEach(clearTimeout);
-    timers.current = [];
+    // Full reset to pre-simulation state
+    clearPendingStep();
+    notifTimers.current.forEach(clearTimeout);
+    notifTimers.current = [];
+    firstRunRef.current = true;
+    isPausedRef.current = false;
+    setIsPaused(false);
     setDemoState('idle');
-    setActiveStep(0);
+    setActiveStepSync(0);
     setShowNotification(false);
     setExtraActivities([]);
     setSignalPulse(false);
     setValueAnimated(false);
   }
 
-  // ── Refresh ────────────────────────────────────────────────────────────────
-
   function startRefresh() {
     if (refreshPhase !== 'idle') return;
-
     setRefreshPhase('checking');
-
-    // STATE 2 — "Checking 42 monitored sources"
-    const t1 = setTimeout(() => {
-      setRefreshPhase('sourcing');
-    }, 1500);
-
-    // STATE 3 — "5 sources updated · No additional material changes detected"
-    const t2 = setTimeout(() => {
-      setRefreshPhase('done');
-      setLastRefreshed('14 Aug 2026, 14:35');
-    }, 3000);
-
-    // STATE 4 — Return to idle, hide banner after a moment
-    const t3 = setTimeout(() => {
-      setRefreshPhase('idle');
-    }, 6500);
-
-    timers.current.push(t1, t2, t3);
+    const t1 = setTimeout(() => setRefreshPhase('sourcing'), 1500);
+    const t2 = setTimeout(() => { setRefreshPhase('done'); setLastRefreshed('14 Aug 2026, 14:35'); }, 3000);
+    const t3 = setTimeout(() => setRefreshPhase('idle'), 6500);
+    refreshTimers.current.push(t1, t2, t3);
   }
 
-  useEffect(() => () => timers.current.forEach(clearTimeout), []);
-
-  const signalHighlighted = demoState === 'complete';
+  useEffect(() => () => {
+    clearPendingStep();
+    notifTimers.current.forEach(clearTimeout);
+    refreshTimers.current.forEach(clearTimeout);
+  }, []);
 
   return (
     <div className="animate-in fade-in duration-400">
@@ -831,17 +932,22 @@ export default function Watchtower() {
         lastRefreshed={lastRefreshed}
       />
 
-      {/* Refresh status banner */}
       <RefreshBanner phase={refreshPhase} />
 
-      {/* Simulation panel */}
       {demoState !== 'idle' && (
-        <SimulationPanel activeStep={activeStep} isComplete={demoState === 'complete'} />
+        <SimulationPanel
+          activeStep={activeStep}
+          isComplete={demoState === 'complete'}
+          isPaused={isPaused}
+          onPause={pauseSimulation}
+          onResume={resumeSimulation}
+          onNextStep={nextStep}
+          onReplay={replayProcess}
+        />
       )}
 
       <StatsBar />
 
-      {/* Two-column body */}
       <div className="grid grid-cols-[1fr_300px] gap-6 items-start">
         {/* LEFT — Material Signals */}
         <div>
@@ -858,7 +964,7 @@ export default function Watchtower() {
                   <SignalCard
                     signal={signal}
                     index={i}
-                    highlighted={signalHighlighted}
+                    highlighted={demoState === 'complete'}
                     pulseOnce={signalPulse}
                     animateValue={valueAnimated}
                   />

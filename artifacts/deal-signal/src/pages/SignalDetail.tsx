@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useEffect, useRef, useState } from 'react';
 import { useLocation } from 'wouter';
 import { AnimatePresence, motion } from 'framer-motion';
 import {
@@ -10,8 +10,11 @@ import {
   FileSpreadsheet,
   FileText,
   GitBranch,
+  Loader2,
   Plus,
+  Search,
   Send,
+  Terminal,
   TrendingUp,
   X,
 } from 'lucide-react';
@@ -605,38 +608,267 @@ function RecommendedActionsContent({
   );
 }
 
+// ─── Signal-detail Q&A engine ──────────────────────────────────────────────────
+
+type SDUserMsg = { id: string; role: 'user'; text: string };
+type SDSystemMsg = {
+  id: string;
+  role: 'system';
+  paragraphs: string[];
+  recommended?: string;
+  searchAction?: {
+    prompt: string;
+    searchingText: string;
+    resultText: string;
+    recommendedAction: string;
+  };
+};
+type SDMessage = SDUserMsg | SDSystemMsg;
+
+const SD_SUGGESTED = [
+  'What is the downside impact if Customer A leaves?',
+  'Has customer concentration increased over time?',
+  'Which contracts contribute most to concentration risk?',
+];
+
+function makeId() {
+  return `sd-${Date.now()}-${Math.random().toString(36).slice(2, 7)}`;
+}
+
+function getSDResponse(input: string): Omit<SDSystemMsg, 'id' | 'role'> {
+  const q = input.toLowerCase();
+
+  if (q.includes('leave') || q.includes('loses') || q.includes('loss') ||
+      (q.includes('downside') && (q.includes('customer') || q.includes('a ')))) {
+    return {
+      paragraphs: [
+        'Customer A currently represents approximately £12.4m of £40.0m quarterly revenue. A complete customer loss would therefore put approximately 31% of current quarterly revenue at risk.',
+        'The current evidence does not contain sufficient customer-level margin, replacement-volume or cost data to calculate a reliable EBITDA impact.',
+      ],
+      recommended: 'Run a downside scenario using the investment model and latest customer-level gross margin data.',
+    };
+  }
+
+  if (q.includes('over time') || q.includes('trend') || q.includes('historical') ||
+      q.includes('increased over') || (q.includes('concentration') && q.includes('time'))) {
+    return {
+      paragraphs: [
+        'The available evidence confirms that the latest Q2 concentration of 31% is above the 18% understanding recorded in the May Management Presentation.',
+        'However, two observation points are not sufficient to establish a historical trend.',
+      ],
+      recommended: 'Additional evidence required: monthly customer-level revenue for the previous 24 months.',
+      searchAction: {
+        prompt: 'Search connected sources',
+        searchingText: 'Searching connected diligence sources…',
+        resultText: 'No sufficiently complete 24-month customer-level revenue series found.',
+        recommendedAction: 'Request monthly customer-level revenue history',
+      },
+    };
+  }
+
+  if (q.includes('contract') || (q.includes('concentrat') && q.includes('risk'))) {
+    return {
+      paragraphs: [
+        'The current evidence identifies Customer A as the largest revenue exposure, but the connected evidence available in this prototype does not contain sufficient contract-level revenue attribution to rank individual contracts reliably.',
+      ],
+      recommended: 'Recommended next evidence: Customer A contract terms and customer-level revenue by contract.',
+    };
+  }
+
+  if (q.includes('evidence') && (q.includes('support') || q.includes('basis') || q.includes('signal'))) {
+    return {
+      paragraphs: [
+        'Two sources currently support the signal:',
+        '• Management Presentation — May 2026: largest customer understood to represent 18% of revenue.\n• July Management Accounts — Aug 2026: Customer A generated £12.4m of £40.0m Q2 revenue, equal to 31%.',
+        'The signal is therefore based on a cross-source contradiction of +13 percentage points.',
+      ],
+    };
+  }
+
+  if (q.includes('next') || q.includes('should') || q.includes('recommend') || q.includes('what to do')) {
+    return {
+      paragraphs: ['Four diligence actions are recommended:',
+        '• Request 24 months of monthly customer-level revenue\n• Review Customer A contract terms\n• Stress-test customer loss in the investment model\n• Reconcile the discrepancy with management',
+      ],
+    };
+  }
+
+  // Fallback
+  return {
+    paragraphs: [
+      "I don't have enough grounded evidence in the current diligence sources to answer that reliably.",
+      'Try asking about:\n• customer concentration\n• supporting evidence\n• downside exposure\n• historical trend\n• recommended diligence actions',
+    ],
+  };
+}
+
 // ─── Investigate content ───────────────────────────────────────────────────────
 
 function InvestigateContent() {
-  const [query, setQuery] = useState('');
-  const suggested = [
-    'What is the downside impact if Customer A leaves?',
-    'Has customer concentration increased over time?',
-    'Which contracts contribute most to concentration risk?',
-  ];
+  const [query, setQuery]         = useState('');
+  const [messages, setMessages]   = useState<SDMessage[]>([]);
+  const [thinking, setThinking]   = useState(false);
+  const [searchStates, setSearchStates] = useState<Record<string, 'idle' | 'searching' | 'done'>>({});
+  const bottomRef = useRef<HTMLDivElement>(null);
+  const inputRef  = useRef<HTMLInputElement>(null);
+
+  useEffect(() => {
+    bottomRef.current?.scrollIntoView({ behavior: 'smooth' });
+  }, [messages, thinking]);
+
+  function send() {
+    const text = query.trim();
+    if (!text || thinking) return;
+
+    const userId = makeId();
+    setMessages((prev) => [...prev, { id: userId, role: 'user', text }]);
+    setQuery('');
+    setThinking(true);
+
+    setTimeout(() => {
+      const resp = getSDResponse(text);
+      const sysId = makeId();
+      setMessages((prev) => [...prev, { id: sysId, role: 'system', ...resp }]);
+      setThinking(false);
+    }, 700);
+  }
+
+  function handleSearch(msgId: string) {
+    setSearchStates((s) => ({ ...s, [msgId]: 'searching' }));
+    setTimeout(() => {
+      setSearchStates((s) => ({ ...s, [msgId]: 'done' }));
+    }, 1800);
+  }
 
   return (
     <div>
+      {/* Suggested chips */}
       <div className="flex flex-wrap gap-2 mb-4">
-        {suggested.map((q) => (
+        {SD_SUGGESTED.map((q) => (
           <button
             key={q}
-            onClick={() => setQuery(q)}
+            onClick={() => { setQuery(q); inputRef.current?.focus(); }}
             className="text-xs px-3 py-1.5 rounded-full border border-border text-muted-foreground hover:text-foreground hover:border-border/80 transition-colors text-left"
           >
             {q}
           </button>
         ))}
       </div>
+
+      {/* Conversation thread */}
+      {messages.length > 0 && (
+        <div className="mb-4 space-y-4 max-h-80 overflow-y-auto pr-1">
+          {messages.map((msg) =>
+            msg.role === 'user' ? (
+              <div key={msg.id} className="flex justify-end">
+                <div className="bg-muted/30 border border-border rounded-xl rounded-tr-sm px-4 py-2.5 max-w-lg">
+                  <p className="text-sm text-foreground">{msg.text}</p>
+                </div>
+              </div>
+            ) : (
+              <div key={msg.id} className="flex justify-start">
+                <div className="bg-background border border-card-border rounded-xl rounded-tl-sm px-4 py-3.5 max-w-lg space-y-2.5">
+                  <div className="flex items-center gap-1.5">
+                    <Terminal className="w-3 h-3 text-primary" />
+                    <span className="text-[10px] font-semibold uppercase tracking-widest text-primary">Watchtower</span>
+                  </div>
+
+                  {(msg as SDSystemMsg).paragraphs.map((para, i) => (
+                    <p key={i} className="text-sm text-foreground leading-relaxed whitespace-pre-line">
+                      {para}
+                    </p>
+                  ))}
+
+                  {(msg as SDSystemMsg).recommended && (
+                    <div className="flex items-start gap-2 pt-2 border-t border-border">
+                      <TrendingUp className="w-3 h-3 text-primary flex-shrink-0 mt-0.5" />
+                      <p className="text-xs font-medium text-primary leading-relaxed">
+                        {(msg as SDSystemMsg).recommended}
+                      </p>
+                    </div>
+                  )}
+
+                  {/* Search connected sources action */}
+                  {(msg as SDSystemMsg).searchAction && (() => {
+                    const sa = (msg as SDSystemMsg).searchAction!;
+                    const ss = searchStates[msg.id] ?? 'idle';
+                    return (
+                      <div className="pt-1">
+                        {ss === 'idle' && (
+                          <button
+                            onClick={() => handleSearch(msg.id)}
+                            className="inline-flex items-center gap-1.5 text-xs text-muted-foreground hover:text-foreground border border-border rounded-md px-2.5 py-1.5 hover:border-border/80 transition-colors"
+                          >
+                            <Search className="w-3 h-3" />
+                            {sa.prompt}
+                          </button>
+                        )}
+                        {ss === 'searching' && (
+                          <div className="flex items-center gap-1.5 text-xs text-muted-foreground">
+                            <Loader2 className="w-3 h-3 animate-spin" />
+                            {sa.searchingText}
+                          </div>
+                        )}
+                        {ss === 'done' && (
+                          <div className="space-y-2 px-3 py-2.5 rounded-lg border border-border bg-muted/10">
+                            <p className="text-xs text-muted-foreground">{sa.resultText}</p>
+                            <div className="flex items-start gap-1.5">
+                              <TrendingUp className="w-3 h-3 text-primary flex-shrink-0 mt-0.5" />
+                              <p className="text-xs font-medium text-primary">{sa.recommendedAction}</p>
+                            </div>
+                          </div>
+                        )}
+                      </div>
+                    );
+                  })()}
+                </div>
+              </div>
+            )
+          )}
+
+          {/* Thinking indicator */}
+          {thinking && (
+            <div className="flex justify-start">
+              <div className="flex items-center gap-2 px-4 py-2.5 rounded-xl bg-background border border-card-border text-xs text-muted-foreground">
+                <Loader2 className="w-3 h-3 animate-spin text-primary" />
+                Reviewing current evidence…
+              </div>
+            </div>
+          )}
+
+          <div ref={bottomRef} />
+        </div>
+      )}
+
+      {/* Thinking (no messages yet) */}
+      {thinking && messages.length === 0 && (
+        <div className="flex items-center gap-2 mb-4 text-xs text-muted-foreground">
+          <Loader2 className="w-3 h-3 animate-spin text-primary" />
+          Reviewing current evidence…
+        </div>
+      )}
+
+      {/* Input row */}
       <div className="flex gap-3">
         <input
+          ref={inputRef}
           type="text"
           value={query}
           onChange={(e) => setQuery(e.target.value)}
+          onKeyDown={(e) => { if (e.key === 'Enter') send(); }}
           placeholder="Ask a follow-up question about this signal..."
           className="flex-1 bg-background border border-border rounded-lg px-4 py-2.5 text-sm text-foreground placeholder:text-muted-foreground focus:outline-none focus:border-primary/50 transition-colors"
         />
-        <button className="flex-shrink-0 inline-flex items-center gap-2 px-4 py-2.5 rounded-lg bg-primary text-primary-foreground text-sm font-medium hover:bg-primary/90 transition-colors">
+        <button
+          onClick={send}
+          disabled={!query.trim() || thinking}
+          className={cn(
+            'flex-shrink-0 inline-flex items-center gap-2 px-4 py-2.5 rounded-lg text-sm font-medium transition-colors',
+            !query.trim() || thinking
+              ? 'bg-primary/40 text-primary-foreground/60 cursor-not-allowed'
+              : 'bg-primary text-primary-foreground hover:bg-primary/90',
+          )}
+        >
           <Send className="w-3.5 h-3.5" />
           Send
         </button>

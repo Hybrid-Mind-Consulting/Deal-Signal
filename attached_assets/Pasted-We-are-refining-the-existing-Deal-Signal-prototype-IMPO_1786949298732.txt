@@ -1,0 +1,230 @@
+We are refining the existing Deal Signal prototype.
+
+IMPORTANT:
+Do NOT redesign the application.
+Do NOT change the current branding, typography, colour palette, layout system, sidebar, page hierarchy, portfolio data, NovaCura story, signals, Deal Brief content, or Analysis Trace architecture in this task.
+
+The current visual design is approved.
+
+This task is ONLY to improve the Watchtower page interaction and demo pacing.
+
+--------------------------------------------------
+1. FIX “REFRESH” BUTTON
+--------------------------------------------------
+
+The Refresh button on the NovaCura Therapeutics Watchtower page currently does not provide a meaningful interaction.
+
+Make it functional as a simulated prototype interaction.
+
+When the user clicks Refresh:
+
+STATE 1 — immediately
+- Disable the Refresh button temporarily.
+- Change button text to:
+  “Checking sources…”
+- Show a subtle spinner inside the button.
+- Do not navigate away from the page.
+
+STATE 2 — after approximately 1.5 seconds
+Show a compact temporary status message near the page header:
+
+“Checking 42 monitored sources”
+
+Optionally show a subtle progress indicator.
+
+STATE 3 — after approximately another 1.5 seconds
+Update the status to:
+
+“5 sources updated · No additional material changes detected”
+
+Use the existing green success styling.
+
+Update the visible “last refreshed” timestamp to the current simulated demo time.
+
+STATE 4
+Return the Refresh button to its normal state.
+
+The whole interaction should take approximately 3–4 seconds.
+
+This is a DEMO simulation only.
+Do not create real external data integrations.
+
+--------------------------------------------------
+2. SLOW DOWN “SIMULATE NEW EVIDENCE”
+--------------------------------------------------
+
+The current Simulate New Evidence interaction completes too quickly.
+
+The purpose of this feature is to demonstrate that Deal Signal is continuously analysing new evidence rather than simply displaying a pre-generated result.
+
+The process must be slow enough for a person watching a live demo to understand each stage.
+
+When the user clicks:
+
+“Simulate New Evidence”
+
+run the following staged sequence.
+
+Total duration should be approximately 8–10 seconds.
+
+Use approximately 1–1.3 seconds between meaningful stages.
+
+The sequence should be:
+
+STEP 1
+NEW EVIDENCE DETECTED
+
+July Management Accounts — Aug 2026
+
+Supporting text:
+“New financial evidence received”
+
+STEP 2
+EXTRACTING KEY DATA
+
+Supporting text:
+“Customer A revenue: £12.4m”
+“Total Q2 revenue: £40.0m”
+
+STEP 3
+CALCULATING CUSTOMER CONCENTRATION
+
+Supporting text:
+“£12.4m ÷ £40.0m = 31.0%”
+
+Important:
+Make this visibly a deterministic calculation, not an AI-generated number.
+
+STEP 4
+CHECKING RELEVANT PRIOR EVIDENCE
+
+Supporting text:
+“Searching connected diligence evidence”
+
+STEP 5
+PRIOR EVIDENCE IDENTIFIED
+
+Supporting text:
+“Management Presentation — May 2026”
+“Previous understanding: 18%”
+
+STEP 6
+CROSS-SOURCE COMPARISON
+
+Supporting text:
+“18% → 31%”
+“Variance: +13 percentage points”
+
+STEP 7
+MATERIALITY ASSESSMENT
+
+Supporting text:
+“Assessing investment relevance and evidence quality”
+
+STEP 8
+HIGH-PRIORITY SIGNAL DETECTED
+
+Supporting text:
+“Customer concentration has increased materially”
+“Commercial · High materiality · 94% confidence”
+
+--------------------------------------------------
+3. VISUAL BEHAVIOUR DURING THE PROCESS
+--------------------------------------------------
+
+Use the existing green evidence-analysis process styling.
+
+Only ONE stage should be visually active at a time.
+
+Previous completed stages should remain visible in a completed state.
+
+The active stage should have:
+- slightly brighter border
+- subtle glow
+- small activity indicator / spinner where appropriate
+
+Avoid flashy animations.
+Keep it premium, restrained and enterprise-grade.
+
+Do not rapidly flash between states.
+
+The user should comfortably be able to read each step.
+
+--------------------------------------------------
+4. AFTER THE ANALYSIS COMPLETES
+--------------------------------------------------
+
+Once the final stage completes:
+
+Show a green success summary bar:
+
+“Evidence analysis complete · New high-priority commercial signal detected”
+
+Provide a small text control on the right:
+
+“View process”
+
+The main Customer Concentration signal card should then:
+- receive a very subtle one-time highlight/pulse
+- show the updated 31% evidence
+- retain the current red High Priority styling
+
+Do NOT repeatedly animate the card.
+
+The Material Signals count should remain 3 because this is reproducing the current demo state rather than creating an additional fourth signal.
+
+--------------------------------------------------
+5. RESET DEMO
+--------------------------------------------------
+
+Keep the existing “Reset demo” button if present.
+
+It should restore the Watchtower page to the state immediately before the simulated new evidence sequence.
+
+After reset:
+- simulated process is hidden
+- normal Watchtower state is restored
+- Simulate New Evidence is enabled again
+- Refresh remains functional
+
+--------------------------------------------------
+6. KEEP CURRENT CONTENT AND DESIGN
+--------------------------------------------------
+
+Do NOT alter:
+- sidebar
+- NovaCura branding
+- KPI values
+- the three existing signals
+- Diligence Coverage
+- Recent Evidence
+- Deal Brief
+- Signals page
+- Ask Watchtower
+- Analysis Trace
+- Data Sources
+- colours/design tokens
+- AI Assistant-aligned visual system
+
+Do not introduce new fictional risks, companies, metrics or documents.
+
+This is purely a Watchtower interaction/pacing improvement.
+
+--------------------------------------------------
+SUCCESS CRITERIA
+--------------------------------------------------
+
+The completed Watchtower should make this sequence obvious in a live demo:
+
+new evidence arrives
+→ key data is extracted
+→ a deterministic calculation is performed
+→ relevant previous evidence is retrieved
+→ the sources are compared
+→ materiality is assessed
+→ a high-priority investment signal is raised
+
+The sequence must feel deliberate and observable rather than instantaneous.
+
+Stop after implementing and testing these changes.
+Do not begin redesigning other pages.

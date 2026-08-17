@@ -5,7 +5,6 @@ import {
   ArrowRight,
   CheckCircle2,
   Clock,
-  Database,
   FileSpreadsheet,
   FileText,
   FileType2,
@@ -23,20 +22,75 @@ import {
 } from '@/data/mock';
 import { cn } from '@/lib/utils';
 
-// ─── Demo sequence ─────────────────────────────────────────────────────────────
+// ─── Demo sequence — 8 deliberate stages ~1.2s apart ──────────────────────────
 
-const DEMO_STEPS = [
-  { label: 'New evidence detected',            sub: 'July Management Accounts — Aug 2026' },
-  { label: 'Analysing evidence',               sub: 'Extracting customer revenue data' },
-  { label: 'Cross-referencing prior evidence', sub: 'Comparing against Management Presentation — May 2026' },
-  { label: 'Material signal detected',         sub: 'Customer concentration increased from 18% to 31%' },
+type StepType = 'ingestion' | 'extraction' | 'deterministic' | 'retrieval' | 'comparison' | 'evaluation' | 'signal';
+
+interface DemoStep {
+  id: string;
+  label: string;
+  lines: string[];
+  type: StepType;
+}
+
+const DEMO_STEPS: DemoStep[] = [
+  {
+    id: 'ds-1',
+    label: 'New evidence detected',
+    lines: ['July Management Accounts — Aug 2026', 'New financial evidence received'],
+    type: 'ingestion',
+  },
+  {
+    id: 'ds-2',
+    label: 'Extracting key data',
+    lines: ['Customer A revenue: £12.4m', 'Total Q2 revenue: £40.0m'],
+    type: 'extraction',
+  },
+  {
+    id: 'ds-3',
+    label: 'Calculating customer concentration',
+    lines: ['£12.4m ÷ £40.0m = 31.0%'],
+    type: 'deterministic',
+  },
+  {
+    id: 'ds-4',
+    label: 'Checking relevant prior evidence',
+    lines: ['Searching connected diligence evidence'],
+    type: 'retrieval',
+  },
+  {
+    id: 'ds-5',
+    label: 'Prior evidence identified',
+    lines: ['Management Presentation — May 2026', 'Previous understanding: 18%'],
+    type: 'retrieval',
+  },
+  {
+    id: 'ds-6',
+    label: 'Cross-source comparison',
+    lines: ['18% → 31%', 'Variance: +13 percentage points'],
+    type: 'comparison',
+  },
+  {
+    id: 'ds-7',
+    label: 'Materiality assessment',
+    lines: ['Assessing investment relevance and evidence quality'],
+    type: 'evaluation',
+  },
+  {
+    id: 'ds-8',
+    label: 'High-priority signal detected',
+    lines: [
+      'Customer concentration has increased materially',
+      'Commercial · High materiality · 94% confidence',
+    ],
+    type: 'signal',
+  },
 ];
 
-// Step timing in ms: step 1 @ 0ms, step 2 @ 900ms, step 3 @ 1800ms, complete @ 3200ms
-const DEMO_TIMINGS = [0, 900, 1800, 3200];
-// Signal pulse happens at step 4 complete
-const VALUE_ANIMATE_AT = 2600; // ms — when to start animating 18→31
-const SIGNAL_PULSE_AT = 3200; // ms — when to pulse the signal card
+// Step start times in ms (~1200ms per step, ~9.6s total)
+const STEP_OFFSETS_MS = [0, 1200, 2400, 3700, 4900, 6100, 7300, 8500];
+const COMPLETE_AT_MS  = 9600;
+const VALUE_ANIMATE_AT_MS = 6100; // when cross-source comparison step becomes active
 
 const NEW_ACTIVITIES = [
   { id: 'demo-a1', time: '14:27', description: 'New evidence ingested: July Management Accounts — Aug 2026', highlight: true },
@@ -71,10 +125,8 @@ function priorityColors(priority: MaterialSignal['priority']) {
 }
 
 function statusColors(status: 'Green' | 'Amber' | 'Red') {
-  if (status === 'Green')
-    return { dot: 'bg-[hsl(160,84%,39%)]', text: 'text-[hsl(160,84%,39%)]' };
-  if (status === 'Amber')
-    return { dot: 'bg-[hsl(38,92%,50%)]', text: 'text-[hsl(38,92%,50%)]' };
+  if (status === 'Green')  return { dot: 'bg-[hsl(160,84%,39%)]', text: 'text-[hsl(160,84%,39%)]' };
+  if (status === 'Amber')  return { dot: 'bg-[hsl(38,92%,50%)]',  text: 'text-[hsl(38,92%,50%)]' };
   return { dot: 'bg-[hsl(0,84%,60%)]', text: 'text-[hsl(0,84%,60%)]' };
 }
 
@@ -107,6 +159,115 @@ function NotificationToast({ visible }: { visible: boolean }) {
   );
 }
 
+// ─── Refresh banner ────────────────────────────────────────────────────────────
+
+type RefreshPhase = 'idle' | 'checking' | 'sourcing' | 'done';
+
+function RefreshBanner({ phase }: { phase: RefreshPhase }) {
+  const green = 'hsl(160,84%,39%)';
+
+  return (
+    <AnimatePresence>
+      {(phase === 'sourcing' || phase === 'done') && (
+        <motion.div
+          initial={{ opacity: 0, height: 0 }}
+          animate={{ opacity: 1, height: 'auto' }}
+          exit={{ opacity: 0, height: 0 }}
+          transition={{ duration: 0.2 }}
+          className="overflow-hidden mb-5"
+        >
+          <div className={cn(
+            'flex items-center gap-3 px-4 py-2.5 rounded-lg border transition-colors duration-500',
+            phase === 'done'
+              ? 'border-[hsl(160,84%,39%,0.3)] bg-[hsl(160,84%,39%,0.05)]'
+              : 'border-border bg-muted/10',
+          )}>
+            {phase === 'sourcing' && (
+              <Loader2 className="w-3.5 h-3.5 text-muted-foreground animate-spin flex-shrink-0" />
+            )}
+            {phase === 'done' && (
+              <CheckCircle2 className="w-3.5 h-3.5 flex-shrink-0" style={{ color: green }} />
+            )}
+            <span className={cn(
+              'text-xs transition-colors duration-300',
+              phase === 'done' ? 'text-foreground' : 'text-muted-foreground',
+            )}>
+              {phase === 'sourcing' && 'Checking 42 monitored sources'}
+              {phase === 'done'     && '5 sources updated · No additional material changes detected'}
+            </span>
+          </div>
+        </motion.div>
+      )}
+    </AnimatePresence>
+  );
+}
+
+// ─── Simulation step row ───────────────────────────────────────────────────────
+
+function SimStepRow({ step, state }: { step: DemoStep; state: 'done' | 'active' | 'pending' }) {
+  const isDone    = state === 'done';
+  const isActive  = state === 'active';
+  const isPending = state === 'pending';
+
+  return (
+    <motion.div
+      initial={isActive ? { opacity: 0, x: -4 } : undefined}
+      animate={{ opacity: 1, x: 0 }}
+      transition={{ duration: 0.25 }}
+      className={cn(
+        'flex items-start gap-3 px-3.5 py-3 rounded-lg border transition-all duration-300',
+        isDone    ? 'bg-[hsl(160,84%,39%,0.04)] border-[hsl(160,84%,39%,0.18)]'
+        : isActive  ? 'bg-primary/[0.04] border-primary/40 shadow-sm shadow-primary/10'
+        :              'border-border/50 opacity-40',
+      )}
+    >
+      {/* Icon */}
+      <div className="flex-shrink-0 mt-0.5">
+        {isDone   && <CheckCircle2 className="w-3.5 h-3.5 text-[hsl(160,84%,39%)]" />}
+        {isActive && <Loader2      className="w-3.5 h-3.5 text-primary animate-spin" />}
+        {isPending && (
+          <span className="flex items-center justify-center w-3.5 h-3.5">
+            <span className="w-2.5 h-2.5 rounded-full border border-border/70" />
+          </span>
+        )}
+      </div>
+
+      {/* Content */}
+      <div className="flex-1 min-w-0">
+        <p className={cn(
+          'text-[11px] font-semibold uppercase tracking-wider leading-snug',
+          isDone   ? 'text-[hsl(160,84%,39%)]'
+          : isActive ? 'text-primary'
+          :             'text-muted-foreground',
+        )}>
+          {step.label}
+        </p>
+
+        {/* Sub-lines — show when done or active */}
+        {(isDone || isActive) && (
+          <div className="mt-1 space-y-0.5">
+            {step.lines.map((line, i) => (
+              <p
+                key={i}
+                className={cn(
+                  'text-[11px] leading-relaxed',
+                  step.type === 'deterministic'
+                    ? 'font-mono text-[hsl(38,92%,50%)] font-semibold'
+                    : step.type === 'signal' && i === 0
+                      ? 'text-foreground font-medium'
+                      : 'text-muted-foreground',
+                )}
+              >
+                {line}
+              </p>
+            ))}
+          </div>
+        )}
+      </div>
+    </motion.div>
+  );
+}
+
 // ─── Simulation panel ──────────────────────────────────────────────────────────
 
 function SimulationPanel({ activeStep, isComplete }: { activeStep: number; isComplete: boolean }) {
@@ -116,13 +277,13 @@ function SimulationPanel({ activeStep, isComplete }: { activeStep: number; isCom
     <div className="mb-7">
       <AnimatePresence mode="wait">
         {isComplete ? (
+          // ── Completed state: slim success bar + expandable process ──
           <motion.div
             key="complete"
             initial={{ opacity: 0 }}
             animate={{ opacity: 1 }}
             transition={{ duration: 0.3 }}
           >
-            {/* Slim status bar */}
             <div className="flex items-center gap-3 px-4 py-2.5 rounded-lg border border-[hsl(160,84%,39%,0.25)] bg-[hsl(160,84%,39%,0.05)]">
               <CheckCircle2 className="w-3.5 h-3.5 text-[hsl(160,84%,39%)] flex-shrink-0" />
               <span className="text-xs text-foreground flex-1">
@@ -136,30 +297,19 @@ function SimulationPanel({ activeStep, isComplete }: { activeStep: number; isCom
               </button>
             </div>
 
-            {/* Expandable 4-step grid */}
+            {/* Expandable: all 8 steps shown as completed */}
             <AnimatePresence>
               {showProcess && (
                 <motion.div
                   initial={{ opacity: 0, height: 0 }}
                   animate={{ opacity: 1, height: 'auto' }}
                   exit={{ opacity: 0, height: 0 }}
-                  transition={{ duration: 0.2 }}
+                  transition={{ duration: 0.22 }}
                   className="overflow-hidden mt-3"
                 >
-                  <div className="grid grid-cols-4 gap-3">
-                    {DEMO_STEPS.map((s, i) => (
-                      <div
-                        key={i}
-                        className="rounded-lg border px-3 py-2.5 bg-[hsl(160,84%,39%,0.06)] border-[hsl(160,84%,39%,0.2)]"
-                      >
-                        <div className="flex items-center gap-1.5 mb-1">
-                          <CheckCircle2 className="w-3 h-3 text-[hsl(160,84%,39%)] flex-shrink-0" />
-                          <span className="text-[10px] font-semibold uppercase tracking-wider text-[hsl(160,84%,39%)]">
-                            {s.label}
-                          </span>
-                        </div>
-                        <p className="text-[10px] text-muted-foreground leading-relaxed pl-[18px]">{s.sub}</p>
-                      </div>
+                  <div className="grid grid-cols-2 gap-2">
+                    {DEMO_STEPS.map((step) => (
+                      <SimStepRow key={step.id} step={step} state="done" />
                     ))}
                   </div>
                 </motion.div>
@@ -167,48 +317,34 @@ function SimulationPanel({ activeStep, isComplete }: { activeStep: number; isCom
             </AnimatePresence>
           </motion.div>
         ) : (
+          // ── Running state: vertical step list ──
           <motion.div
             key="running"
             initial={{ opacity: 0, height: 0 }}
             animate={{ opacity: 1, height: 'auto' }}
             exit={{ opacity: 0, height: 0 }}
-            transition={{ duration: 0.2 }}
+            transition={{ duration: 0.22 }}
             className="overflow-hidden"
           >
             <div className="border border-card-border rounded-xl p-4">
+              {/* Header */}
               <div className="flex items-center gap-2 mb-4">
                 <Loader2 className="w-3.5 h-3.5 text-primary animate-spin" />
                 <span className="text-xs font-medium text-foreground">Analysing new evidence…</span>
+                <span className="text-xs text-muted-foreground ml-auto tabular-nums">
+                  {activeStep}/{DEMO_STEPS.length}
+                </span>
               </div>
-              <div className="grid grid-cols-4 gap-3">
-                {DEMO_STEPS.map((s, i) => {
+
+              {/* Step list */}
+              <div className="space-y-2">
+                {DEMO_STEPS.map((step, i) => {
                   const stepNum = i + 1;
-                  const done = activeStep > stepNum;
-                  const active = activeStep === stepNum;
-                  return (
-                    <div
-                      key={i}
-                      className={cn(
-                        'rounded-lg border px-3 py-2.5 transition-colors duration-300',
-                        done   ? 'bg-[hsl(160,84%,39%,0.06)] border-[hsl(160,84%,39%,0.2)]'
-                        : active ? 'bg-primary/5 border-primary/25'
-                        :          'border-border opacity-40',
-                      )}
-                    >
-                      <div className="flex items-center gap-1.5 mb-1">
-                        {done   ? <CheckCircle2 className="w-3 h-3 text-[hsl(160,84%,39%)] flex-shrink-0" />
-                        : active ? <Loader2 className="w-3 h-3 text-primary animate-spin flex-shrink-0" />
-                        :          <span className="w-3 h-3 rounded-full border border-border flex-shrink-0" />}
-                        <span className={cn(
-                          'text-[10px] font-semibold uppercase tracking-wider',
-                          done ? 'text-[hsl(160,84%,39%)]' : active ? 'text-primary' : 'text-muted-foreground',
-                        )}>
-                          {s.label}
-                        </span>
-                      </div>
-                      <p className="text-[10px] text-muted-foreground leading-relaxed pl-[18px]">{s.sub}</p>
-                    </div>
-                  );
+                  const state =
+                    activeStep > stepNum ? 'done'
+                    : activeStep === stepNum ? 'active'
+                    : 'pending';
+                  return <SimStepRow key={step.id} step={step} state={state} />;
                 })}
               </div>
             </div>
@@ -224,15 +360,23 @@ function SimulationPanel({ activeStep, isComplete }: { activeStep: number; isCom
 function WatchtowerHeader({
   onSimulate,
   onReset,
+  onRefresh,
   simRunning,
   demoState,
+  refreshPhase,
+  lastRefreshed,
 }: {
   onSimulate: () => void;
   onReset: () => void;
+  onRefresh: () => void;
   simRunning: boolean;
   demoState: 'idle' | 'running' | 'complete';
+  refreshPhase: RefreshPhase;
+  lastRefreshed: string;
 }) {
   const amber = statusColors('Amber');
+  const isRefreshing = refreshPhase === 'checking' || refreshPhase === 'sourcing';
+
   return (
     <div className="flex items-start justify-between mb-7">
       <div>
@@ -247,15 +391,30 @@ function WatchtowerHeader({
           <span className="text-muted-foreground/40 text-xs">·</span>
           <span className="text-xs text-muted-foreground flex items-center gap-1">
             <Clock className="w-3 h-3" />
-            14 Aug 2026, 14:32
+            {lastRefreshed}
           </span>
         </div>
       </div>
+
       <div className="flex items-center gap-2">
-        <button className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-md border border-border text-sm text-muted-foreground hover:text-foreground hover:border-border/80 transition-colors">
-          <RefreshCw className="w-3.5 h-3.5" />
-          Refresh
+        {/* Refresh button */}
+        <button
+          onClick={onRefresh}
+          disabled={isRefreshing}
+          className={cn(
+            'inline-flex items-center gap-1.5 px-3 py-1.5 rounded-md border text-sm transition-colors',
+            isRefreshing
+              ? 'border-border text-muted-foreground cursor-not-allowed opacity-70'
+              : 'border-border text-muted-foreground hover:text-foreground hover:border-border/80',
+          )}
+        >
+          {isRefreshing
+            ? <Loader2 className="w-3.5 h-3.5 animate-spin" />
+            : <RefreshCw className="w-3.5 h-3.5" />}
+          {refreshPhase === 'checking' ? 'Checking sources…' : 'Refresh'}
         </button>
+
+        {/* Reset demo */}
         {demoState === 'complete' && (
           <button
             onClick={onReset}
@@ -265,6 +424,8 @@ function WatchtowerHeader({
             Reset demo
           </button>
         )}
+
+        {/* Simulate New Evidence */}
         <button
           onClick={onSimulate}
           disabled={simRunning || demoState === 'complete'}
@@ -287,12 +448,12 @@ function WatchtowerHeader({
 
 // ─── Stats bar ─────────────────────────────────────────────────────────────────
 
-function StatsBar({ openActionsBonus }: { openActionsBonus: number }) {
+function StatsBar() {
   const stats = [
-    { label: 'Diligence Risk',    value: 'Amber',        sub: 'Risk elevated',       highlight: 'amber' as const },
-    { label: 'Material Signals',  value: '3',            sub: '2 new since yesterday', highlight: 'amber' as const },
-    { label: 'Open Actions',      value: String(7 + openActionsBonus), sub: '3 high priority',      highlight: undefined },
-    { label: 'Sources Monitored', value: '42',           sub: '5 updated today',      highlight: undefined },
+    { label: 'Diligence Risk',    value: 'Amber', sub: 'Risk elevated',        highlight: 'amber' as const },
+    { label: 'Material Signals',  value: '3',     sub: '2 new since yesterday', highlight: 'amber' as const },
+    { label: 'Open Actions',      value: '7',     sub: '3 high priority',       highlight: undefined },
+    { label: 'Sources Monitored', value: '42',    sub: '5 updated today',       highlight: undefined },
   ];
   return (
     <div className="flex items-stretch border border-card-border rounded-xl divide-x divide-border mb-8">
@@ -300,7 +461,7 @@ function StatsBar({ openActionsBonus }: { openActionsBonus: number }) {
         <div key={s.label} className="flex-1 px-6 py-4">
           <p className="text-xs text-muted-foreground mb-1.5">{s.label}</p>
           <p className={cn(
-            'text-xl font-bold leading-none transition-all duration-500',
+            'text-xl font-bold leading-none',
             s.highlight === 'amber' ? 'text-[hsl(38,92%,50%)]' : 'text-foreground',
           )}>
             {s.value}
@@ -312,7 +473,7 @@ function StatsBar({ openActionsBonus }: { openActionsBonus: number }) {
   );
 }
 
-// ─── Hero signal card (full detail) ───────────────────────────────────────────
+// ─── Hero signal card ──────────────────────────────────────────────────────────
 
 function SignalCard({
   signal,
@@ -341,21 +502,20 @@ function SignalCard({
         highlighted && 'ring-1 ring-[hsl(0,84%,60%,0.35)] shadow-md shadow-[hsl(0,84%,60%,0.06)]',
       )}
     >
-      {/* Pulse highlight overlay */}
+      {/* One-time pulse overlay */}
       <AnimatePresence>
         {pulseOnce && (
           <motion.div
-            initial={{ opacity: 0.3 }}
+            initial={{ opacity: 0.25 }}
             animate={{ opacity: 0 }}
             exit={{ opacity: 0 }}
-            transition={{ duration: 1.8, ease: 'easeOut' }}
+            transition={{ duration: 2, ease: 'easeOut' }}
             className="absolute inset-0 rounded-xl bg-[hsl(0,84%,60%,0.08)] pointer-events-none z-10"
           />
         )}
       </AnimatePresence>
 
       <div className="relative px-5 py-5">
-        {/* Top row */}
         <div className="flex items-center justify-between mb-3">
           <div className="flex items-center gap-2.5">
             <span className={cn('text-[10px] font-semibold uppercase tracking-wider px-2 py-0.5 rounded', colors.badge)}>
@@ -366,13 +526,9 @@ function SignalCard({
           <span className="text-xs text-muted-foreground">{signal.detected}</span>
         </div>
 
-        {/* Title */}
         <h3 className="text-[15px] font-semibold text-foreground leading-snug mb-1.5">{signal.title}</h3>
-
-        {/* Summary */}
         <p className="text-sm text-muted-foreground leading-relaxed mb-5">{signal.summary}</p>
 
-        {/* Value comparison */}
         <div className="flex items-center gap-5 mb-4">
           <div>
             <p className="text-[11px] text-muted-foreground mb-1">{signal.previousLabel}</p>
@@ -385,18 +541,15 @@ function SignalCard({
               {animateValue ? (
                 <motion.p
                   key="animated"
-                  initial={{ opacity: 0, scale: 0.9 }}
+                  initial={{ opacity: 0, scale: 0.88 }}
                   animate={{ opacity: 1, scale: 1 }}
-                  transition={{ duration: 0.4, type: 'spring', stiffness: 200 }}
+                  transition={{ duration: 0.45, type: 'spring', stiffness: 180 }}
                   className={cn('text-2xl font-bold', colors.value)}
                 >
                   {signal.latestValue}
                 </motion.p>
               ) : (
-                <motion.p
-                  key="static"
-                  className={cn('text-2xl font-bold', colors.value)}
-                >
+                <motion.p key="static" className={cn('text-2xl font-bold', colors.value)}>
                   {signal.latestValue}
                 </motion.p>
               )}
@@ -404,7 +557,6 @@ function SignalCard({
           </div>
         </div>
 
-        {/* Meta + action */}
         <div className="flex items-center justify-between gap-4">
           <p className="text-xs text-muted-foreground leading-relaxed">
             Materiality: <span className={colors.mat}>{signal.materiality}</span>
@@ -424,7 +576,7 @@ function SignalCard({
   );
 }
 
-// ─── Compact signal row (secondary signals) ────────────────────────────────────
+// ─── Compact signal row ────────────────────────────────────────────────────────
 
 function CompactSignalRow({ signal, index }: { signal: MaterialSignal; index: number }) {
   const [, navigate] = useLocation();
@@ -435,36 +587,24 @@ function CompactSignalRow({ signal, index }: { signal: MaterialSignal; index: nu
       initial={{ opacity: 0, y: 4 }}
       animate={{ opacity: 1, y: 0 }}
       transition={{ delay: index * 0.08 }}
-      className={cn(
-        'bg-card border border-card-border rounded-xl border-l-[3px] overflow-hidden',
-        colors.glow,
-      )}
+      className={cn('bg-card border border-card-border rounded-xl border-l-[3px] overflow-hidden', colors.glow)}
     >
       <div className="px-5 py-3.5 flex items-center gap-4 min-w-0">
-        {/* Badges */}
         <div className="flex items-center gap-2 flex-shrink-0">
           <span className={cn('text-[10px] font-semibold uppercase tracking-wider px-2 py-0.5 rounded', colors.badge)}>
             {signal.priority}
           </span>
           <span className="text-[10px] text-muted-foreground uppercase tracking-wider">{signal.category}</span>
         </div>
-
-        {/* Title */}
         <p className="flex-1 text-sm font-medium text-foreground truncate min-w-0">{signal.title}</p>
-
-        {/* Value comparison */}
         <div className="flex items-center gap-2 flex-shrink-0">
           <span className="text-sm font-semibold text-foreground">{signal.previousValue}</span>
           <ArrowRight className="w-3 h-3 text-muted-foreground/40" />
           <span className={cn('text-sm font-semibold', colors.value)}>{signal.latestValue}</span>
         </div>
-
-        {/* Confidence */}
         <span className={cn('text-xs flex-shrink-0 tabular-nums', colors.mat)}>
           {signal.confidence}% conf.
         </span>
-
-        {/* Investigate */}
         <button
           onClick={() => navigate('/signals/customer-concentration')}
           className="inline-flex items-center gap-1 text-xs font-medium text-primary hover:text-primary/80 transition-colors group flex-shrink-0"
@@ -526,7 +666,7 @@ function RecentEvidence() {
   );
 }
 
-// ─── Activity Log (collapsed by default) ──────────────────────────────────────
+// ─── Activity Log ──────────────────────────────────────────────────────────────
 
 function WatchtowerActivity({ extraEvents }: { extraEvents: typeof NEW_ACTIVITIES }) {
   const [open, setOpen] = useState(false);
@@ -534,10 +674,7 @@ function WatchtowerActivity({ extraEvents }: { extraEvents: typeof NEW_ACTIVITIE
 
   return (
     <div className="bg-card border border-card-border rounded-xl p-5">
-      <button
-        onClick={() => setOpen((o) => !o)}
-        className="flex items-center justify-between w-full"
-      >
+      <button onClick={() => setOpen((o) => !o)} className="flex items-center justify-between w-full">
         <h2 className="text-sm font-medium text-foreground">Activity Log</h2>
         <span className="text-xs text-primary hover:text-primary/80 transition-colors">
           {open ? 'Hide activity' : 'View activity'}
@@ -573,10 +710,7 @@ function WatchtowerActivity({ extraEvents }: { extraEvents: typeof NEW_ACTIVITIE
                         ? 'border-[hsl(0,84%,60%)] bg-[hsl(0,84%,60%,0.2)]'
                         : 'border-border bg-background',
                     )} />
-                    <p className={cn(
-                      'text-xs leading-relaxed',
-                      item.highlight ? 'text-foreground' : 'text-muted-foreground',
-                    )}>
+                    <p className={cn('text-xs leading-relaxed', item.highlight ? 'text-foreground' : 'text-muted-foreground')}>
                       {item.description}
                     </p>
                   </motion.div>
@@ -594,19 +728,21 @@ function WatchtowerActivity({ extraEvents }: { extraEvents: typeof NEW_ACTIVITIE
 
 type DemoState = 'idle' | 'running' | 'complete';
 
-// Shared open-actions bonus — updated from SignalDetail actions
-export let _openActionsBonus = 0;
-export function incrementOpenActions() { _openActionsBonus += 1; }
-
 export default function Watchtower() {
-  const [demoState, setDemoState] = useState<DemoState>('idle');
-  const [activeStep, setActiveStep] = useState(0);
+  const [demoState, setDemoState]             = useState<DemoState>('idle');
+  const [activeStep, setActiveStep]           = useState(0);
   const [showNotification, setShowNotification] = useState(false);
   const [extraActivities, setExtraActivities] = useState<typeof NEW_ACTIVITIES>([]);
-  const [signalPulse, setSignalPulse] = useState(false);
-  const [valueAnimated, setValueAnimated] = useState(false);
-  const [openActionsBonus] = useState(0); // will be reactive via re-render
+  const [signalPulse, setSignalPulse]         = useState(false);
+  const [valueAnimated, setValueAnimated]     = useState(false);
+
+  // Refresh state
+  const [refreshPhase, setRefreshPhase]       = useState<RefreshPhase>('idle');
+  const [lastRefreshed, setLastRefreshed]     = useState('14 Aug 2026, 14:32');
+
   const timers = useRef<ReturnType<typeof setTimeout>[]>([]);
+
+  // ── Simulation ─────────────────────────────────────────────────────────────
 
   function startSimulation() {
     if (demoState !== 'idle') return;
@@ -617,30 +753,26 @@ export default function Watchtower() {
     setSignalPulse(false);
     setValueAnimated(false);
 
-    // Step advances
-    DEMO_TIMINGS.slice(1).forEach((ms, i) => {
-      const t = setTimeout(() => {
-        setActiveStep(i + 2);
-      }, ms);
+    // Advance step at each offset
+    STEP_OFFSETS_MS.slice(1).forEach((ms, i) => {
+      const t = setTimeout(() => setActiveStep(i + 2), ms);
       timers.current.push(t);
     });
 
-    // Animate value change (18→31) mid-sequence
-    const tVal = setTimeout(() => {
-      setValueAnimated(true);
-    }, VALUE_ANIMATE_AT);
+    // Animate the 18→31 value when cross-source comparison activates
+    const tVal = setTimeout(() => setValueAnimated(true), VALUE_ANIMATE_AT_MS);
     timers.current.push(tVal);
 
-    // Complete + pulse signal
+    // Complete: signal pulse + notification + activities
     const tComplete = setTimeout(() => {
       setDemoState('complete');
       setShowNotification(true);
       setExtraActivities(NEW_ACTIVITIES);
       setSignalPulse(true);
-      const hide = setTimeout(() => setShowNotification(false), 5000);
+      const hide       = setTimeout(() => setShowNotification(false), 5000);
       const clearPulse = setTimeout(() => setSignalPulse(false), 2500);
       timers.current.push(hide, clearPulse);
-    }, SIGNAL_PULSE_AT);
+    }, COMPLETE_AT_MS);
     timers.current.push(tComplete);
   }
 
@@ -655,6 +787,32 @@ export default function Watchtower() {
     setValueAnimated(false);
   }
 
+  // ── Refresh ────────────────────────────────────────────────────────────────
+
+  function startRefresh() {
+    if (refreshPhase !== 'idle') return;
+
+    setRefreshPhase('checking');
+
+    // STATE 2 — "Checking 42 monitored sources"
+    const t1 = setTimeout(() => {
+      setRefreshPhase('sourcing');
+    }, 1500);
+
+    // STATE 3 — "5 sources updated · No additional material changes detected"
+    const t2 = setTimeout(() => {
+      setRefreshPhase('done');
+      setLastRefreshed('14 Aug 2026, 14:35');
+    }, 3000);
+
+    // STATE 4 — Return to idle, hide banner after a moment
+    const t3 = setTimeout(() => {
+      setRefreshPhase('idle');
+    }, 6500);
+
+    timers.current.push(t1, t2, t3);
+  }
+
   useEffect(() => () => timers.current.forEach(clearTimeout), []);
 
   const signalHighlighted = demoState === 'complete';
@@ -666,15 +824,22 @@ export default function Watchtower() {
       <WatchtowerHeader
         onSimulate={startSimulation}
         onReset={resetDemo}
+        onRefresh={startRefresh}
         simRunning={demoState === 'running'}
         demoState={demoState}
+        refreshPhase={refreshPhase}
+        lastRefreshed={lastRefreshed}
       />
 
+      {/* Refresh status banner */}
+      <RefreshBanner phase={refreshPhase} />
+
+      {/* Simulation panel */}
       {demoState !== 'idle' && (
         <SimulationPanel activeStep={activeStep} isComplete={demoState === 'complete'} />
       )}
 
-      <StatsBar openActionsBonus={openActionsBonus} />
+      <StatsBar />
 
       {/* Two-column body */}
       <div className="grid grid-cols-[1fr_300px] gap-6 items-start">
@@ -699,11 +864,7 @@ export default function Watchtower() {
                   />
                 </div>
               ) : (
-                <CompactSignalRow
-                  key={signal.id}
-                  signal={signal}
-                  index={i}
-                />
+                <CompactSignalRow key={signal.id} signal={signal} index={i} />
               )
             )}
           </div>

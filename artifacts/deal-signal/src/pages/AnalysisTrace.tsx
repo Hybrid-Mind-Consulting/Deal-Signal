@@ -263,7 +263,7 @@ const DEAL_SIGNAL_NODES: TechNodeDef[] = [
   },
   {
     id: 'gho-src',
-    label: 'Retrieve via GHO Connected Sources',
+    label: 'Retrieve Context',
     typeLabel: 'GHO RETRIEVAL',
     color: 'violet',
     icon: BrainCircuit,
@@ -814,9 +814,9 @@ function TechnicalWorkflow() {
 
                 {/* Spacer + boundary arrow */}
                 <div className="flex-1" />
-                <div className="flex items-center justify-end gap-1 mt-4 pr-1">
-                  <span className="text-[8px] text-muted-foreground/40 italic">triggers</span>
-                  <ArrowRight className="w-3.5 h-3.5 text-sky-500/30" />
+                <div className="flex items-center justify-end gap-1.5 mt-4 pr-1">
+                  <span className="text-[8px] font-semibold text-sky-400/60 tracking-wide">triggers</span>
+                  <ArrowRight className="w-4 h-4 text-sky-500/60" />
                 </div>
               </div>
 
@@ -842,30 +842,22 @@ function TechnicalWorkflow() {
                   ))}
                 </div>
 
-                {/* Branch lines from Signal Orchestration */}
-                <div className="flex mt-1 mb-1" style={{ paddingLeft: '312px' }}>
-                  {/* Left branch */}
-                  <div className="relative" style={{ width: '160px', height: '24px' }}>
-                    <div className="absolute left-[36px] top-0 bottom-0 w-px bg-border" />
-                    <div className="absolute left-0 right-[calc(100%-37px)] bottom-0 h-px bg-border" />
-                    <div className="absolute left-0 bottom-0" style={{ top: '50%' }}>
-                      <div className="w-px bg-border" style={{ height: '12px' }} />
-                    </div>
-                  </div>
-                  {/* Right branch */}
-                  <div className="relative" style={{ width: '160px', height: '24px' }}>
-                    <div className="absolute left-[36px] top-0 bottom-0 w-px bg-border" />
-                    <div className="absolute left-[37px] right-0 bottom-0 h-px bg-border" />
-                    <div className="absolute right-0 bottom-0" style={{ top: '50%' }}>
-                      <div className="w-px bg-border" style={{ height: '12px' }} />
-                    </div>
-                  </div>
+                {/* Fork connector: stem from Orchestration (428px) → horizontal bar 72–428px → drops to both branches */}
+                <div className="relative" style={{ height: '28px' }}>
+                  {/* Vertical stem down from Orchestration centre (428px) */}
+                  <div className="absolute w-px bg-border" style={{ left: '428px', top: '0', height: '14px' }} />
+                  {/* Horizontal fork bar: 72px → 428px */}
+                  <div className="absolute h-px bg-border" style={{ left: '72px', width: '356px', top: '14px' }} />
+                  {/* Left drop at 72px */}
+                  <div className="absolute w-px bg-border" style={{ left: '72px', top: '14px', bottom: '0' }} />
+                  {/* Right drop at 344px */}
+                  <div className="absolute w-px bg-border" style={{ left: '344px', top: '14px', bottom: '0' }} />
                 </div>
 
-                {/* Row 2: branches */}
-                <div className="flex gap-3 mb-1" style={{ paddingLeft: '272px' }}>
-                  {/* Left branch: context routing + GHO sources stacked */}
-                  <div className="flex flex-col gap-1">
+                {/* Row 2: parallel branches — left col 0px, spacer 128px, right col 272px */}
+                <div className="flex">
+                  {/* Left branch: Context Routing + Retrieve Context stacked (centre 72px) */}
+                  <div style={{ width: '144px', flexShrink: 0 }} className="flex flex-col gap-1">
                     <TechNode node={branchLeft} delay={0.26} selected={selectedId === branchLeft.id} onSelect={handleSelect} />
                     <div className="flex justify-center">
                       <ArrowDown className="w-3 h-3 text-border" />
@@ -873,32 +865,33 @@ function TechnicalWorkflow() {
                     <TechNode node={branchLeft2} delay={0.30} selected={selectedId === branchLeft2.id} onSelect={handleSelect} />
                   </div>
 
-                  {/* Horizontal divider between branches */}
-                  <div className="w-4 self-start mt-[68px] flex items-center justify-center">
-                    <div className="w-full h-px bg-border" />
-                  </div>
+                  {/* Spacer */}
+                  <div style={{ width: '128px', flexShrink: 0 }} />
 
-                  {/* Right branch: deterministic */}
-                  <div className="self-start">
+                  {/* Right branch: Deterministic Analysis (centre 344px) — stretches to match left branch height */}
+                  <div style={{ width: '144px', flexShrink: 0 }} className="flex flex-col">
                     <TechNode node={branchRight} delay={0.32} selected={selectedId === branchRight.id} onSelect={handleSelect} />
+                    {/* Equalizer: vertical line filling remaining height to align with left branch bottom */}
+                    <div className="flex-1 flex justify-center pt-1 min-h-[8px]">
+                      <div className="w-px bg-border/50" />
+                    </div>
                   </div>
                 </div>
 
-                {/* Merge lines */}
-                <div className="flex mb-1" style={{ paddingLeft: '272px' }}>
-                  <div className="relative" style={{ width: '160px', height: '24px' }}>
-                    <div className="absolute left-[76px] top-0 bottom-0 w-px bg-border" />
-                    <div className="absolute left-[76px] right-0 bottom-0 h-px bg-border" />
-                  </div>
-                  <div className="w-4" />
-                  <div className="relative" style={{ width: '160px', height: '24px' }}>
-                    <div className="absolute left-[76px] top-0 bottom-0 w-px bg-border" />
-                    <div className="absolute left-0 right-[calc(100%-76px)] bottom-0 h-px bg-border" />
-                  </div>
+                {/* Join connector: stems from branches → horizontal bar 72–344px → single drop into Row 3 */}
+                <div className="relative" style={{ height: '28px' }}>
+                  {/* Left stem up from left branch (72px) */}
+                  <div className="absolute w-px bg-border" style={{ left: '72px', top: '0', height: '14px' }} />
+                  {/* Right stem up from right branch (344px) */}
+                  <div className="absolute w-px bg-border" style={{ left: '344px', top: '0', height: '14px' }} />
+                  {/* Horizontal join bar: 72px → 344px */}
+                  <div className="absolute h-px bg-border" style={{ left: '72px', width: '272px', top: '14px' }} />
+                  {/* Single drop from join into Row 3 at 72px */}
+                  <div className="absolute w-px bg-border" style={{ left: '72px', top: '14px', bottom: '0' }} />
                 </div>
 
-                {/* Merge arrow */}
-                <div className="flex mb-2" style={{ paddingLeft: '432px' }}>
+                {/* Arrow into Row 3 (centred on 72px → left edge of cross-source comparison node) */}
+                <div style={{ paddingLeft: '65px', marginBottom: '4px' }}>
                   <ArrowDown className="w-3.5 h-3.5 text-border" />
                 </div>
 
@@ -920,7 +913,7 @@ function TechnicalWorkflow() {
               </div>
 
               {/* ── RIGHT: GHO User Channels ── */}
-              <div className="w-44 flex-shrink-0 flex flex-col p-4 bg-[hsl(160,84%,39%,0.02)]">
+              <div className="w-60 flex-shrink-0 flex flex-col p-4 bg-[hsl(160,84%,39%,0.02)]">
                 <p className="text-[8px] font-bold uppercase tracking-widest text-[hsl(160,84%,39%)] mb-4">
                   GHO User Channels / Outputs
                 </p>

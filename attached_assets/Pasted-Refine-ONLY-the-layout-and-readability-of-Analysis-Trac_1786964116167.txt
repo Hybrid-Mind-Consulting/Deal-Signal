@@ -1,0 +1,161 @@
+Refine ONLY the layout and readability of Analysis Trace → Technical View.
+
+Do not change the architecture content, labels, colours, other pages, or functionality.
+
+The current architecture is conceptually correct, but the visual composition is still too dense and some relationships are unclear.
+
+GOAL:
+Make the diagram readable in under 10 seconds at normal presentation size.
+
+1. STRENGTHEN THE THREE SWIMLANES
+
+Use three clearly separated vertical regions:
+
+LEFT:
+GHO EXISTING ENVIRONMENT
+
+CENTER:
+DEAL SIGNAL — PROACTIVE INTELLIGENCE
+
+RIGHT:
+GHO USER CHANNELS & OUTPUTS
+
+Give the CENTER region the most width.
+
+Give the RIGHT region more width than it currently has so Watchtower, Deal Brief, Sana, and Claude do not look cramped.
+
+2. CLARIFY THE INPUT FLOW
+
+Inside GHO Existing Environment, show:
+
+SharePoint / Document Repositories
+Financial Data
+CRM / Deal Data
+External / Public Data
+
+These should visually feed into:
+
+SANA
+Existing GHO platform
+Retrieval · triggers · workflows
+
+Sana should sit directly on the main path into Deal Signal.
+
+Then draw one clear arrow from Sana into:
+
+Evidence Event / Trigger
+
+Do not leave Sana visually detached from the actual flow.
+
+3. SIMPLIFY THE DEAL SIGNAL FLOW
+
+Use this primary flow:
+
+Evidence Event / Trigger
+→ Evidence Extraction
+→ Signal Orchestration
+
+Then branch into ONLY two paths:
+
+A)
+Context & Evidence Routing
+→ Retrieve Context
+
+B)
+Deterministic Analysis
+£12.4m ÷ £40.0m = 31.0%
+
+Then visually merge the two branches into:
+
+Cross-source Comparison
+→ Materiality Evaluation
+→ Quality / Governance Gate
+→ Publish Governed Signal
+
+Make the merge point visually obvious.
+
+4. SIMPLIFY NODE LABELS
+
+Rename:
+
+“Retrieve via GHO Connected Sources”
+→ “Retrieve Context”
+
+Keep the longer explanation inside the node inspector.
+
+Keep:
+- Evidence Event / Trigger
+- Evidence Extraction
+- Signal Orchestration
+- Context & Evidence Routing
+- Deterministic Analysis
+- Cross-source Comparison
+- Materiality Evaluation
+- Quality / Governance Gate
+- Publish Governed Signal
+
+5. IMPROVE CONNECTORS
+
+Use cleaner connectors with:
+- one obvious direction
+- fewer right-angle turns
+- no ambiguous crossing lines
+- stronger arrowheads
+- consistent spacing
+
+Where branches merge, use a clear visual convergence point.
+
+6. OUTPUT SIDE
+
+After Publish Governed Signal, draw one clear fan-out into:
+
+WATCHTOWER
+Proactive alert
+
+DEAL BRIEF
+Controlled snapshot
+
+SANA
+Workflow / actions
+
+CLAUDE
+Follow-up investigation
+MCP / API
+
+Increase the width of these output cards.
+
+Do not stack them so tightly that labels wrap awkwardly.
+
+7. VISUAL PRIORITY
+
+The viewer should visually understand this story:
+
+GHO data
+→ Sana
+→ Deal Signal governed workflow
+→ Watchtower / Deal Brief / Sana / Claude
+
+That should be the dominant visual reading order.
+
+8. KEEP THE CURRENT DISCLAIMERS
+
+Retain:
+
+“Illustrative integration architecture — final deployment would align to GHO’s existing systems, security and integration standards.”
+
+Retain the prototype workflow disclaimer below the diagram.
+
+9. DO NOT ADD NEW TECHNOLOGIES
+
+Do not introduce:
+- new vendors
+- databases
+- cloud services
+- model providers
+- security components
+
+Do not alter the architecture concept.
+
+This is a layout/readability refinement only.
+
+Stop after updating Technical View.

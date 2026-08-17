@@ -76,13 +76,17 @@ export default function Signals() {
                       <span className="text-xs text-foreground">{signal.detected}</span>
                     </div>
                   </div>
-                  <button
-                    onClick={() => navigate('/signals/customer-concentration')}
-                    className="inline-flex items-center gap-1 text-xs font-medium text-primary hover:text-primary/80 transition-colors group"
-                  >
-                    View Signal
-                    <ArrowRight className="w-3 h-3 group-hover:translate-x-0.5 transition-transform" />
-                  </button>
+                  {idx === 0 ? (
+                    <button
+                      onClick={() => navigate('/signals/customer-concentration')}
+                      className="inline-flex items-center gap-1 text-xs font-medium text-primary hover:text-primary/80 transition-colors group"
+                    >
+                      View Signal
+                      <ArrowRight className="w-3 h-3 group-hover:translate-x-0.5 transition-transform" />
+                    </button>
+                  ) : (
+                    <span className="text-[10px] text-muted-foreground/50 italic">Detail view — prototype</span>
+                  )}
                 </div>
               </div>
             </motion.div>

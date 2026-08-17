@@ -518,7 +518,7 @@ function ActionSuccessToast({ visible }: { visible: boolean }) {
         >
           <CheckCircle2 className="w-3.5 h-3.5 text-[hsl(160,84%,39%)] flex-shrink-0" />
           <span className="text-xs font-medium text-foreground">
-            Action created · Open Actions updated
+            Action created successfully
           </span>
         </motion.div>
       )}

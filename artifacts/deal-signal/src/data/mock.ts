@@ -57,31 +57,24 @@ export interface Signal {
 export const SIGNALS: Signal[] = [
   {
     id: 'sig-1',
-    type: 'Regulatory Risk',
+    type: 'Commercial',
     severity: 'High',
-    description: 'FDA indicates delay in PDUFA date for lead asset NCT-440 due to manufacturing facility inspection findings.',
-    timestamp: '14 Aug 2026, 11:20',
+    description: 'Customer concentration has increased materially — largest customer represents 31% of Q2 revenue versus 18% in the management presentation.',
+    timestamp: '14 Aug 2026, 14:27',
   },
   {
     id: 'sig-2',
-    type: 'Financial Discrepancy',
+    type: 'Financial',
     severity: 'Medium',
-    description: 'Q2 interim unaudited figures reflect a 14% deviation in projected COGS for the biologics segment compared to management presentation.',
-    timestamp: '13 Aug 2026, 16:45',
+    description: 'FY27 revenue growth assumption of 14% exceeds the latest annualised trading run-rate of approximately 8%.',
+    timestamp: '14 Aug 2026, 13:58',
   },
   {
     id: 'sig-3',
-    type: 'Management Change',
+    type: 'Regulatory',
     severity: 'Medium',
-    description: 'Chief Medical Officer Dr. Aris Thorne submitted resignation. Not yet publicly disclosed.',
-    timestamp: '12 Aug 2026, 09:15',
-  },
-  {
-    id: 'sig-4',
-    type: 'IP Litigation',
-    severity: 'Low',
-    description: "Competitor filed a continuation patent that could marginally intersect with NovaCura's secondary delivery mechanism.",
-    timestamp: '10 Aug 2026, 14:00',
+    description: 'Management guidance implies a Q1 2027 regulatory milestone; latest regulatory submission indicates a likely Q2 2027 decision window.',
+    timestamp: '14 Aug 2026, 12:41',
   },
 ];
 

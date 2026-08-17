@@ -526,6 +526,118 @@ function InspectorPanel({ nodeId, onClose }: { nodeId: string; onClose: () => vo
   );
 }
 
+// ─── System architecture context strip ─────────────────────────────────────────
+
+function SystemArchitectureStrip() {
+  return (
+    <motion.div
+      initial={{ opacity: 0, y: 6 }}
+      animate={{ opacity: 1, y: 0 }}
+      transition={{ delay: 0.05 }}
+      className="mb-8"
+    >
+      {/* Section label */}
+      <p className="text-[10px] font-semibold uppercase tracking-wider text-muted-foreground mb-3">
+        System Architecture Context
+      </p>
+
+      <div className="flex items-stretch gap-0 rounded-xl overflow-hidden border border-border">
+        {/* Column 1 — GHO Existing Environment */}
+        <div className="flex-1 bg-sky-500/[0.03] border-r border-border px-4 py-4">
+          <p className="text-[9px] font-bold uppercase tracking-widest text-sky-400 mb-3">
+            GHO Existing Environment
+          </p>
+          <div className="space-y-2">
+            {[
+              { label: 'Sana', note: 'Knowledge management platform' },
+              { label: 'Claude', note: 'AI assistant interface' },
+              { label: 'Document repositories', note: 'Diligence evidence store' },
+              { label: 'Financial data feeds', note: 'Management accounts, models' },
+            ].map((item) => (
+              <div key={item.label} className="flex items-start gap-2">
+                <span className="flex-shrink-0 w-1.5 h-1.5 rounded-full bg-sky-400/60 mt-1.5" />
+                <div>
+                  <span className="text-xs font-medium text-foreground">{item.label}</span>
+                  <span className="text-[10px] text-muted-foreground ml-1.5">{item.note}</span>
+                </div>
+              </div>
+            ))}
+          </div>
+          <p className="text-[9px] text-muted-foreground/50 italic mt-3">
+            Existing GHO infrastructure — not Deal Signal–owned
+          </p>
+        </div>
+
+        {/* Arrow */}
+        <div className="flex items-center px-3 flex-shrink-0 bg-muted/5">
+          <ArrowRight className="w-4 h-4 text-border" />
+        </div>
+
+        {/* Column 2 — Deal Signal Proactive Intelligence */}
+        <div className="flex-1 bg-primary/[0.03] border-r border-border px-4 py-4">
+          <p className="text-[9px] font-bold uppercase tracking-widest text-primary mb-3">
+            Deal Signal — Proactive Intelligence
+          </p>
+          <div className="space-y-2">
+            {[
+              { label: 'Evidence ingestion', note: 'Continuous source monitoring' },
+              { label: 'Extraction & reasoning', note: 'AI + deterministic pipeline' },
+              { label: 'Cross-source comparison', note: 'Contradiction detection' },
+              { label: 'Materiality evaluation', note: 'Signal scoring & governance' },
+            ].map((item) => (
+              <div key={item.label} className="flex items-start gap-2">
+                <span className="flex-shrink-0 w-1.5 h-1.5 rounded-full bg-primary/60 mt-1.5" />
+                <div>
+                  <span className="text-xs font-medium text-foreground">{item.label}</span>
+                  <span className="text-[10px] text-muted-foreground ml-1.5">{item.note}</span>
+                </div>
+              </div>
+            ))}
+          </div>
+          <p className="text-[9px] text-muted-foreground/50 italic mt-3">
+            Workflow shown in detail below · Integrations illustrative
+          </p>
+        </div>
+
+        {/* Arrow */}
+        <div className="flex items-center px-3 flex-shrink-0 bg-muted/5">
+          <ArrowRight className="w-4 h-4 text-border" />
+        </div>
+
+        {/* Column 3 — User Channels & Controlled Outputs */}
+        <div className="flex-1 bg-[hsl(160,84%,39%,0.03)] px-4 py-4">
+          <p className="text-[9px] font-bold uppercase tracking-widest text-[hsl(160,84%,39%)] mb-3">
+            User Channels &amp; Controlled Outputs
+          </p>
+          <div className="space-y-2">
+            {[
+              { label: 'Deal Team Workspace', note: 'Signal view, recommended actions' },
+              { label: 'Deal Brief', note: 'Controlled snapshot for IC review' },
+              { label: 'Ask Watchtower', note: 'Evidence-grounded Q&A' },
+              { label: 'Notifications', note: 'Alert on new material signals' },
+            ].map((item) => (
+              <div key={item.label} className="flex items-start gap-2">
+                <span className="flex-shrink-0 w-1.5 h-1.5 rounded-full bg-[hsl(160,84%,39%,0.7)] mt-1.5" />
+                <div>
+                  <span className="text-xs font-medium text-foreground">{item.label}</span>
+                  <span className="text-[10px] text-muted-foreground ml-1.5">{item.note}</span>
+                </div>
+              </div>
+            ))}
+          </div>
+          <p className="text-[9px] text-muted-foreground/50 italic mt-3">
+            Investment team–facing outputs only
+          </p>
+        </div>
+      </div>
+
+      <p className="text-[9px] text-muted-foreground/50 mt-2 px-1 italic">
+        Source integrations (Sana, Claude, financial data feeds) are illustrative. Production connectivity subject to GHO environment and security review.
+      </p>
+    </motion.div>
+  );
+}
+
 // ─── Technical workflow canvas ─────────────────────────────────────────────────
 
 function TechnicalWorkflow() {
@@ -541,7 +653,10 @@ function TechnicalWorkflow() {
   const row3 = TECH_NODES.slice(5);    // Cross-source Comparison → Watchtower Output
 
   return (
-    <div className="flex gap-6 items-start">
+    <div>
+      <SystemArchitectureStrip />
+
+      <div className="flex gap-6 items-start">
       {/* Canvas */}
       <div className="flex-1 min-w-0">
         {/* Subtle grid background */}
@@ -673,6 +788,7 @@ function TechnicalWorkflow() {
           <InspectorPanel key={selectedId} nodeId={selectedId} onClose={() => setSelectedId(null)} />
         )}
       </AnimatePresence>
+    </div>
     </div>
   );
 }

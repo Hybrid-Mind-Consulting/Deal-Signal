@@ -627,6 +627,8 @@ function SignalCard({
 function CompactSignalRow({ signal, index }: { signal: MaterialSignal; index: number }) {
   const [, navigate] = useLocation();
   const colors = priorityColors(signal.priority);
+  // Only signal index 0 (customer concentration) has a detail page in this prototype
+  const hasDetailPage = index === 0;
 
   return (
     <motion.div
@@ -649,13 +651,17 @@ function CompactSignalRow({ signal, index }: { signal: MaterialSignal; index: nu
           <span className={cn('text-sm font-semibold', colors.value)}>{signal.latestValue}</span>
         </div>
         <span className={cn('text-xs flex-shrink-0 tabular-nums', colors.mat)}>{signal.confidence}% conf.</span>
-        <button
-          onClick={() => navigate('/signals/customer-concentration')}
-          className="inline-flex items-center gap-1 text-xs font-medium text-primary hover:text-primary/80 transition-colors group flex-shrink-0"
-        >
-          Investigate
-          <ArrowRight className="w-3 h-3 group-hover:translate-x-0.5 transition-transform" />
-        </button>
+        {hasDetailPage ? (
+          <button
+            onClick={() => navigate('/signals/customer-concentration')}
+            className="inline-flex items-center gap-1 text-xs font-medium text-primary hover:text-primary/80 transition-colors group flex-shrink-0"
+          >
+            Investigate
+            <ArrowRight className="w-3 h-3 group-hover:translate-x-0.5 transition-transform" />
+          </button>
+        ) : (
+          <span className="text-[10px] text-muted-foreground/50 italic flex-shrink-0">Prototype</span>
+        )}
       </div>
     </motion.div>
   );

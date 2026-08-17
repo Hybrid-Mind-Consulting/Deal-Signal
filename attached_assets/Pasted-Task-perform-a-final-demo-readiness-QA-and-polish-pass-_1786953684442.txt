@@ -1,0 +1,89 @@
+Task: perform a final demo-readiness QA and polish pass across Deal Signal.
+
+Do not redesign the app.
+Do not add new features.
+Do not change the NovaCura story, current signals, architecture, design system, routes or navigation.
+
+This task is only to make the current prototype reliable and presentation-ready.
+
+Check and fix:
+
+every navigation item works
+every button works
+every suggested prompt works
+Enter key submits in both Q&A areas
+Send buttons never appear active if they do nothing
+Refresh works consistently
+Simulate New Evidence works repeatedly
+Pause / Resume / Next step work reliably
+completed simulation remains visible until deliberately hidden
+Replay process works
+Reset demo restores the correct pre-simulation state
+no duplicate signals are created during replay
+Open Actions updates correctly after Create Action
+signal lifecycle changes correctly between New / Investigating / Resolved
+evidence drawers open and close correctly
+Analysis Trace node inspector opens for every clickable node
+Business View and Technical View switch correctly
+Technical View clearly shows:
+GHO Existing Environment
+→ Deal Signal Proactive Intelligence
+→ User Channels & Controlled Outputs
+Sana and Claude are shown as existing GHO environment/interface components, not Deal Signal-owned platforms
+all architecture labels clearly indicate that integrations are illustrative
+Deal Brief regeneration works reliably
+Changes Since Previous Brief remains consistent
+Export PDF should either work or be clearly disabled/labelled as prototype if it is not implemented
+no dead-end UI
+no broken hover states
+no layout shifts or overflow at standard laptop presentation resolution
+no clipped text
+no placeholder text
+no old FDA / NCT-440 / Series C / CMO / IP-litigation content
+no invented architecture vendors or infrastructure
+
+Consistency check across every page
+
+Customer concentration:
+18% → 31%
++13 percentage points
+High
+94% confidence
+
+FY27 growth:
+14% → approximately 8%
+Medium
+89% confidence
+
+Regulatory timing:
+Q1 2027 → Q2 2027
+Medium
+86% confidence
+
+Overall diligence risk:
+Amber
+
+Material signals:
+3
+
+Ensure dates, source names, values and labels are consistent everywhere.
+
+Presentation polish
+
+Keep transitions restrained.
+Avoid unnecessary animation.
+Ensure active/selected states are obvious.
+Ensure text contrast is strong enough for screen-sharing.
+Ensure primary actions are visually clear.
+Keep the current AI Assistant-aligned graphite/violet design system unchanged.
+
+Final output
+
+After testing, give me a short report with:
+
+issues found
+issues fixed
+anything still non-functional
+anything that is intentionally simulated
+
+Stop after QA and fixes.

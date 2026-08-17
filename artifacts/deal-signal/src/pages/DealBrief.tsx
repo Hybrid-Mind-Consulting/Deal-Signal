@@ -153,7 +153,7 @@ export default function DealBrief() {
   const timers = useRef<ReturnType<typeof setTimeout>[]>([]);
 
   function startRegen() {
-    if (regenState !== 'idle') return;
+    if (regenState === 'running') return;
     timers.current.forEach(clearTimeout);
     timers.current = [];
     setRegenState('running');
@@ -197,10 +197,16 @@ export default function DealBrief() {
             : <RefreshCw className="w-3.5 h-3.5" />}
             {isComplete ? 'Regenerated' : 'Regenerate Deal Brief'}
           </button>
-          <button className="inline-flex items-center gap-2 px-3 py-1.5 rounded-md bg-primary text-primary-foreground hover:bg-primary/90 text-sm font-medium transition-colors">
-            <FileDown className="w-3.5 h-3.5" />
-            Export PDF
-          </button>
+          <div className="relative group">
+            <button
+              disabled
+              className="inline-flex items-center gap-2 px-3 py-1.5 rounded-md bg-muted border border-border text-muted-foreground/60 text-sm font-medium cursor-not-allowed select-none"
+            >
+              <FileDown className="w-3.5 h-3.5" />
+              Export PDF
+              <span className="text-[9px] font-normal opacity-70 ml-0.5">(prototype)</span>
+            </button>
+          </div>
         </div>
       </PageHeader>
 

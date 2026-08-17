@@ -6,6 +6,7 @@ import {
   ArrowDown,
   ArrowRight,
   BellRing,
+  Bot,
   BrainCircuit,
   CheckCircle2,
   ChevronDown,
@@ -19,6 +20,7 @@ import {
   Network,
   ShieldCheck,
   SlidersHorizontal,
+  Workflow,
   X,
 } from 'lucide-react';
 import { cn } from '@/lib/utils';
@@ -34,6 +36,9 @@ interface InspectorData {
   type: string;
   inputs?: { label: string; value: string }[];
   logic?: string;
+  role?: string;
+  dealSignalInteraction?: string;
+  integration?: string;
   output?: string;
   status?: 'Passed' | 'Running';
   checks?: { label: string; status: 'Passed' | 'Failed' }[];
@@ -138,7 +143,7 @@ function BusinessWorkflow() {
 }
 
 // ─────────────────────────────────────────────────────────────────────────────
-// TECHNICAL VIEW — node-based workflow canvas
+// TECHNICAL VIEW
 // ─────────────────────────────────────────────────────────────────────────────
 
 const NODE_COLORS: Record<NodeColor, {
@@ -192,76 +197,89 @@ const NODE_COLORS: Record<NodeColor, {
   },
 };
 
-// ─── Node definitions ──────────────────────────────────────────────────────────
+// ─── Deal Signal workflow nodes ────────────────────────────────────────────────
 
-const TECH_NODES: TechNodeDef[] = [
+const DEAL_SIGNAL_NODES: TechNodeDef[] = [
   {
-    id: 'tn-1',
-    label: 'Evidence Ingestion',
-    typeLabel: 'SOURCE',
+    id: 'ev-trigger',
+    label: 'Evidence Event / Trigger',
+    typeLabel: 'TRIGGER',
     color: 'slate',
     icon: Database,
     inspector: {
-      name: 'Evidence Ingestion',
+      name: 'Evidence Event / Trigger',
       type: 'Source / Data Processing',
       inputs: [{ label: 'Document', value: 'July Management Accounts — Aug 2026' }],
-      logic: 'Ingest new source document, validate format, extract metadata',
-      output: 'Structured document ready for extraction',
+      logic: 'New document event received from connected GHO environment · validate and classify',
+      output: 'Evidence event created · Routed to Signal Orchestration',
       status: 'Passed',
-      notes: 'Source authenticated · Financial data category',
+      notes: 'Source authenticated · Financial data category · Received via Sana trigger',
     },
   },
   {
-    id: 'tn-2',
-    label: 'Extraction',
+    id: 'ev-extract',
+    label: 'Evidence Extraction',
     typeLabel: 'PROCESSOR',
     color: 'slate',
     icon: FileSearch,
     inspector: {
-      name: 'Extraction',
+      name: 'Evidence Extraction',
       type: 'Source / Data Processing',
-      inputs: [
-        { label: 'Document', value: 'July Management Accounts — Aug 2026' },
-      ],
+      inputs: [{ label: 'Document', value: 'July Management Accounts — Aug 2026' }],
       logic: 'Identify and extract named entities, revenue figures, customer references',
       output: 'Customer A revenue: £12.4m · Total Q2 revenue: £40.0m',
       status: 'Passed',
     },
   },
   {
-    id: 'tn-3',
-    label: 'Evidence Router',
+    id: 'sig-orch',
+    label: 'Signal Orchestration',
+    typeLabel: 'ORCHESTRATOR',
+    color: 'violet',
+    icon: Workflow,
+    inspector: {
+      name: 'Signal Orchestration',
+      type: 'AI / Context Reasoning',
+      inputs: [{ label: 'Extracted entities', value: 'Customer revenue data, concentration figures' }],
+      logic: 'Classify signal type and orchestrate parallel evidence retrieval and deterministic analysis',
+      output: 'Dispatched to Context & Evidence Routing + Deterministic Analysis in parallel',
+      status: 'Passed',
+    },
+  },
+  {
+    id: 'ctx-route',
+    label: 'Context & Evidence Routing',
     typeLabel: 'ROUTER',
     color: 'slate',
     icon: Network,
     inspector: {
-      name: 'Evidence Router',
+      name: 'Context & Evidence Routing',
       type: 'Source / Data Processing',
-      inputs: [{ label: 'Extracted entities', value: 'Customer revenue data, concentration figures' }],
-      logic: 'Route extracted evidence to relevant downstream processors in parallel',
-      output: 'Dispatched to Prior Evidence Retrieval + Deterministic Calculation',
+      inputs: [{ label: 'Signal context', value: 'Customer concentration · NovaCura Therapeutics' }],
+      logic: 'Identify relevant prior evidence and initiate retrieval via GHO connected sources',
+      output: 'Retrieval request dispatched to GHO connected environment',
       status: 'Passed',
     },
   },
   {
-    id: 'tn-4',
-    label: 'Prior Evidence Retrieval',
-    typeLabel: 'AI CONTEXT',
+    id: 'gho-src',
+    label: 'Retrieve via GHO Connected Sources',
+    typeLabel: 'GHO RETRIEVAL',
     color: 'violet',
     icon: BrainCircuit,
     inspector: {
-      name: 'Prior Evidence Retrieval',
+      name: 'Retrieve via GHO Connected Sources',
       type: 'AI / Context Reasoning',
       inputs: [{ label: 'Query', value: 'Customer concentration · NovaCura Therapeutics' }],
-      logic: 'Vector search across document store for semantically related prior evidence',
+      logic: 'Vector search across existing GHO-connected evidence — not a new Deal Signal document store',
       output: 'Management Presentation May 2026 · Largest customer: 18%',
       status: 'Passed',
-      notes: 'Cosine similarity > 0.82 · Retrieved 2 relevant documents',
+      notes: 'Cosine similarity > 0.82 · 2 relevant documents retrieved from GHO connected environment',
     },
   },
   {
-    id: 'tn-5',
-    label: 'Deterministic Calculation',
+    id: 'det-calc',
+    label: 'Deterministic Analysis',
     typeLabel: 'LOGIC',
     color: 'amber',
     icon: Cpu,
@@ -273,7 +291,7 @@ const TECH_NODES: TechNodeDef[] = [
       </div>
     ),
     inspector: {
-      name: 'Deterministic Calculation',
+      name: 'Deterministic Analysis',
       type: 'Deterministic / Business Logic',
       inputs: [
         { label: 'Customer A revenue', value: '£12.4m' },
@@ -285,11 +303,17 @@ const TECH_NODES: TechNodeDef[] = [
     },
   },
   {
-    id: 'tn-6',
+    id: 'cross-cmp',
     label: 'Cross-source Comparison',
     typeLabel: 'COMPARATOR',
     color: 'red',
     icon: GitBranch,
+    snippet: (
+      <div className="mt-1 rounded bg-background border border-border px-2 py-1.5 font-mono">
+        <p className="text-[9px] text-[hsl(0,84%,60%)] font-bold">18% → 31%</p>
+        <p className="text-[9px] text-muted-foreground">+13 percentage points</p>
+      </div>
+    ),
     inspector: {
       name: 'Cross-source Comparison',
       type: 'Contradiction / Material Issue',
@@ -304,7 +328,7 @@ const TECH_NODES: TechNodeDef[] = [
     },
   },
   {
-    id: 'tn-7',
+    id: 'mat-eval',
     label: 'Materiality Evaluator',
     typeLabel: 'EVALUATOR',
     color: 'amber',
@@ -322,13 +346,13 @@ const TECH_NODES: TechNodeDef[] = [
     },
   },
   {
-    id: 'tn-8',
-    label: 'Quality / Evaluation Gate',
+    id: 'gov-gate',
+    label: 'Quality / Governance Gate',
     typeLabel: 'GATE',
     color: 'green',
     icon: ShieldCheck,
     inspector: {
-      name: 'Quality / Evaluation Gate',
+      name: 'Quality / Governance Gate',
       type: 'Evaluation / Governance',
       checks: [
         { label: 'Source grounding', status: 'Passed' },
@@ -341,24 +365,124 @@ const TECH_NODES: TechNodeDef[] = [
     },
   },
   {
-    id: 'tn-9',
-    label: 'Watchtower Output',
+    id: 'publish',
+    label: 'Publish Governed Signal',
     typeLabel: 'OUTPUT',
     color: 'green',
     icon: BellRing,
     inspector: {
-      name: 'Watchtower Output',
+      name: 'Publish Governed Signal',
       type: 'Evaluation / Governance',
       inputs: [{ label: 'Signal', value: 'Customer concentration has increased materially' }],
-      logic: 'Dispatch signal to deal team · Update Deal Brief · Create recommended actions',
+      logic: 'Dispatch governed signal to Watchtower, Deal Brief, Sana workflow, and Claude investigation capability',
       output: 'SIG-001 dispatched · 4 actions created · Deal Brief updated',
       status: 'Passed',
     },
   },
 ];
 
-// Lookup by id
-const NODE_BY_ID = Object.fromEntries(TECH_NODES.map((n) => [n.id, n]));
+// ─── GHO boundary nodes ────────────────────────────────────────────────────────
+
+interface GhoNodeDef {
+  id: string;
+  label: string;
+  sublabel: string;
+  badge: string;
+  icon: React.ElementType;
+  inspector: InspectorData;
+  connectorLabel?: string;
+}
+
+const GHO_INPUT_NODE: GhoNodeDef = {
+  id: 'sana-in',
+  label: 'Sana',
+  sublabel: 'Retrieval · triggers · workflows',
+  badge: 'EXISTING GHO PLATFORM',
+  icon: Database,
+  inspector: {
+    name: 'Sana',
+    type: 'Existing GHO platform',
+    role: 'Retrieval, workflow triggers and task orchestration',
+    dealSignalInteraction: 'Provides and initiates evidence workflow · can receive governed signals and actions',
+    integration: 'Illustrative',
+  },
+};
+
+const GHO_OUTPUT_NODES: GhoNodeDef[] = [
+  {
+    id: 'out-wt',
+    label: 'Watchtower',
+    sublabel: 'Proactive alert',
+    badge: 'DEAL SIGNAL',
+    icon: BellRing,
+    inspector: {
+      name: 'Watchtower',
+      type: 'Deal Signal — user interface',
+      role: 'Investment team workspace for material signal review and action management',
+      dealSignalInteraction: 'Primary destination for published governed signals',
+      integration: 'Native',
+    },
+  },
+  {
+    id: 'out-db',
+    label: 'Deal Brief',
+    sublabel: 'Controlled investment snapshot',
+    badge: 'DEAL SIGNAL',
+    icon: FileText,
+    inspector: {
+      name: 'Deal Brief',
+      type: 'Deal Signal — user interface',
+      role: 'Controlled, evidence-backed snapshot for investment committee review',
+      dealSignalInteraction: 'Updated automatically when governed signals are published',
+      integration: 'Native',
+    },
+  },
+  {
+    id: 'out-sana',
+    label: 'Sana',
+    sublabel: 'Workflow / actions',
+    badge: 'EXISTING GHO PLATFORM',
+    icon: Database,
+    inspector: {
+      name: 'Sana',
+      type: 'Existing GHO platform',
+      role: 'Workflow triggers and action management within GHO environment',
+      dealSignalInteraction: 'Governed signals and recommended actions can be dispatched to Sana workflows',
+      integration: 'Illustrative',
+    },
+  },
+  {
+    id: 'out-claude',
+    label: 'Claude',
+    sublabel: 'Follow-up investigation',
+    badge: 'EXISTING GHO AI',
+    icon: Bot,
+    inspector: {
+      name: 'Claude',
+      type: 'Existing GHO AI interface',
+      role: 'Advanced user investigation and follow-up',
+      dealSignalInteraction: 'Governed diligence capability can be exposed through MCP / API',
+      integration: 'Illustrative',
+    },
+    connectorLabel: 'MCP / API',
+  },
+];
+
+// ─── Combined node lookup ──────────────────────────────────────────────────────
+
+type AnyNode = TechNodeDef | GhoNodeDef;
+
+function isGhoNode(n: AnyNode): n is GhoNodeDef {
+  return 'sublabel' in n;
+}
+
+const ALL_NODES: AnyNode[] = [
+  GHO_INPUT_NODE,
+  ...DEAL_SIGNAL_NODES,
+  ...GHO_OUTPUT_NODES,
+];
+
+const NODE_BY_ID = Object.fromEntries(ALL_NODES.map((n) => [n.id, n]));
 
 // ─── Technical node card ───────────────────────────────────────────────────────
 
@@ -383,36 +507,91 @@ function TechNode({
       transition={{ delay }}
       onClick={() => onSelect(node.id)}
       className={cn(
-        'flex-shrink-0 w-40 rounded-xl border p-3.5 flex flex-col gap-2 text-left transition-all duration-200 cursor-pointer shadow-lg',
+        'flex-shrink-0 w-36 rounded-xl border p-3 flex flex-col gap-2 text-left transition-all duration-200 cursor-pointer shadow-lg',
         c.border, c.bg, c.glow,
         selected ? 'ring-2 ring-offset-2 ring-offset-background ring-primary/50 shadow-primary/10' : 'hover:brightness-110',
       )}
     >
       <div className="flex items-center justify-between gap-1">
-        <span className={cn('text-[8px] font-bold uppercase tracking-widest font-mono px-1.5 py-0.5 rounded-sm', c.badge, c.badgeText)}>
+        <span className={cn('text-[7px] font-bold uppercase tracking-widest font-mono px-1.5 py-0.5 rounded-sm', c.badge, c.badgeText)}>
           {node.typeLabel}
         </span>
-        <Icon className={cn('w-3.5 h-3.5 flex-shrink-0', c.icon)} />
+        <Icon className={cn('w-3 h-3 flex-shrink-0', c.icon)} />
       </div>
       <p className="text-[11px] font-semibold text-foreground leading-tight">{node.label}</p>
       {node.snippet}
-      {node.id === 'tn-8' && (
+      {node.id === 'gov-gate' && (
         <div className="space-y-1 mt-0.5">
           {['Source grounding', 'Evidence consistency', 'Relevance'].map((check) => (
             <div key={check} className="flex items-center gap-1.5">
               <CheckCircle2 className="w-2.5 h-2.5 text-[hsl(160,84%,39%)] flex-shrink-0" />
               <span className="text-[9px] text-muted-foreground font-mono">
-                {check}: <span className="text-[hsl(160,84%,39%)]">Passed</span>
+                {check.split(' ')[0]}: <span className="text-[hsl(160,84%,39%)]">Passed</span>
               </span>
             </div>
           ))}
         </div>
       )}
+      {node.id === 'gho-src' && (
+        <p className="text-[9px] text-muted-foreground/70 italic leading-tight mt-0.5">
+          Existing connected evidence
+        </p>
+      )}
     </motion.button>
   );
 }
 
-// ─── Connector dots ────────────────────────────────────────────────────────────
+// ─── GHO boundary node card ────────────────────────────────────────────────────
+
+function GhoNode({
+  node,
+  delay,
+  selected,
+  onSelect,
+}: {
+  node: GhoNodeDef;
+  delay: number;
+  selected: boolean;
+  onSelect: (id: string) => void;
+}) {
+  const Icon = node.icon;
+  const isGHO = node.badge.startsWith('EXISTING');
+
+  return (
+    <motion.button
+      initial={{ opacity: 0, y: 6 }}
+      animate={{ opacity: 1, y: 0 }}
+      transition={{ delay }}
+      onClick={() => onSelect(node.id)}
+      className={cn(
+        'w-full rounded-xl border-2 border-dashed p-3 flex flex-col gap-1.5 text-left transition-all duration-200 cursor-pointer',
+        isGHO
+          ? 'border-sky-500/30 bg-sky-500/[0.03] hover:bg-sky-500/[0.06]'
+          : 'border-[hsl(160,84%,39%,0.3)] bg-[hsl(160,84%,39%,0.03)] hover:bg-[hsl(160,84%,39%,0.06)]',
+        selected && 'ring-2 ring-offset-2 ring-offset-background ring-primary/50',
+      )}
+    >
+      <div className="flex items-center justify-between gap-1">
+        <span className={cn(
+          'text-[7px] font-bold uppercase tracking-widest font-mono px-1.5 py-0.5 rounded-sm',
+          isGHO ? 'bg-sky-500/10 text-sky-400' : 'bg-[hsl(160,84%,39%,0.1)] text-[hsl(160,84%,39%)]',
+        )}>
+          {node.badge}
+        </span>
+        <Icon className={cn('w-3 h-3 flex-shrink-0', isGHO ? 'text-sky-400' : 'text-[hsl(160,84%,39%)]')} />
+      </div>
+      <p className="text-[11px] font-semibold text-foreground leading-tight">{node.label}</p>
+      <p className="text-[9px] text-muted-foreground">{node.sublabel}</p>
+      {node.connectorLabel && (
+        <span className="self-start text-[8px] font-mono font-bold px-1.5 py-0.5 rounded border border-primary/30 text-primary bg-primary/5">
+          {node.connectorLabel}
+        </span>
+      )}
+    </motion.button>
+  );
+}
+
+// ─── Connector ─────────────────────────────────────────────────────────────────
 
 function ConnectorH() {
   return (
@@ -430,8 +609,17 @@ function ConnectorH() {
 function InspectorPanel({ nodeId, onClose }: { nodeId: string; onClose: () => void }) {
   const node = NODE_BY_ID[nodeId];
   const insp = node.inspector;
-  const c = NODE_COLORS[node.color];
+
+  // Determine color context
+  const isGho = isGhoNode(node);
+  const color = isGho ? null : (node as TechNodeDef).color;
+  const c = color ? NODE_COLORS[color] : null;
   const Icon = node.icon;
+
+  const headerBg = c ? c.bg : 'bg-sky-500/[0.04]';
+  const iconBg = c ? c.iconBg : 'bg-sky-500/10 border-sky-500/25';
+  const iconColor = c ? c.icon : 'text-sky-400';
+  const typeColor = c ? c.badgeText : 'text-sky-400';
 
   return (
     <motion.div
@@ -442,13 +630,13 @@ function InspectorPanel({ nodeId, onClose }: { nodeId: string; onClose: () => vo
       className="w-72 flex-shrink-0 rounded-xl border border-card-border bg-card shadow-xl flex flex-col overflow-hidden"
     >
       {/* Header */}
-      <div className={cn('px-4 pt-4 pb-3 border-b border-border flex items-start gap-3', c.bg)}>
-        <div className={cn('w-7 h-7 rounded-lg border flex items-center justify-center flex-shrink-0 mt-0.5', c.iconBg)}>
-          <Icon className={cn('w-3.5 h-3.5', c.icon)} />
+      <div className={cn('px-4 pt-4 pb-3 border-b border-border flex items-start gap-3', headerBg)}>
+        <div className={cn('w-7 h-7 rounded-lg border flex items-center justify-center flex-shrink-0 mt-0.5', iconBg)}>
+          <Icon className={cn('w-3.5 h-3.5', iconColor)} />
         </div>
         <div className="flex-1 min-w-0">
           <p className="text-sm font-semibold text-foreground leading-tight">{insp.name}</p>
-          <p className={cn('text-[10px] mt-0.5', c.badgeText)}>{insp.type}</p>
+          <p className={cn('text-[10px] mt-0.5', typeColor)}>{insp.type}</p>
         </div>
         <button onClick={onClose} className="text-muted-foreground hover:text-foreground transition-colors flex-shrink-0">
           <X className="w-3.5 h-3.5" />
@@ -457,6 +645,28 @@ function InspectorPanel({ nodeId, onClose }: { nodeId: string; onClose: () => vo
 
       {/* Body */}
       <div className="flex-1 overflow-y-auto p-4 space-y-4 text-xs">
+
+        {insp.role && (
+          <div>
+            <p className="text-[10px] font-semibold uppercase tracking-wider text-muted-foreground mb-1">Role</p>
+            <p className="text-foreground leading-relaxed">{insp.role}</p>
+          </div>
+        )}
+
+        {insp.dealSignalInteraction && (
+          <div>
+            <p className="text-[10px] font-semibold uppercase tracking-wider text-muted-foreground mb-1">Deal Signal Interaction</p>
+            <p className="text-foreground leading-relaxed">{insp.dealSignalInteraction}</p>
+          </div>
+        )}
+
+        {insp.integration && (
+          <div className="flex items-center justify-between">
+            <p className="text-[10px] font-semibold uppercase tracking-wider text-muted-foreground">Integration</p>
+            <span className="text-[10px] font-medium text-muted-foreground italic">{insp.integration}</span>
+          </div>
+        )}
+
         {insp.inputs && (
           <div>
             <p className="text-[10px] font-semibold uppercase tracking-wider text-muted-foreground mb-2">Input</p>
@@ -512,133 +722,21 @@ function InspectorPanel({ nodeId, onClose }: { nodeId: string; onClose: () => vo
           </div>
         )}
 
-        <div className="flex items-center justify-between pt-1">
-          <p className="text-[10px] font-semibold uppercase tracking-wider text-muted-foreground">Execution Status</p>
-          {insp.status && (
+        {insp.status && (
+          <div className="flex items-center justify-between pt-1">
+            <p className="text-[10px] font-semibold uppercase tracking-wider text-muted-foreground">Execution Status</p>
             <div className="flex items-center gap-1.5">
               <CheckCircle2 className="w-3 h-3 text-[hsl(160,84%,39%)]" />
               <span className="text-[hsl(160,84%,39%)] font-semibold text-[10px]">{insp.status}</span>
             </div>
-          )}
-        </div>
+          </div>
+        )}
       </div>
     </motion.div>
   );
 }
 
-// ─── System architecture context strip ─────────────────────────────────────────
-
-function SystemArchitectureStrip() {
-  return (
-    <motion.div
-      initial={{ opacity: 0, y: 6 }}
-      animate={{ opacity: 1, y: 0 }}
-      transition={{ delay: 0.05 }}
-      className="mb-8"
-    >
-      {/* Section label */}
-      <p className="text-[10px] font-semibold uppercase tracking-wider text-muted-foreground mb-3">
-        System Architecture Context
-      </p>
-
-      <div className="flex items-stretch gap-0 rounded-xl overflow-hidden border border-border">
-        {/* Column 1 — GHO Existing Environment */}
-        <div className="flex-1 bg-sky-500/[0.03] border-r border-border px-4 py-4">
-          <p className="text-[9px] font-bold uppercase tracking-widest text-sky-400 mb-3">
-            GHO Existing Environment
-          </p>
-          <div className="space-y-2">
-            {[
-              { label: 'Sana', note: 'Knowledge management platform' },
-              { label: 'Claude', note: 'AI assistant interface' },
-              { label: 'Document repositories', note: 'Diligence evidence store' },
-              { label: 'Financial data feeds', note: 'Management accounts, models' },
-            ].map((item) => (
-              <div key={item.label} className="flex items-start gap-2">
-                <span className="flex-shrink-0 w-1.5 h-1.5 rounded-full bg-sky-400/60 mt-1.5" />
-                <div>
-                  <span className="text-xs font-medium text-foreground">{item.label}</span>
-                  <span className="text-[10px] text-muted-foreground ml-1.5">{item.note}</span>
-                </div>
-              </div>
-            ))}
-          </div>
-          <p className="text-[9px] text-muted-foreground/50 italic mt-3">
-            Existing GHO infrastructure — not Deal Signal–owned
-          </p>
-        </div>
-
-        {/* Arrow */}
-        <div className="flex items-center px-3 flex-shrink-0 bg-muted/5">
-          <ArrowRight className="w-4 h-4 text-border" />
-        </div>
-
-        {/* Column 2 — Deal Signal Proactive Intelligence */}
-        <div className="flex-1 bg-primary/[0.03] border-r border-border px-4 py-4">
-          <p className="text-[9px] font-bold uppercase tracking-widest text-primary mb-3">
-            Deal Signal — Proactive Intelligence
-          </p>
-          <div className="space-y-2">
-            {[
-              { label: 'Evidence ingestion', note: 'Continuous source monitoring' },
-              { label: 'Extraction & reasoning', note: 'AI + deterministic pipeline' },
-              { label: 'Cross-source comparison', note: 'Contradiction detection' },
-              { label: 'Materiality evaluation', note: 'Signal scoring & governance' },
-            ].map((item) => (
-              <div key={item.label} className="flex items-start gap-2">
-                <span className="flex-shrink-0 w-1.5 h-1.5 rounded-full bg-primary/60 mt-1.5" />
-                <div>
-                  <span className="text-xs font-medium text-foreground">{item.label}</span>
-                  <span className="text-[10px] text-muted-foreground ml-1.5">{item.note}</span>
-                </div>
-              </div>
-            ))}
-          </div>
-          <p className="text-[9px] text-muted-foreground/50 italic mt-3">
-            Workflow shown in detail below · Integrations illustrative
-          </p>
-        </div>
-
-        {/* Arrow */}
-        <div className="flex items-center px-3 flex-shrink-0 bg-muted/5">
-          <ArrowRight className="w-4 h-4 text-border" />
-        </div>
-
-        {/* Column 3 — User Channels & Controlled Outputs */}
-        <div className="flex-1 bg-[hsl(160,84%,39%,0.03)] px-4 py-4">
-          <p className="text-[9px] font-bold uppercase tracking-widest text-[hsl(160,84%,39%)] mb-3">
-            User Channels &amp; Controlled Outputs
-          </p>
-          <div className="space-y-2">
-            {[
-              { label: 'Deal Team Workspace', note: 'Signal view, recommended actions' },
-              { label: 'Deal Brief', note: 'Controlled snapshot for IC review' },
-              { label: 'Ask Watchtower', note: 'Evidence-grounded Q&A' },
-              { label: 'Notifications', note: 'Alert on new material signals' },
-            ].map((item) => (
-              <div key={item.label} className="flex items-start gap-2">
-                <span className="flex-shrink-0 w-1.5 h-1.5 rounded-full bg-[hsl(160,84%,39%,0.7)] mt-1.5" />
-                <div>
-                  <span className="text-xs font-medium text-foreground">{item.label}</span>
-                  <span className="text-[10px] text-muted-foreground ml-1.5">{item.note}</span>
-                </div>
-              </div>
-            ))}
-          </div>
-          <p className="text-[9px] text-muted-foreground/50 italic mt-3">
-            Investment team–facing outputs only
-          </p>
-        </div>
-      </div>
-
-      <p className="text-[9px] text-muted-foreground/50 mt-2 px-1 italic">
-        Source integrations (Sana, Claude, financial data feeds) are illustrative. Production connectivity subject to GHO environment and security review.
-      </p>
-    </motion.div>
-  );
-}
-
-// ─── Technical workflow canvas ─────────────────────────────────────────────────
+// ─── Technical workflow — swimlane canvas ──────────────────────────────────────
 
 function TechnicalWorkflow() {
   const [selectedId, setSelectedId] = useState<string | null>(null);
@@ -647,148 +745,258 @@ function TechnicalWorkflow() {
     setSelectedId((prev) => (prev === id ? null : id));
   }
 
-  const row1 = TECH_NODES.slice(0, 3); // Evidence Ingestion, Extraction, Evidence Router
-  const branchLeft = TECH_NODES[3];    // Prior Evidence Retrieval
-  const branchRight = TECH_NODES[4];   // Deterministic Calculation
-  const row3 = TECH_NODES.slice(5);    // Cross-source Comparison → Watchtower Output
+  // Deal Signal rows
+  const row1 = DEAL_SIGNAL_NODES.slice(0, 3);  // trigger, extract, orchestrate
+  const branchLeft  = DEAL_SIGNAL_NODES[3];     // context routing
+  const branchLeft2 = DEAL_SIGNAL_NODES[4];     // GHO sources
+  const branchRight = DEAL_SIGNAL_NODES[5];     // deterministic
+  const row3 = DEAL_SIGNAL_NODES.slice(6);      // comparison → publish
 
   return (
     <div>
-      <SystemArchitectureStrip />
+      {/* Disclaimer note */}
+      <motion.p
+        initial={{ opacity: 0 }}
+        animate={{ opacity: 1 }}
+        transition={{ delay: 0.05 }}
+        className="text-[9px] text-muted-foreground/50 italic mb-4 px-1"
+      >
+        Illustrative integration architecture — final deployment would align to GHO's existing systems, security and integration standards.
+      </motion.p>
 
+      {/* Canvas + inspector */}
       <div className="flex gap-6 items-start">
-      {/* Canvas */}
-      <div className="flex-1 min-w-0">
-        {/* Subtle grid background */}
-        <div
-          className="rounded-2xl border border-border p-6 relative"
-          style={{
-            backgroundImage: 'radial-gradient(circle, hsl(var(--border) / 0.5) 1px, transparent 1px)',
-            backgroundSize: '20px 20px',
-          }}
-        >
-          {/* Click hint */}
-          <p className="text-[10px] text-muted-foreground/60 mb-4 font-mono">
-            Click any node to inspect · {TECH_NODES.length} nodes · 9 edges
-          </p>
+        {/* Swimlane canvas */}
+        <div className="flex-1 min-w-0">
+          <div
+            className="rounded-2xl border border-border overflow-hidden relative"
+            style={{
+              backgroundImage: 'radial-gradient(circle, hsl(var(--border) / 0.5) 1px, transparent 1px)',
+              backgroundSize: '20px 20px',
+            }}
+          >
+            <div className="flex min-h-[520px]">
 
-          {/* Row 1: linear chain */}
-          <div className="flex items-start gap-1">
-            {row1.map((node, i) => (
-              <Fragment key={node.id}>
-                <TechNode node={node} delay={i * 0.06} selected={selectedId === node.id} onSelect={handleSelect} />
-                {i < row1.length - 1 && <ConnectorH />}
-              </Fragment>
-            ))}
-          </div>
+              {/* ── LEFT: GHO Existing Environment ── */}
+              <div className="w-44 flex-shrink-0 flex flex-col p-4 bg-sky-500/[0.02]"
+                   style={{ borderRight: '1px dashed hsl(var(--border))' }}>
+                <p className="text-[8px] font-bold uppercase tracking-widest text-sky-400 mb-4">
+                  GHO Existing Environment
+                </p>
 
-          {/* Branch connectors from Evidence Router down */}
-          <div className="flex mt-2 mb-2" style={{ paddingLeft: '342px' }}>
-            {/* Left branch: down + left to Prior Evidence */}
-            <div className="relative" style={{ width: '180px', height: '28px' }}>
-              {/* Vertical line down from center-ish */}
-              <div className="absolute left-[40px] top-0 bottom-0 w-px bg-border" />
-              {/* Horizontal line going left */}
-              <div className="absolute left-0 right-[calc(100%-41px)] bottom-0 h-px bg-border" />
-              {/* Vertical line down on left side */}
-              <div className="absolute left-0 bottom-0" style={{ top: '50%' }}>
-                <div className="w-px bg-border" style={{ height: '14px' }} />
+                {/* Data sources */}
+                <div className="space-y-2 mb-4">
+                  {[
+                    { label: 'SharePoint / Document Repos' },
+                    { label: 'Financial Data' },
+                    { label: 'CRM / Deal Data' },
+                    { label: 'External / Public Data' },
+                  ].map(({ label }) => (
+                    <div key={label} className="flex items-center gap-1.5 px-2 py-1 rounded-md border border-sky-500/15 bg-sky-500/[0.04]">
+                      <span className="w-1 h-1 rounded-full bg-sky-400/50 flex-shrink-0" />
+                      <span className="text-[9px] text-sky-300/70 leading-tight">{label}</span>
+                    </div>
+                  ))}
+                </div>
+
+                {/* Arrow down */}
+                <div className="flex justify-center my-1">
+                  <ArrowDown className="w-3 h-3 text-sky-500/30" />
+                </div>
+
+                {/* Sana node */}
+                <GhoNode
+                  node={GHO_INPUT_NODE}
+                  delay={0.06}
+                  selected={selectedId === GHO_INPUT_NODE.id}
+                  onSelect={handleSelect}
+                />
+
+                {/* Spacer + boundary arrow */}
+                <div className="flex-1" />
+                <div className="flex items-center justify-end gap-1 mt-4 pr-1">
+                  <span className="text-[8px] text-muted-foreground/40 italic">triggers</span>
+                  <ArrowRight className="w-3.5 h-3.5 text-sky-500/30" />
+                </div>
               </div>
-            </div>
-            {/* Right branch: down + right to Deterministic Calc */}
-            <div className="relative" style={{ width: '180px', height: '28px' }}>
-              <div className="absolute left-[40px] top-0 bottom-0 w-px bg-border" />
-              <div className="absolute left-[41px] right-0 bottom-0 h-px bg-border" />
-              <div className="absolute right-0 bottom-0" style={{ top: '50%' }}>
-                <div className="w-px bg-border" style={{ height: '14px' }} />
+
+              {/* ── CENTER: Deal Signal Proactive Intelligence ── */}
+              <div className="flex-1 flex flex-col p-4 bg-primary/[0.01]"
+                   style={{ borderRight: '1px dashed hsl(var(--border))' }}>
+                <p className="text-[8px] font-bold uppercase tracking-widest text-primary mb-4">
+                  Deal Signal Proactive Intelligence
+                </p>
+
+                {/* Click hint */}
+                <p className="text-[9px] text-muted-foreground/50 mb-4 font-mono">
+                  Click any node to inspect
+                </p>
+
+                {/* Row 1: trigger → extraction → orchestration */}
+                <div className="flex items-start gap-1 mb-2">
+                  {row1.map((node, i) => (
+                    <Fragment key={node.id}>
+                      <TechNode node={node} delay={0.08 + i * 0.06} selected={selectedId === node.id} onSelect={handleSelect} />
+                      {i < row1.length - 1 && <ConnectorH />}
+                    </Fragment>
+                  ))}
+                </div>
+
+                {/* Branch lines from Signal Orchestration */}
+                <div className="flex mt-1 mb-1" style={{ paddingLeft: '312px' }}>
+                  {/* Left branch */}
+                  <div className="relative" style={{ width: '160px', height: '24px' }}>
+                    <div className="absolute left-[36px] top-0 bottom-0 w-px bg-border" />
+                    <div className="absolute left-0 right-[calc(100%-37px)] bottom-0 h-px bg-border" />
+                    <div className="absolute left-0 bottom-0" style={{ top: '50%' }}>
+                      <div className="w-px bg-border" style={{ height: '12px' }} />
+                    </div>
+                  </div>
+                  {/* Right branch */}
+                  <div className="relative" style={{ width: '160px', height: '24px' }}>
+                    <div className="absolute left-[36px] top-0 bottom-0 w-px bg-border" />
+                    <div className="absolute left-[37px] right-0 bottom-0 h-px bg-border" />
+                    <div className="absolute right-0 bottom-0" style={{ top: '50%' }}>
+                      <div className="w-px bg-border" style={{ height: '12px' }} />
+                    </div>
+                  </div>
+                </div>
+
+                {/* Row 2: branches */}
+                <div className="flex gap-3 mb-1" style={{ paddingLeft: '272px' }}>
+                  {/* Left branch: context routing + GHO sources stacked */}
+                  <div className="flex flex-col gap-1">
+                    <TechNode node={branchLeft} delay={0.26} selected={selectedId === branchLeft.id} onSelect={handleSelect} />
+                    <div className="flex justify-center">
+                      <ArrowDown className="w-3 h-3 text-border" />
+                    </div>
+                    <TechNode node={branchLeft2} delay={0.30} selected={selectedId === branchLeft2.id} onSelect={handleSelect} />
+                  </div>
+
+                  {/* Horizontal divider between branches */}
+                  <div className="w-4 self-start mt-[68px] flex items-center justify-center">
+                    <div className="w-full h-px bg-border" />
+                  </div>
+
+                  {/* Right branch: deterministic */}
+                  <div className="self-start">
+                    <TechNode node={branchRight} delay={0.32} selected={selectedId === branchRight.id} onSelect={handleSelect} />
+                  </div>
+                </div>
+
+                {/* Merge lines */}
+                <div className="flex mb-1" style={{ paddingLeft: '272px' }}>
+                  <div className="relative" style={{ width: '160px', height: '24px' }}>
+                    <div className="absolute left-[76px] top-0 bottom-0 w-px bg-border" />
+                    <div className="absolute left-[76px] right-0 bottom-0 h-px bg-border" />
+                  </div>
+                  <div className="w-4" />
+                  <div className="relative" style={{ width: '160px', height: '24px' }}>
+                    <div className="absolute left-[76px] top-0 bottom-0 w-px bg-border" />
+                    <div className="absolute left-0 right-[calc(100%-76px)] bottom-0 h-px bg-border" />
+                  </div>
+                </div>
+
+                {/* Merge arrow */}
+                <div className="flex mb-2" style={{ paddingLeft: '432px' }}>
+                  <ArrowDown className="w-3.5 h-3.5 text-border" />
+                </div>
+
+                {/* Row 3: comparison → materiality → gate → publish */}
+                <div className="flex items-start gap-1">
+                  {row3.map((node, i) => (
+                    <Fragment key={node.id}>
+                      <TechNode node={node} delay={0.38 + i * 0.06} selected={selectedId === node.id} onSelect={handleSelect} />
+                      {i < row3.length - 1 && <ConnectorH />}
+                    </Fragment>
+                  ))}
+                </div>
+
+                {/* Publish → right boundary arrow */}
+                <div className="flex items-center justify-end gap-1 mt-4 pr-1">
+                  <span className="text-[8px] text-muted-foreground/40 italic">dispatch</span>
+                  <ArrowRight className="w-3.5 h-3.5 text-[hsl(160,84%,39%)]/30" />
+                </div>
               </div>
+
+              {/* ── RIGHT: GHO User Channels ── */}
+              <div className="w-44 flex-shrink-0 flex flex-col p-4 bg-[hsl(160,84%,39%,0.02)]">
+                <p className="text-[8px] font-bold uppercase tracking-widest text-[hsl(160,84%,39%)] mb-4">
+                  GHO User Channels / Outputs
+                </p>
+
+                <div className="flex flex-col gap-3">
+                  {GHO_OUTPUT_NODES.map((node, i) => (
+                    <GhoNode
+                      key={node.id}
+                      node={node}
+                      delay={0.5 + i * 0.06}
+                      selected={selectedId === node.id}
+                      onSelect={handleSelect}
+                    />
+                  ))}
+                </div>
+
+                {/* Claude note */}
+                <p className="text-[8px] text-muted-foreground/40 italic mt-3 leading-relaxed">
+                  Expose governed diligence capability through existing AI interface
+                </p>
+              </div>
+
             </div>
           </div>
 
-          {/* Row 2: Branch nodes */}
-          <div className="flex gap-2 mb-2" style={{ paddingLeft: '302px' }}>
-            <TechNode node={branchLeft} delay={0.22} selected={selectedId === branchLeft.id} onSelect={handleSelect} />
-            <div className="w-14 self-center flex items-center justify-center">
-              <div className="w-full h-px bg-border" />
-            </div>
-            <TechNode node={branchRight} delay={0.28} selected={selectedId === branchRight.id} onSelect={handleSelect} />
-          </div>
-
-          {/* Merge connectors down to Row 3 */}
-          <div className="flex mb-2" style={{ paddingLeft: '302px' }}>
-            <div className="relative" style={{ width: '180px', height: '28px' }}>
-              <div className="absolute left-[80px] top-0 bottom-0 w-px bg-border" />
-              <div className="absolute left-[80px] right-0 bottom-0 h-px bg-border" />
-            </div>
-            <div className="w-14" />
-            <div className="relative" style={{ width: '180px', height: '28px' }}>
-              <div className="absolute left-[80px] top-0 bottom-0 w-px bg-border" />
-              <div className="absolute left-0 right-[calc(100%-80px)] bottom-0 h-px bg-border" />
-            </div>
-          </div>
-
-          {/* Merge arrow */}
-          <div className="flex mb-2" style={{ paddingLeft: '462px' }}>
-            <ArrowDown className="w-4 h-4 text-border" />
-          </div>
-
-          {/* Row 3: linear chain */}
-          <div className="flex items-start gap-1">
-            {row3.map((node, i) => (
-              <Fragment key={node.id}>
-                <TechNode node={node} delay={0.34 + i * 0.06} selected={selectedId === node.id} onSelect={handleSelect} />
-                {i < row3.length - 1 && <ConnectorH />}
-              </Fragment>
+          {/* Legend */}
+          <motion.div
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            transition={{ delay: 0.7 }}
+            className="mt-4 flex items-center flex-wrap gap-4 px-1"
+          >
+            {(
+              [
+                { color: 'slate', label: 'Source / Data Processing' },
+                { color: 'violet', label: 'AI / Context Reasoning' },
+                { color: 'amber', label: 'Deterministic / Business Logic' },
+                { color: 'green', label: 'Evaluation / Governance' },
+                { color: 'red', label: 'Contradiction / Material Issue' },
+              ] as { color: NodeColor; label: string }[]
+            ).map(({ color, label }) => (
+              <div key={color} className="flex items-center gap-1.5">
+                <div
+                  className="w-2 h-2 rounded-full"
+                  style={{ background: color === 'slate' ? 'hsl(199, 89%, 60%)' : color === 'violet' ? 'hsl(265, 42%, 66%)' : color === 'amber' ? 'hsl(38, 92%, 50%)' : color === 'green' ? 'hsl(160, 84%, 39%)' : 'hsl(0, 84%, 60%)' }}
+                />
+                <span className="text-[10px] text-muted-foreground">{label}</span>
+              </div>
             ))}
-          </div>
+            <div className="flex items-center gap-1.5">
+              <div className="w-2 h-2 rounded-sm border border-dashed border-sky-500/50" />
+              <span className="text-[10px] text-muted-foreground">Existing GHO component</span>
+            </div>
+          </motion.div>
+
+          {/* Prototype disclaimer */}
+          <motion.div
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            transition={{ delay: 0.8 }}
+            className="mt-4 flex items-start gap-2.5 px-4 py-3 rounded-lg border border-border bg-muted/20 max-w-2xl"
+          >
+            <Info className="w-3.5 h-3.5 text-muted-foreground flex-shrink-0 mt-0.5" />
+            <p className="text-xs text-muted-foreground leading-relaxed">
+              <span className="font-medium text-foreground">Prototype workflow</span> — production architecture can be orchestrated with governed agent workflows, deterministic business logic and evaluation tooling.
+            </p>
+          </motion.div>
         </div>
 
-        {/* Legend */}
-        <motion.div
-          initial={{ opacity: 0 }}
-          animate={{ opacity: 1 }}
-          transition={{ delay: 0.7 }}
-          className="mt-4 flex items-center flex-wrap gap-4 px-1"
-        >
-          {(
-            [
-              { color: 'slate', label: 'Source / Data Processing' },
-              { color: 'violet', label: 'AI / Context Reasoning' },
-              { color: 'amber', label: 'Deterministic / Business Logic' },
-              { color: 'green', label: 'Evaluation / Governance' },
-              { color: 'red', label: 'Contradiction / Material Issue' },
-            ] as { color: NodeColor; label: string }[]
-          ).map(({ color, label }) => (
-            <div key={color} className="flex items-center gap-1.5">
-              <div className={cn('w-2 h-2 rounded-full', NODE_COLORS[color].icon.replace('text-', 'bg-').split(' ')[0])}
-                style={{ background: color === 'slate' ? 'hsl(199, 89%, 60%)' : color === 'violet' ? 'hsl(265, 42%, 66%)' : color === 'amber' ? 'hsl(38, 92%, 50%)' : color === 'green' ? 'hsl(160, 84%, 39%)' : 'hsl(0, 84%, 60%)' }}
-              />
-              <span className="text-[10px] text-muted-foreground">{label}</span>
-            </div>
-          ))}
-        </motion.div>
-
-        {/* Prototype disclaimer */}
-        <motion.div
-          initial={{ opacity: 0 }}
-          animate={{ opacity: 1 }}
-          transition={{ delay: 0.8 }}
-          className="mt-4 flex items-start gap-2.5 px-4 py-3 rounded-lg border border-border bg-muted/20 max-w-2xl"
-        >
-          <Info className="w-3.5 h-3.5 text-muted-foreground flex-shrink-0 mt-0.5" />
-          <p className="text-xs text-muted-foreground leading-relaxed">
-            <span className="font-medium text-foreground">Prototype workflow</span> — production architecture can be orchestrated with governed agent workflows, deterministic business logic and evaluation tooling.
-          </p>
-        </motion.div>
+        {/* Inspector panel */}
+        <AnimatePresence>
+          {selectedId && (
+            <InspectorPanel key={selectedId} nodeId={selectedId} onClose={() => setSelectedId(null)} />
+          )}
+        </AnimatePresence>
       </div>
-
-      {/* Inspector panel */}
-      <AnimatePresence>
-        {selectedId && (
-          <InspectorPanel key={selectedId} nodeId={selectedId} onClose={() => setSelectedId(null)} />
-        )}
-      </AnimatePresence>
-    </div>
     </div>
   );
 }

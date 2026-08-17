@@ -1,0 +1,268 @@
+Refine ONLY Analysis Trace → Technical View.
+
+Do not redesign the app, Business View, styling, sidebar or other pages.
+
+The current architecture context correctly names GHO technologies such as Sana and Claude, but the detailed workflow underneath still looks too much like an isolated Deal Signal technology stack.
+
+The detailed architecture diagram itself must explicitly show where Deal Signal interacts with GHO’s existing environment.
+
+GOAL:
+
+A viewer should be able to point at the workflow and immediately answer:
+
+- where does existing GHO data come from?
+- where does Sana participate?
+- what does Deal Signal actually add?
+- where can Claude participate?
+- where does the resulting signal go?
+
+--------------------------------------------------
+1. ADD EXPLICIT GHO INTEGRATION NODES TO THE DIAGRAM
+--------------------------------------------------
+
+On the LEFT / INPUT side of the technical workflow, create a clearly labelled group:
+
+GHO EXISTING ENVIRONMENT
+
+Inside show:
+
+SharePoint / Document Repositories
+Financial Data
+CRM / Deal Data
+External / Public Data
+
+These feed into an explicit node:
+
+SANA
+Retrieval · triggers · workflows
+
+Label this node clearly as:
+
+EXISTING GHO PLATFORM
+
+Do not visually style Sana as a Deal Signal-owned component.
+
+--------------------------------------------------
+2. CONNECT SANA INTO DEAL SIGNAL
+--------------------------------------------------
+
+From Sana / the connected GHO environment, feed into:
+
+Evidence Event / Trigger
+
+Then:
+
+Signal Orchestration
+
+Use supporting label:
+
+DEAL SIGNAL CAPABILITY
+
+From Signal Orchestration branch into:
+
+A)
+Context & Evidence Routing
+
+→ Retrieve via GHO Connected Sources
+
+Supporting note:
+“Existing connected evidence — not a new Deal Signal document store”
+
+B)
+Deterministic Analysis
+
+£12.4m ÷ £40.0m = 31.0%
+
+--------------------------------------------------
+3. CORE DEAL SIGNAL WORKFLOW
+--------------------------------------------------
+
+Merge the evidence and deterministic branches into:
+
+Cross-source Comparison
+18% → 31%
++13 percentage points
+
+→ Materiality Evaluator
+
+→ Quality / Governance Gate
+
+Show:
+
+Source grounding — Passed
+Evidence consistency — Passed
+Relevance — Passed
+
+→ Publish Governed Signal
+
+The Deal Signal layer should therefore visually communicate:
+
+Trigger
+→ orchestrate
+→ retrieve relevant existing evidence
+→ deterministic / AI analysis
+→ compare
+→ evaluate
+→ govern
+→ publish
+
+--------------------------------------------------
+4. EXPLICIT OUTPUT / INTERACTION NODES
+--------------------------------------------------
+
+After Publish Governed Signal, visually fan out to four destinations:
+
+WATCHTOWER
+Proactive alert
+
+DEAL BRIEF
+Controlled investment snapshot
+
+SANA
+Workflow / actions
+
+CLAUDE
+Follow-up investigation
+
+The Sana and Claude boxes must be clearly labelled.
+
+For Claude add a small connector label:
+
+MCP / API
+
+Supporting note:
+
+“Expose governed diligence capability through existing AI interface”
+
+Do NOT imply that a live MCP integration currently exists.
+
+--------------------------------------------------
+5. SHOW SANA IN TWO ROLES
+--------------------------------------------------
+
+It is acceptable and desirable for Sana to appear at both boundaries:
+
+INPUT / ORCHESTRATION SIDE:
+Sana
+Retrieval · triggers · workflows
+
+OUTPUT SIDE:
+Sana
+Workflow / actions
+
+This demonstrates that Deal Signal can operate through GHO’s existing environment rather than replacing it.
+
+--------------------------------------------------
+6. CLAUDE POSITIONING
+--------------------------------------------------
+
+Do NOT place Claude as a required internal processing component.
+
+Claude should sit primarily at the user-interaction/output boundary.
+
+Do not imply Claude necessarily powers the underlying Deal Signal analysis.
+
+The architecture should remain model-flexible.
+
+--------------------------------------------------
+7. VISUAL GROUPING
+--------------------------------------------------
+
+Use subtle labelled boundaries / swimlanes:
+
+GHO EXISTING ENVIRONMENT
+
+DEAL SIGNAL PROACTIVE INTELLIGENCE
+
+GHO USER CHANNELS / OUTPUTS
+
+Keep the existing node-canvas aesthetic, dotted background, node colouring and inspector interaction.
+
+Use clear arrows crossing the boundaries.
+
+The boundary crossings are important: they visually demonstrate integration.
+
+--------------------------------------------------
+8. UPDATE NODE NAMES
+--------------------------------------------------
+
+Rename:
+
+Evidence Ingestion
+→ Evidence Event / Trigger
+
+Extraction
+→ Evidence Extraction
+
+Evidence Router
+→ Context & Evidence Routing
+
+Prior Evidence Retrieval
+→ Retrieve via GHO Connected Sources
+
+Watchtower Output
+→ Publish Governed Signal
+
+Keep Deterministic Analysis, Cross-source Comparison, Materiality Evaluator and Quality / Governance Gate.
+
+--------------------------------------------------
+9. NODE INSPECTORS
+--------------------------------------------------
+
+Keep nodes clickable.
+
+Add inspectors for Sana and Claude.
+
+SANA inspector:
+
+Type:
+Existing GHO platform
+
+Role:
+Retrieval, workflow triggers and task orchestration
+
+Deal Signal interaction:
+Provides/initiates evidence workflow and can receive governed signals/actions
+
+Integration:
+Illustrative
+
+CLAUDE inspector:
+
+Type:
+Existing GHO AI interface
+
+Role:
+Advanced user investigation and follow-up
+
+Deal Signal interaction:
+Governed diligence capability can be exposed through MCP / API
+
+Integration:
+Illustrative
+
+--------------------------------------------------
+10. ARCHITECTURAL DISCLAIMER
+--------------------------------------------------
+
+Retain a concise note:
+
+“Illustrative integration architecture — final deployment would align to GHO’s existing systems, security and integration standards.”
+
+Do not add invented infrastructure vendors or technologies.
+
+Do not claim Sana, Claude or MCP integrations are live in the prototype.
+
+--------------------------------------------------
+SUCCESS CRITERIA
+--------------------------------------------------
+
+Without reading the explanatory text above the diagram, a viewer looking ONLY at the detailed technical workflow should immediately understand:
+
+GHO data / Sana
+→ Deal Signal governed workflow
+→ Watchtower / Deal Brief / Sana / Claude
+
+Deal Signal must visually look like an additive specialist intelligence layer inside GHO’s current environment — not a new standalone technology stack.
+
+Stop after updating and testing Technical View only.

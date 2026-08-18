@@ -720,7 +720,10 @@ function RecentEvidence() {
 
 function WatchtowerActivity({ extraEvents }: { extraEvents: typeof NEW_ACTIVITIES }) {
   const [open, setOpen] = useState(false);
-  const allEvents = [...extraEvents, ...WATCHTOWER_ACTIVITY];
+  const allEvents: Array<{ id: string; time: string; description: string; highlight?: boolean }> = [
+    ...extraEvents,
+    ...WATCHTOWER_ACTIVITY,
+  ];
 
   return (
     <div className="bg-card border border-card-border rounded-xl p-5">

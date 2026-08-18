@@ -1,5 +1,10 @@
 # See https://docs.github.com/en/get-started/getting-started-with-git/ignoring-files for more about ignoring files.
 
+# Environment / secrets — never commit
+.env
+.env.*
+!.env.example
+
 # compiled output
 dist
 tmp
@@ -47,3 +52,13 @@ Thumbs.db
 # Replit
 .cache/
 .local/
+
+# Replit agent memory (internal agent state, not application code)
+.agents/
+
+# Uploaded task/spec files — internal prompt history, not product code
+attached_assets/
+
+# Design reference prototype — not imported by the app at runtime
+# Exclude from a clean product repository push; keep locally as reference
+design-reference/
